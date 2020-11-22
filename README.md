@@ -1,4 +1,4 @@
-# \GiftHub
+# GiftHub
 
 > A social and user-friendly app for buying and selling romantic gifts :heart:
 
