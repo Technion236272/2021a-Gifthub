@@ -1,5 +1,5 @@
 import 'dart:ui';
-
+import 'userMock.dart'; //TODO: remove as soon as user repository class is implemented
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);
@@ -25,6 +24,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _creditCardController = TextEditingController();
+  bool _firstNameChanged = false;
+  bool _lastNameChanged = false;
+  String _newFirstName = "";
+  String _newLastName = "";
 
   @override
   Widget build(BuildContext context) {
@@ -285,14 +288,20 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                                     ),
                                     onChanged: (text) => {},
                                     textAlign: TextAlign.center,
-                                    controller: _firstNameController..text = userRep.firstName,
+                                    controller: _firstNameChanged ?
+                                    (_firstNameController..text = _newFirstName)
+                                    : (_firstNameController..text = userRep.firstName),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                                     ],
                                     onSubmitted: (text) {
-                                      setState(() {
-                                        _firstNameController.text = text;
-                                      });
+                                      if(text.isNotEmpty) {
+                                        setState(() {
+                                          _newFirstName = text;
+                                          _firstNameChanged = true;
+                                          // _firstNameController.text = text;
+                                        });
+                                      }
                                     },
                                     style: GoogleFonts.lato(
                                       fontSize: 16.0,
@@ -341,8 +350,21 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                                         borderSide: BorderSide(color: Colors.white),
                                       ),
                                     ),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
+                                    ],
                                     textAlign: TextAlign.center,
-                                    controller: _lastNameController..text = userRep.lastName,
+                                    controller: _lastNameChanged
+                                      ? (_lastNameController..text = _newLastName)
+                                      : (_lastNameController..text = userRep.lastName),
+                                    onSubmitted: (text) {
+                                      if (text.isNotEmpty){
+                                        setState(() {
+                                          _newLastName = text;
+                                          _lastNameChanged = true;
+                                        });
+                                      }
+                                    },
                                     onChanged: (text) => {},
                                     style: GoogleFonts.lato(
                                       fontSize: 16.0,
@@ -371,21 +393,22 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                           )
                       ),
                       TextField(
-                          decoration: InputDecoration(
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
+                        //TODO: think about how validate correct input for address
+                        decoration: InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
                           ),
-                          controller: _addressController..text = userRep.address,
-                          onChanged: (text) => {},
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.lato(
-                            fontSize: 16.0,
-                            color: Colors.white
-                          )
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        controller: _addressController..text = userRep.address,
+                        onChanged: (text) => {},
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: 16.0,
+                          color: Colors.white
+                        )
                       ),
                     ],
                   ),
@@ -434,8 +457,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                         textColor: Colors.white,
                         onPressed: () {
                           setState(() {
-                            userRep.firstName = _firstNameController.text;
-                            userRep.lastName = _lastNameController.text;
+                            if(_firstNameChanged){
+                              userRep.firstName = _newFirstName;
+                            }
+                            if(_lastNameChanged){
+                              userRep.lastName = _newLastName;
+                            }
                             userRep.address = _addressController.text;
                           });
                         },
@@ -458,48 +485,4 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
       )
     );
   }
-}
-
-/// This is a user mocking for testing purposes only
-/// as soon as a user class is implemented, this must be removed
-class UserRepository with ChangeNotifier {
-  String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
-  String _firstName = "Daddy";
-  String _lastName = "Cool";
-  String _address = "Crazy like s fool st. 23, Some cool city";
-  String _creditCard = "1234 1234 5678 8901";
-  Status _status = Status.Authenticated;
-
-  Status get status => _status;
-
-  String get avatarURL => _avatarURL;
-
-  set avatarURL(String value) {
-    _avatarURL = value;
-  }
-
-  String get firstName => _firstName;
-
-  set firstName(String value) {
-    _firstName = value;
-  }
-
-  String get lastName => _lastName;
-
-  set lastName(String value) {
-    _lastName = value;
-  }
-
-  String get address => _address;
-
-  set address(String value) {
-    _address = value;
-  }
-
-  String get creditCard => _creditCard;
-
-  set creditCard(String value) {
-    _creditCard = value;
-  }
-
 }
