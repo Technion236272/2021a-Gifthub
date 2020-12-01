@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'userMock.dart';
+// import 'package:flutter/cupertino.dart';
+import 'userOrdersScreen.dart';
+// import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -7,13 +12,16 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return ChangeNotifierProvider(
+      create: (_) => UserRepository(),
+      child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: UserOrdersScreen()
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
