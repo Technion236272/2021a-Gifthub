@@ -8,14 +8,19 @@ enum OrderStatus { Ordered, Pending, Confirmed, Arrived }
 class Product with ChangeNotifier {
   String _name;
   double _price;
-  DateFormat _dateOfOrder;
-
-  Product(this._name, this._price, this._orderStatus, this._productPictureURL){
-    _dateOfOrder = new DateFormat("dd-MM-yyyy");
-  }
-
+  String _dateOfOrder;
   OrderStatus _orderStatus;
   String _productPictureURL;
+
+  Product(this._name, this._price, this._orderStatus, this._productPictureURL){
+    _dateOfOrder = new DateFormat("dd-MM-yyyy").format(DateTime.now());
+  }
+
+  String get dateOfOrder => _dateOfOrder;
+
+  set dateOfOrder(String value) {
+    _dateOfOrder = value;
+  }
 
   String get name => _name;
 
@@ -29,11 +34,6 @@ class Product with ChangeNotifier {
     _price = value;
   }
 
-  DateFormat get dateOfOrder => _dateOfOrder;
-
-  set dateOfOrder(DateFormat value) {
-    _dateOfOrder = value;
-  }
 
   OrderStatus get orderStatus => _orderStatus;
 
