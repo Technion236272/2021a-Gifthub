@@ -40,7 +40,7 @@ class UserRepository with ChangeNotifier {
     });
   }
 
-  Future<void> signIn(String email, String password) async {
+  Future<String> signIn(String email, String password) async {
     try {
       _status = Status.Authenticating;
       notifyListeners();
@@ -56,14 +56,16 @@ class UserRepository with ChangeNotifier {
       }
 
       notifyListeners();
+      return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
       notifyListeners();
+      return e.message;
       throw e;
     }
   }
 
-  Future signUp(String email, String password,String firstName,String lastName,String phoneNumber) async {
+  Future<String> signUp(String email, String password,String firstName,String lastName,String phoneNumber) async {
 
     try {
       _status = Status.Authenticating;
@@ -84,9 +86,11 @@ class UserRepository with ChangeNotifier {
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
       notifyListeners();
+      return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
       notifyListeners();
+      return e.message;
       throw e;
     }
   }
