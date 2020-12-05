@@ -1,7 +1,8 @@
 import 'all_confetti_widget.dart';
 import 'my_flutter_app_icons.dart';
 import 'package:flutter/material.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'user_repository.dart';
 
 //For many uses:
 var gifthub_logo = Column(
@@ -33,7 +34,7 @@ var star_gifthub = Container(
 
 
 
-
+UserRepository userRep;
 
 
 final firstNameController = TextEditingController();
@@ -41,6 +42,12 @@ final lastNameController = TextEditingController();
 final emailController = TextEditingController();
 final phoneController = TextEditingController();
 final passwordController = TextEditingController();
+bool checkEmailSignupFields(){
+  return (emailController.text.isNotEmpty && passwordController.text.isNotEmpty && firstNameController.text.isNotEmpty
+      && lastNameController.text.isNotEmpty && phoneController.text.isNotEmpty)
+  &&RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(emailController.text) && passwordController.text.length>=6;
+}
+
 
 void firstSignUpSheet(var context) {
   int screen = 1;
@@ -267,6 +274,9 @@ void firstSignUpSheet(var context) {
                                   return 'Cannot be empty!';
                                 }
                                 else {
+                                  if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(text)){
+                                    return 'Email must be valid!';
+                                  }
                                   return null;
                                 }
                               },
@@ -330,6 +340,9 @@ void firstSignUpSheet(var context) {
                               obscureText: true,
                               autovalidateMode: AutovalidateMode.onUserInteraction,
                               validator: (text) {
+                                if (text.length<6) {
+                                  return 'Password length should be 6 or more!';
+                                }
                                 if (text.isEmpty) {
                                   return 'Cannot be empty!';
                                 }
@@ -357,13 +370,17 @@ void firstSignUpSheet(var context) {
                           FlatButton(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(80.0)),
-                            onPressed: () {
-                              //TODO: sign up
+                            onPressed:checkEmailSignupFields()? () {
+
+                              if (checkEmailSignupFields()) {
+                                userRep.signUp(emailController.text,passwordController.text,firstNameController.text
+                                    ,lastNameController.text,phoneController.text);
+                              }
                               //TODO: verify email: https://stackoverflow.com/questions/61023827/firebase-email-verification-flutter
                               setState(() {
                                 screen = 4;
                               });
-                            },
+                            }:null,
                             color: Colors.red,
                             textColor: Colors.white,
                             child: Text(
@@ -599,6 +616,7 @@ Widget startScreenScaffold(context)=>Scaffold(
             borderRadius: new BorderRadius.circular(30.0),
           ),
           onPressed: () {
+            userRep=UserRepository.instance();
             firstSignUpSheet(context);
           },
         )
