@@ -1,9 +1,7 @@
 import 'dart:ui';
 import 'package:gifthub_2021a/productMock.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'userMock.dart'; //TODO: remove as soon as user repository class is implemented
-import 'userOrdersScreen.dart'; //TODO: remove as soon as user repository class is implemented
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +9,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share/share.dart';
 
 class UserOrdersScreen extends StatefulWidget {
   UserOrdersScreen({Key key}) : super(key: key);
@@ -24,20 +22,26 @@ class UserOrdersScreen extends StatefulWidget {
 class _UserOrdersScreenState extends State<UserOrdersScreen>{
   final GlobalKey<ScaffoldState> _scaffoldKeyOrders = new GlobalKey<ScaffoldState>();
 
+  // TODO: remove these as soon as user repository is initialized with firebase:
+  @override
+  void initState() {
+    super.initState();
+    var userRep = Provider.of<UserRepository>(context, listen: false);
+    userRep.orders.add(new Product("cake", 15.0, OrderStatus.Arrived,
+        "https://storcpdkenticomedia.blob.core.windows.net/media/recipemanagementsystem/media/recipe-media-files/recipes/retail/desktopimages/rainbow-cake600x600_2.jpg?ext=.jpg"));
+    userRep.orders.add(new Product(
+        "18 muffins", 5.0, OrderStatus.Pending,
+        "https://pngimg.com/uploads/muffin/muffin_PNG123.png"));
+    userRep.orders.add(new Product(
+        "rose bouquet", 50.0, OrderStatus.Ordered,
+        "https://images-na.ssl-images-amazon.com/images/I/71t3JW2-jzL._SL1500_.jpg"));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) {
-          //TODO: remove these 3 lines as soon as user firebase initializes:
-            userRep.orders.add(new Product("cake", 15.0, OrderStatus.Arrived,
-                "https://storcpdkenticomedia.blob.core.windows.net/media/recipemanagementsystem/media/recipe-media-files/recipes/retail/desktopimages/rainbow-cake600x600_2.jpg?ext=.jpg"));
-            userRep.orders.add(new Product(
-                "18 muffins", 5.0, OrderStatus.Pending,
-                "https://pngimg.com/uploads/muffin/muffin_PNG123.png"));
-            userRep.orders.add(new Product(
-                "rose bouquet", 50.0, OrderStatus.Ordered,
-                "https://images-na.ssl-images-amazon.com/images/I/71t3JW2-jzL._SL1500_.jpg"));
           return Scaffold(
             key: _scaffoldKeyOrders,
             resizeToAvoidBottomInset: false,
@@ -51,9 +55,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                   onPressed: null //TODO: implement navigation drawer
               ),
               title: Text("Orders",
-                /*style: GoogleFonts.robotoSlab(
-                  fontSize: 18.0
-                ),*/
               ),
             ),
             body: SingleChildScrollView(
@@ -81,7 +82,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                           shrinkWrap: true,
                           padding: const EdgeInsets.all(16),
                           itemBuilder: (BuildContext _context, int i) {
-                            if (i >= userRep.orders.length) {
+                            if (i >= 2 * userRep.orders.length) {
                               return null;
                             }
                             if (i.isOdd) {
@@ -99,7 +100,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                       context: _scaffoldKeyOrders.currentContext,
                                       builder: (BuildContext context) {
                                         return Container(
-                                          height: 202,
+                                          height: 200,
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -131,7 +132,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                                 title: Text("Send to...",
                                                   style: GoogleFonts.lato(),
                                                 ),
-                                                onTap: null //TODO: implement sharing options,
+                                                onTap: () async { //TODO: implement sharing options,
+                                                  final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
+                                                  await Share.share("check this cool product now!",
+                                                    sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                                    subject: 'I found a lovely product on Gifthub!'
+                                                  );
+                                                }
                                               ),
                                               Divider(
                                                 indent: 20,
@@ -255,12 +262,24 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                         );
                                       }
                                   );  //showModalBottomSheet
-                                }, //TODO: show modal bottom sheet of options
+                                },
                               ),
                               leading: CircularProfileAvatar(
                                 userRep.orders[i~/2].productPictureURL,
                                 radius: 20.0,
-                                onTap: null, //TODO: add navigation to product screen when set
+                                onTap: () {
+                                  Navigator.of(context).push(new MaterialPageRoute<void>(
+                                    builder: (BuildContext context) => new DecoratedBox(
+                                      decoration: new BoxDecoration(
+                                      image: new DecorationImage(
+                                          image: new NetworkImage(userRep.orders[i~/2].productPictureURL),
+                                          fit: BoxFit.fitWidth,
+                                        )
+                                      )
+                                    ),
+                                  )
+                                  );
+                                },
                               ),
                               title: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -295,5 +314,4 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
       ),
     );
   }
-
 }
