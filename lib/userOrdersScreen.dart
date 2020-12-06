@@ -170,6 +170,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                                               crossAxisAlignment: CrossAxisAlignment.center,
                                                               mainAxisSize: MainAxisSize.min,
                                                               children: <Widget>[
+                                                                SizedBox(height: 10,),
                                                                 RatingBar.builder(
                                                                     initialRating: 0,
                                                                     itemCount: 5,
@@ -217,7 +218,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                                                     keyboardType: TextInputType.multiline,
                                                                   ),
                                                                 ),
-                                                                SizedBox(height: 10.0,),
+                                                                SizedBox(height: 5.0,),
                                                                 Align(
                                                                   alignment: FractionalOffset.bottomCenter,
                                                                   child: Container(
@@ -250,6 +251,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                                                     ),
                                                                   ),
                                                                 ),
+                                                                SizedBox(height: 10.0,)
                                                               ],
                                                             ),
                                                           );
