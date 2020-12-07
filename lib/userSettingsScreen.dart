@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
 class UserSettingsScreen extends StatefulWidget {
@@ -30,8 +31,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final FocusNode _addressInputFocusNode = FocusNode();
   bool _firstNameChanged = false;
   bool _lastNameChanged = false;
+  bool _addressChanged = false;
   String _newFirstName = "";
   String _newLastName = "";
+  String _newAddress = "";
 
   @override
   void initState() {
@@ -169,7 +172,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               setState(() {
                                                 _newFirstName = text;
                                                 _firstNameChanged = true;
-                                                // _firstNameController.text = text;
                                               });
                                             }
                                           },
@@ -276,10 +278,20 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 ),
                               ),
                               focusNode: _addressInputFocusNode,
-                              controller: _addressController..text = userRep.address,
+                              controller: _addressChanged
+                                  ? (_addressController..text = _newAddress)
+                                  : (_addressController..text = userRep.address),
                               autofocus: false,
                               keyboardType: TextInputType.streetAddress,
                               onChanged: (text) => {},
+                              onSubmitted: (text) {
+                                if(text.isNotEmpty){
+                                  setState(() {
+                                    _newAddress = text;
+                                    _addressChanged = true;
+                                  });
+                                }
+                              },
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
                                 fontSize: 16.0,
@@ -333,13 +345,21 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               textColor: Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  if(_firstNameChanged){
+                                  if(_firstNameChanged) {
                                     userRep.firstName = _newFirstName;
+                                    _newFirstName = "";
+                                    _firstNameChanged = false;
                                   }
                                   if(_lastNameChanged){
                                     userRep.lastName = _newLastName;
+                                    _newLastName = "";
+                                    _lastNameChanged = false;
                                   }
-                                  userRep.address = _addressController.text;
+                                  if(_addressChanged){
+                                    userRep.address = _newAddress;
+                                    _newAddress = "";
+                                    _addressChanged = false;
+                                  }
                                 });
                               },
                               child: Text(
@@ -378,8 +398,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     super.dispose();
   }
 
-
-
   void _showAvatarChangeOptions() {
     final userRep = Provider.of<UserRepository>(context, listen: false);
     showModalBottomSheet(
@@ -387,7 +405,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
         context: context,
         builder: (BuildContext context) {
           return Container(
-            height: userRep.avatarURL == defaultAvatar ? 117.0 : 117.0 + 117 / 2,
+            height: userRep.avatarURL == defaultAvatar ? 128.0 : 142.0 + 117 / 2,
             child: Column(
               textDirection: TextDirection.ltr,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -424,6 +442,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     }
                   },
                 ),
+                Divider(
+                  color: Colors.red,
+                  indent: 20,
+                  thickness: 2.0,
+                  endIndent: 20,
+                ),
                 ListTile(
                   tileColor: Colors.white,
                   leading: Icon(
@@ -454,6 +478,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     }
                   },
                 ),
+                userRep.avatarURL != defaultAvatar
+                  ? Divider(
+                  color: Colors.red,
+                  indent: 20,
+                  thickness: 2.0,
+                  endIndent: 20,
+                )
+                  : Container(),
                 userRep.avatarURL != defaultAvatar
                     ? ListTile(
                   tileColor: Colors.white,
