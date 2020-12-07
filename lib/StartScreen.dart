@@ -69,120 +69,7 @@ void firstSignUpSheet(var context,int screen) {
       builder: (context) {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-          if (screen == 1) {
-            return Container(
-                height: 300,
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(40),
-                        topRight: const Radius.circular(40))),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(),
-                    Container(
-                      height: 65,
-                      width: 300,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80.0)),
-                        onPressed: () {
-                          setState(() {
-                            screen = 3;
-                          });
-                        },
-                        color: Colors.red[800],
-                        textColor: Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image(
-                              width: 40,
-                              height: 40,
-                              image: AssetImage("Assets/google.png"),
-                            ),
-                            Container(
-                              width: 10,
-                            ),
-                            Text(
-                              'Continue with Google',
-                              style: TextStyle(fontSize: 20),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 65,
-                      width: 300,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80.0)),
-                        onPressed: () {
-                          setState(() {
-                            screen = 4;
-                          });
-                        },
-                        color: Colors.red[800],
-                        textColor: Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image,
-                              size: 40,
-                            ),
-                            Container(
-                              width: 10,
-                            ),
-                            Text(
-                              'Continue with Facebook',
-                              style: TextStyle(fontSize: 20),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 65,
-                      width: 300,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80.0)),
-                        onPressed: () {
-                          setState(() {
-                            screen = 5;
-                          });
-                        },
-                        color: Colors.red[800],
-                        textColor: Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.email,
-                              size: 40,
-                            ),
-                            Container(
-                              width: 10,
-                            ),
-                            Text(
-                              'Continue with Email',
-                              style: TextStyle(fontSize: 20),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(),
-                    Container(),
-                  ],
-                ));
-          }
+
 
           if (screen == 2) {
             return Padding(
@@ -386,7 +273,7 @@ void firstSignUpSheet(var context,int screen) {
                                     lastNameController.text,
                                     phoneController.text);
                                 if (code == 'Success') {
-                                  screen = 4;
+                                  //TODO: User is now logged in. Move to Ariel's start screen
                                 }
                                 if (code == 'email-already-in-use') {}
                                 emailInUse = true;
@@ -522,7 +409,7 @@ void firstSignUpSheet(var context,int screen) {
                         onPressed: () {
                           //TODO: sign up
                           setState(() {
-                            screen = 4;
+                            //TODO: User is now logged in. Move to Ariel's start screen
                           });
                         },
                         color: Colors.red,
@@ -533,52 +420,7 @@ void firstSignUpSheet(var context,int screen) {
                   )),
             );
           }
-          if (screen == 4) {
-            return Padding(
-              padding: MediaQuery.of(context).viewInsets,
-              child: Container(
-                  height: 250,
-                  decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(40),
-                          topRight: const Radius.circular(40))),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(),
-                      Text(
-                        'Lets go gifting!',
-                        style: TextStyle(
-                            fontSize: 28,
-                            fontFamily: 'TimesNewRoman',
-                            color: Colors.white70,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic),
-                        textAlign: TextAlign.center,
-                      ),
-                      FlatButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80.0)),
-                        onPressed: () {
-                          //TODO: sign up
-                          setState(() {
-                            screen = 4;
-                          });
-                        },
-                        color: Colors.red,
-                        textColor: Colors.white,
-                        child: Text('Start Gifting!',
-                            style: TextStyle(
-                              fontSize: 23,
-                              fontFamily: 'TimesNewRoman',
-                            )),
-                      )
-                    ],
-                  )),
-            );
-          }
+
 
           if (screen == 5) {
             return Padding(
@@ -664,7 +506,7 @@ void firstSignUpSheet(var context,int screen) {
                                     emailController.text,
                                     passwordController.text);
                                 if (message == 'Success') {
-                                  screen = 4;
+                                  //TODO: User is now logged in. Move to Ariel's start screen
                                 }
                                 if (message ==
                                     'The password is invalid or the user does not have a password.') {
@@ -695,8 +537,7 @@ void firstSignUpSheet(var context,int screen) {
       });
 }
 
-GlobalKey<ScaffoldState> _scaffoldkey =
-    GlobalKey<ScaffoldState>(debugLabel: '_scaffoldkeySaved');
+
 Widget startScreenScaffold(context) => Scaffold(
       //resizeToAvoidBottomInset: true,
       body: Center(
