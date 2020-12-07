@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gifthub_2021a/user_repository.dart';
 import 'StartScreen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -68,7 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    Firebase.initializeApp();
+    init();
     return startScreenScaffold(context);
+  }
+  Future<void> init() async {
+    await Firebase.initializeApp();
+    userRep = UserRepository.instance();
   }
 }

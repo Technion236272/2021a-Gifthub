@@ -53,10 +53,10 @@ bool checkEmailSigninFields() {
   return (emailController.text.isNotEmpty &&
       passwordController.text.isNotEmpty);
 }
+
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-bool emailInUse=false;
-void firstSignUpSheet(var context) {
-  int screen = 1;
+bool emailInUse = false;
+void firstSignUpSheet(var context,int screen) {
   showModalBottomSheet<void>(
       isScrollControlled: true,
       context: context,
@@ -92,15 +92,16 @@ void firstSignUpSheet(var context) {
                             screen = 3;
                           });
                         },
-                        color: Colors.red,
+                        color: Colors.red[800],
                         textColor: Colors.white,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.image,
-                              size: 40,
+                            Image(
+                              width: 40,
+                              height: 40,
+                              image: AssetImage("Assets/google.png"),
                             ),
                             Container(
                               width: 10,
@@ -124,7 +125,7 @@ void firstSignUpSheet(var context) {
                             screen = 4;
                           });
                         },
-                        color: Colors.red,
+                        color: Colors.red[800],
                         textColor: Colors.white,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -156,7 +157,7 @@ void firstSignUpSheet(var context) {
                             screen = 5;
                           });
                         },
-                        color: Colors.red,
+                        color: Colors.red[800],
                         textColor: Colors.white,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -272,14 +273,14 @@ void firstSignUpSheet(var context) {
                             color: Colors.white70,
                             borderRadius: BorderRadius.circular(5.0)),
                         child: TextFormField(
-                          key:_formKey,
+                          key: _formKey,
                           keyboardType: TextInputType.emailAddress,
                           textAlign: TextAlign.center,
                           controller: emailController,
-                          autovalidateMode: AutovalidateMode.always,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (text) {
-                            if(emailInUse){
-                              emailInUse=false;
+                            if (emailInUse) {
+                              emailInUse = false;
                               return 'email in use';
                             }
 
@@ -387,17 +388,16 @@ void firstSignUpSheet(var context) {
                                 if (code == 'Success') {
                                   screen = 4;
                                 }
-                                if(code == 'email-already-in-use'){
-
-                                }
-                                emailInUse=true;
+                                if (code == 'email-already-in-use') {}
+                                emailInUse = true;
 
                                 setState(() {});
                               }
                             : null,
                         color: Colors.red,
                         textColor: Colors.white,
-                        child: Text('Continue', style: TextStyle(fontSize: 23)),
+                        child: Text('Sign up',
+                            style: TextStyle(fontSize: 23)),
                       )
                     ],
                   )),
@@ -683,7 +683,7 @@ void firstSignUpSheet(var context) {
                             : null,
                         color: Colors.red,
                         textColor: Colors.white,
-                        child: Text('Continue', style: TextStyle(fontSize: 23)),
+                        child: Text('Login / Sign up', style: TextStyle(fontSize: 23)),
                       )
                     ],
                   )),
@@ -694,10 +694,10 @@ void firstSignUpSheet(var context) {
         });
       });
 }
-GlobalKey<ScaffoldState> _scaffoldkey=
-GlobalKey<ScaffoldState>(debugLabel: '_scaffoldkeySaved');
-Widget startScreenScaffold(context) => Scaffold(
 
+GlobalKey<ScaffoldState> _scaffoldkey =
+    GlobalKey<ScaffoldState>(debugLabel: '_scaffoldkeySaved');
+Widget startScreenScaffold(context) => Scaffold(
       //resizeToAvoidBottomInset: true,
       body: Center(
         child: Column(
@@ -722,20 +722,86 @@ Widget startScreenScaffold(context) => Scaffold(
             Container(
               height: 100,
             ),
-            OutlineButton(
+            Container(
+              width: 300,
+              child: OutlineButton(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image(
+                      width: 30,
+                      height: 30,
+                      image: AssetImage("Assets/google.png"),
+                    ),
+                    Container(
+                      width: 10,
+                    ),
+                    Text(
+                      'Continue with Google',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 24, fontFamily: 'TimesNewRoman'),
+                    )
+                  ],
+                ),
+                shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(30.0),
+                ),
+                onPressed: () {
+                  firstSignUpSheet(context,3);
+                },
+              ),
+            ),
+            Container(
+              width: 300,
+              child: OutlineButton(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.email,
+                      size: 30,
+                    ),
+                    Container(
+                      width: 10,
+                    ),
+                    Text(
+                      'Continue with Email',
+                      textAlign: TextAlign.center,
+                      style:
+                      TextStyle(fontSize: 24, fontFamily: 'TimesNewRoman'),
+                    )
+                  ],
+                ),
+                shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(30.0),
+                ),
+                onPressed: () {
+                  firstSignUpSheet(context,5);
+                },
+              ),
+            ),
+            Text(
+              'or',
+              style: TextStyle(fontSize: 20, fontFamily: 'TimesNewRoman'),
+              textAlign: TextAlign.center,
+            )
+            ,
+            TextButton(
+
               child: Text(
-                'Get Started',
-                style: TextStyle(fontSize: 30, fontFamily: 'TimesNewRoman'),
+                'Continue as a guest',
+                style: TextStyle(fontSize: 20, fontFamily: 'TimesNewRoman',color: Colors.black),
                 textAlign: TextAlign.center,
               ),
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              onPressed: () {
-                userRep = UserRepository.instance();
-                firstSignUpSheet(context);
-              },
+
+
+              onPressed: () {},
             )
+
+
           ],
         ),
       ),
