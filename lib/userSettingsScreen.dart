@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);
@@ -80,91 +81,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           alignment: Alignment.center,
                           children: <Widget> [
                             CircularProfileAvatar(
-                              userRep.avatarURL ??
-                                  'https://www.flaticon.com/svg/static/icons/svg/848/848043.svg',
+                              userRep.avatarURL ?? defaultAvatar,
                               borderColor: Colors.red,
                               borderWidth: 1.3,
                               radius: MediaQuery.of(context).size.height * 0.1,
-                              onTap: () {
-                                //TODO: add option of avatar removal if exists
-                                showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Container(
-                                        height: 117,
-                                        child: Column(
-                                          textDirection: TextDirection.ltr,
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            //TODO: initialize firebase so that pictures can be added
-                                            ListTile(
-                                              tileColor: Colors.white,
-                                              leading: Icon(
-                                                Icons.photo_camera,
-                                                color: Colors.red,
-                                              ),
-                                              title: Text("Take a new photo",
-                                                style: GoogleFonts.lato(),
-                                              ),
-                                              onTap: () async {
-                                                PickedFile photo = await ImagePicker()
-                                                    .getImage(source: ImageSource.camera);
-                                                Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
-                                                if (null == photo) {
-                                                  _scaffoldKeyUserScreenSet.currentState.showSnackBar(
-                                                      SnackBar(content:
-                                                      Text("No image selected",
-                                                        style: GoogleFonts.notoSans(fontSize: 14.0),
-                                                      ),
-                                                        behavior: SnackBarBehavior.floating,
-                                                        duration: Duration(milliseconds: 2500),
-                                                      )
-                                                  );
-                                                } else {
-                                                  setState(() {
-                                                    userRep.avatarURL = photo.path;
-                                                  });
-                                                }
-                                              },
-                                            ),
-                                            ListTile(
-                                              tileColor: Colors.white,
-                                              leading: Icon(
-                                                Icons.photo_size_select_actual_rounded,
-                                                color: Colors.red,
-                                              ),
-                                              title: Text("Select from gallery",
-                                                style: GoogleFonts.lato(),
-                                              ),
-                                              onTap: () async {
-                                                PickedFile photo = await ImagePicker()
-                                                    .getImage(source: ImageSource.gallery);
-                                                Navigator.pop(context);
-                                                if (null == photo) {
-                                                  _scaffoldKeyUserScreenSet.currentState.showSnackBar(
-                                                      SnackBar(content:
-                                                      Text("No image selected",
-                                                        style: GoogleFonts.notoSans(fontSize: 14.0),
-                                                      ),
-                                                        behavior: SnackBarBehavior.floating,
-                                                        duration: Duration(milliseconds: 2500),
-                                                      )
-                                                  );
-                                                } else {
-                                                  setState(() {
-                                                    userRep.avatarURL = photo.path;
-                                                  });
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                );  //showModalBottomSheet
-                              },
+                              onTap: _showAvatarChangeOptions,
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,86 +94,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               children: <Widget>[
                                 SizedBox(height: 50,),
                                 InkWell(
-                                  onTap: () {
-                                    //TODO: add option of avatar removal if exists
-                                    showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return Container(
-                                            height: 117,
-                                            child: Column(
-                                              textDirection: TextDirection.ltr,
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: <Widget>[
-                                                //TODO: initialize firebase so that pictures can be added
-                                                ListTile(
-                                                  tileColor: Colors.white,
-                                                  leading: Icon(
-                                                    Icons.photo_camera,
-                                                    color: Colors.red,
-                                                  ),
-                                                  title: Text("Take a new photo",
-                                                    style: GoogleFonts.lato(),
-                                                  ),
-                                                  onTap: () async {
-                                                    PickedFile photo = await ImagePicker()
-                                                        .getImage(source: ImageSource.camera);
-                                                    Navigator.pop(context);
-                                                    if (null == photo) {
-                                                      _scaffoldKeyUserScreenSet.currentState.showSnackBar(
-                                                          SnackBar(content:
-                                                          Text("No image selected",
-                                                            style: GoogleFonts.notoSans(fontSize: 14.0),
-                                                          ),
-                                                            behavior: SnackBarBehavior.floating,
-                                                            duration: Duration(milliseconds: 2500),
-                                                          )
-                                                      );
-                                                    } else {
-                                                      setState(() {
-                                                        userRep.avatarURL = photo.path;
-                                                      });
-                                                    }
-                                                  },
-                                                ),
-                                                ListTile(
-                                                  tileColor: Colors.white,
-                                                  leading: Icon(
-                                                    Icons.photo_size_select_actual_rounded,
-                                                    color: Colors.red,
-                                                  ),
-                                                  title: Text("Select from gallery",
-                                                    style: GoogleFonts.lato(),
-                                                  ),
-                                                  onTap: () async {
-                                                    PickedFile photo = await ImagePicker()
-                                                        .getImage(source: ImageSource.gallery);
-                                                    Navigator.pop(context);
-                                                    if (null == photo) {
-                                                      _scaffoldKeyUserScreenSet.currentState.showSnackBar(
-                                                          SnackBar(content:
-                                                          Text("No image selected",
-                                                            style: GoogleFonts.notoSans(fontSize: 14.0),
-                                                          ),
-                                                            behavior: SnackBarBehavior.floating,
-                                                            duration: Duration(milliseconds: 2500),
-                                                          )
-                                                      );
-                                                    } else {
-                                                      setState(() {
-                                                        userRep.avatarURL = photo.path;
-                                                      });
-                                                    }
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }
-                                    );  //showModalBottomSheet
-                                  },
+                                  onTap: _showAvatarChangeOptions,
                                   child: Container(
                                       width: MediaQuery.of(context).size.height * 0.18,
                                       decoration: BoxDecoration(
@@ -534,6 +376,109 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressController.dispose();
     _creditCardController.dispose();
     super.dispose();
+  }
+
+
+
+  void _showAvatarChangeOptions() {
+    final userRep = Provider.of<UserRepository>(context, listen: false);
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            height: userRep.avatarURL == defaultAvatar ? 117.0 : 117.0 + 117 / 2,
+            child: Column(
+              textDirection: TextDirection.ltr,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                //TODO: initialize firebase so that pictures can be added
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(
+                    Icons.photo_camera,
+                    color: Colors.red,
+                  ),
+                  title: Text("Take a new photo",
+                    style: GoogleFonts.lato(),
+                  ),
+                  onTap: () async {
+                    PickedFile photo = await ImagePicker()
+                        .getImage(source: ImageSource.camera);
+                    Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
+                    if (null == photo) {
+                      _scaffoldKeyUserScreenSet.currentState.showSnackBar(
+                          SnackBar(content:
+                          Text("No image selected",
+                            style: GoogleFonts.notoSans(fontSize: 14.0),
+                          ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(milliseconds: 2500),
+                          )
+                      );
+                    } else {
+                      setState(() {
+                        userRep.avatarURL = photo.path;
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(
+                    Icons.photo_size_select_actual_rounded,
+                    color: Colors.red,
+                  ),
+                  title: Text("Select from gallery",
+                    style: GoogleFonts.lato(),
+                  ),
+                  onTap: () async {
+                    PickedFile photo = await ImagePicker()
+                        .getImage(source: ImageSource.gallery);
+                    Navigator.pop(context);
+                    if (null == photo) {
+                      _scaffoldKeyUserScreenSet.currentState.showSnackBar(
+                          SnackBar(content:
+                          Text("No image selected",
+                            style: GoogleFonts.notoSans(fontSize: 14.0),
+                          ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(milliseconds: 2500),
+                          )
+                      );
+                    } else {
+                      setState(() {
+                        userRep.avatarURL = photo.path;
+                      });
+                    }
+                  },
+                ),
+                userRep.avatarURL != defaultAvatar
+                    ? ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(
+                    Icons.delete_outline_outlined,
+                    color: Colors.red,
+                  ),
+                  title: Text("Delete avatar",
+                    style: GoogleFonts.lato(
+                        color: Colors.red
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      userRep.avatarURL = defaultAvatar;
+                    });
+                    Navigator.pop(context);
+                  },
+                )
+                    : Container(),
+              ],
+            ),
+          );
+        }
+    );
   }
 
   @override
