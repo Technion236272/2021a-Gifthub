@@ -291,6 +291,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                   Text(userRep.orders[i~/2].name,
                                     style: GoogleFonts.lato(
                                       fontSize: 16.0,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   SizedBox(height: 6,),
@@ -299,6 +300,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                     userRep.orders[i~/2].orderStatus.toString().substring(12),
                                     style: GoogleFonts.lato(
                                       fontSize: 11.0,
+                                      color: Colors.white,
                                     ),
                                   )
                                 ],
