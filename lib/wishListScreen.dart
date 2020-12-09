@@ -11,6 +11,7 @@ import 'package:share/share.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -23,8 +24,7 @@ class WishListScreen extends StatefulWidget {
   _WishListScreenState createState() => _WishListScreenState();
 }
 
-class _WishListScreenState extends State<WishListScreen> {
-  final GlobalKey _moreVerticalKey = GlobalKey();
+class _WishListScreenState extends State<WishListScreen> with SingleTickerProviderStateMixin {
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKeyWishList = new GlobalKey<ScaffoldState>();
 
@@ -195,20 +195,16 @@ class _WishListScreenState extends State<WishListScreen> {
                                         direction: DismissDirection.down,
                                         key: const Key('key'),
                                         onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
-                                        child: InteractiveViewer(
-                                          panEnabled: true,
-                                          boundaryMargin: EdgeInsets.all(100),
-                                          minScale: 0.5,
-                                          maxScale: 2,
-                                          child: new DecoratedBox(
-                                              decoration: new BoxDecoration(
-                                                image: new DecorationImage(
-                                                  image: new NetworkImage(wishListProduct.productPictureURL),
-                                                  fit: BoxFit.fitWidth,
-                                                )
-                                              )
+                                        child: Center(
+                                          child: InteractiveViewer(
+                                            boundaryMargin: EdgeInsets.all(0),
+                                            minScale: 1.0,
+                                            maxScale: 2.2,
+                                            child: Image.network(wishListProduct.productPictureURL,
+                                              fit: BoxFit.fitWidth,
+                                            )
                                           ),
-                                        ),
+                                        )
                                       ),
                                     )
                                     );
