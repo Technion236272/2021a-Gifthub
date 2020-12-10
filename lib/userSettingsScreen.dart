@@ -124,131 +124,131 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Expanded(
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
                               child: Container(
-                                width: MediaQuery.of(context).size.width * 0.25,
+                                width: MediaQuery.of(context).size.width * 0.43,
                                 height: MediaQuery.of(context).size.height * 0.1,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: 200.0,
-                                        width: 100,
-                                        child: Text('First name',
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 16.0,
-                                            color: Colors.white
-                                          ),
-                                          textAlign: TextAlign.center,
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.height * 0.025 - 2,
+                                      width: 100.0,
+                                      child: Text('First name',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 16.0,
+                                          color: Colors.white
                                         ),
+                                        textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Container(
-                                        height: 200.0,
-                                        width: MediaQuery.of(context).size.width * 0.5 - 10,
-                                        child: TextField(
-                                          autofocus: false,
-                                          decoration: InputDecoration(
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white),
-                                            ),
+                                    SizedBox(height: 4,),
+                                    Container(
+                                      height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                      width: MediaQuery.of(context).size.width * 0.5 - 10,
+                                      child: TextField(
+                                        autofocus: false,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.all(Radius.circular(30))
                                           ),
-                                          onChanged: (text) => {},
-                                          textAlign: TextAlign.center,
-                                          controller: _firstNameChanged
-                                            ? (_firstNameController..text = _newFirstName)
-                                            : (_firstNameController..text = userRep.firstName),
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
-                                          ],
-                                          focusNode: _firstNameInputFocusNode,
-                                          onSubmitted: (text) {
-                                            if(text.isNotEmpty) {
-                                              setState(() {
-                                                _newFirstName = text;
-                                                _firstNameChanged = true;
-                                              });
-                                            }
-                                          },
-                                          style: GoogleFonts.lato(
-                                            fontSize: 16.0,
-                                            color: Colors.white,
-                                          )
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.white),
+                                              borderRadius: BorderRadius.all(Radius.circular(30))
+                                          ),
                                         ),
+                                        onChanged: (text) => {},
+                                        textAlign: TextAlign.center,
+                                        controller: _firstNameChanged
+                                          ? (_firstNameController..text = _newFirstName)
+                                          : (_firstNameController..text = userRep.firstName),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
+                                        ],
+                                        focusNode: _firstNameInputFocusNode,
+                                        onSubmitted: (text) {
+                                          if(text.isNotEmpty) {
+                                            setState(() {
+                                              _newFirstName = text;
+                                              _firstNameChanged = true;
+                                            });
+                                          }
+                                        },
+                                        style: GoogleFonts.lato(
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        )
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            Expanded(
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
                               child: Container(
-                                width: MediaQuery.of(context).size.width * 0.25,
+                                width: MediaQuery.of(context).size.width * 0.43,
                                 height: MediaQuery.of(context).size.height * 0.1,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: 200.0,
-                                        width: 100.0,
-                                        child: Text('Last name',
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 16.0,
-                                              color: Colors.white,
-                                            )
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: SizedBox(
-                                        height: 200.0,
-                                        width: MediaQuery.of(context).size.width * 0.5 - 10,
-                                        child: TextField(
-                                          autofocus: false,
-                                          focusNode: _lastNameInputFocusNode,
-                                          keyboardType: TextInputType.name,
-                                          decoration: InputDecoration(
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white),
-                                            ),
-                                          ),
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
-                                          ],
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.height * 0.025 - 2,
+                                      width: 100.0,
+                                      child: Text('Last name',
                                           textAlign: TextAlign.center,
-                                          controller: _lastNameChanged
-                                            ? (_lastNameController..text = _newLastName)
-                                            : (_lastNameController..text = userRep.lastName),
-                                          onSubmitted: (text) {
-                                            if (text.isNotEmpty){
-                                              setState(() {
-                                                _newLastName = text;
-                                                _lastNameChanged = true;
-                                              });
-                                            }
-                                          },
-                                          onChanged: (text) => {},
-                                          style: GoogleFonts.lato(
+                                          style: GoogleFonts.montserrat(
                                             fontSize: 16.0,
                                             color: Colors.white,
                                           )
+                                      ),
+                                    ),
+                                    SizedBox(height: 4,),
+                                    Container(
+                                      height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                      width: MediaQuery.of(context).size.width * 0.5 - 10,
+                                      child: TextField(
+                                        autofocus: false,
+                                        focusNode: _lastNameInputFocusNode,
+                                        keyboardType: TextInputType.name,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color: Colors.white),
+                                              borderRadius: BorderRadius.all(Radius.circular(30))
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color: Colors.white),
+                                              borderRadius: BorderRadius.all(Radius.circular(30))
+                                          ),
                                         ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -]'))
+                                        ],
+                                        textAlign: TextAlign.center,
+                                        controller: _lastNameChanged
+                                          ? (_lastNameController..text = _newLastName)
+                                          : (_lastNameController..text = userRep.lastName),
+                                        onSubmitted: (text) {
+                                          if (text.isNotEmpty){
+                                            setState(() {
+                                              _newLastName = text;
+                                              _lastNameChanged = true;
+                                            });
+                                          }
+                                        },
+                                        onChanged: (text) => {},
+                                        style: GoogleFonts.lato(
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        )
                                       ),
                                     ),
                                   ],
@@ -304,36 +304,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           ],
                         ),
                         SizedBox(height: 30,),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text('Credit card number',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16.0,
-                                  color: Colors.white,
-                                )
-                            ),
-                            TextField(
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                              ),
-                              textAlign: TextAlign.center,
-                              controller: _creditCardController..text = "**** **** **** " + userRep.creditCard.substring(15),
-                              style: GoogleFonts.lato(
-                                fontSize: 16.0,
-                                color: Colors.white
-                              ),
-                              readOnly: true,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 55,),
+                        SizedBox(height: 130,),
                         Align(
                           alignment: FractionalOffset.bottomCenter,
                           child: Container(
