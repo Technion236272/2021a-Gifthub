@@ -99,16 +99,19 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 InkWell(
                                   onTap: _showAvatarChangeOptions,
                                   child: Container(
-                                      width: MediaQuery.of(context).size.height * 0.18,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                                        color: Colors.black45,
+                                    width: MediaQuery.of(context).size.height * 0.18,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                                      color: Colors.white54,
+                                    ),
+                                    child: Text(
+                                      "Press to change",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.lato(
+                                        fontSize: 15.0,
+                                        color: Colors.black
                                       ),
-                                      child: Text(
-                                        "Press to change",
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.lato(),
-                                      ),
+                                    ),
                                   ),
                                 ),
                               ]
@@ -336,9 +339,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           child: Container(
                             width: 200,
                             child: RaisedButton(
+                              elevation: 8.0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(18.0),
-                                side: BorderSide(color: Colors.red)
+                                side: BorderSide(color: Colors.red),
                               ),
                               visualDensity: VisualDensity.adaptivePlatformDensity,
                               color: Colors.red,
