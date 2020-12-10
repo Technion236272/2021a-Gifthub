@@ -148,7 +148,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     ),
                                     Expanded(
                                       flex: 3,
-                                      child: SizedBox(
+                                      child: Container(
                                         height: 200.0,
                                         width: MediaQuery.of(context).size.width * 0.5 - 10,
                                         child: TextField(
@@ -338,40 +338,45 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           alignment: FractionalOffset.bottomCenter,
                           child: Container(
                             width: 200,
-                            child: RaisedButton(
-                              elevation: 8.0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                                side: BorderSide(color: Colors.red),
-                              ),
-                              visualDensity: VisualDensity.adaptivePlatformDensity,
-                              color: Colors.red,
-                              textColor: Colors.white,
-                              onPressed: () {
-                                setState(() {
-                                  if(_firstNameChanged) {
-                                    userRep.firstName = _newFirstName;
-                                    _newFirstName = "";
-                                    _firstNameChanged = false;
-                                  }
-                                  if(_lastNameChanged){
-                                    userRep.lastName = _newLastName;
-                                    _newLastName = "";
-                                    _lastNameChanged = false;
-                                  }
-                                  if(_addressChanged){
-                                    userRep.address = _newAddress;
-                                    _newAddress = "";
-                                    _addressChanged = false;
-                                  }
-                                });
-                              },
-                              child: Text(
-                                "Update",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.openSans(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold
+                            child: InkWell(
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              child: RaisedButton(
+                                elevation: 15.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                  side: BorderSide(color: Colors.red),
+                                ),
+                                visualDensity: VisualDensity.adaptivePlatformDensity,
+                                color: Colors.red,
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  setState(() {
+                                    if(_firstNameChanged) {
+                                      userRep.firstName = _newFirstName;
+                                      _newFirstName = "";
+                                      _firstNameChanged = false;
+                                    }
+                                    if(_lastNameChanged){
+                                      userRep.lastName = _newLastName;
+                                      _newLastName = "";
+                                      _lastNameChanged = false;
+                                    }
+                                    if(_addressChanged){
+                                      userRep.address = _newAddress;
+                                      _newAddress = "";
+                                      _addressChanged = false;
+                                    }
+                                  });
+                                },
+                                child: Text(
+                                  "Update",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold
+                                  ),
                                 ),
                               ),
                             ),
