@@ -9,9 +9,17 @@ class UserRepository with ChangeNotifier {
   String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
   String _firstName = "Daddy";
   String _lastName = "Cool";
-  String _address = "Crazy like a fool st. 23, Boney M. city";
+  String _address = "Crazy like a fool st. 23";
+  String _apt = "2";
+  String _city = "Boney M. city";
   String _creditCard = "1234 1234 5678 8901";
   Status _status = Status.Authenticated;
+
+  String get apt => _apt;
+
+  set apt(String value) {
+    _apt = value;
+  }
 
   Status get status => _status;
 
@@ -45,4 +53,9 @@ class UserRepository with ChangeNotifier {
     _creditCard = value;
   }
 
+  String get city => _city;
+
+  set city(String value) {
+    _city = value;
+  }
 }

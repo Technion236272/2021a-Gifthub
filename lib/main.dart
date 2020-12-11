@@ -14,9 +14,13 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => UserRepository(),
       child: MaterialApp(
-        title: 'Flutter Demo',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.lightGreen,
+          cursorColor: Colors.lightGreen,
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: Colors.lightGreen,
+            selectionHandleColor: Colors.transparent
+          ),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: UserSettingsScreen()
