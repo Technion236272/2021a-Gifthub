@@ -11,11 +11,7 @@ import 'package:share/share.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 class WishListScreen extends StatefulWidget {
   WishListScreen({Key key}) : super(key: key);
@@ -54,16 +50,21 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
               key: _scaffoldKeyWishList,
               resizeToAvoidBottomPadding: false,
               resizeToAvoidBottomInset: false,
-              backgroundColor: Colors.lightGreen[900],
+              backgroundColor: Colors.lightGreen[800],
               appBar: AppBar(
                 automaticallyImplyLeading: false,
                 elevation: 0.0,
-                backgroundColor: Colors.lightGreen[900],
+                backgroundColor: Colors.lightGreen[800],
                 leading: IconButton(
                     icon: Icon(Icons.menu),
                     onPressed: null //TODO: implement navigation drawer
                 ),
-                title: Text("Wish List",
+                title: Text("       Wish List",
+                  style: GoogleFonts.calistoga(
+                      fontSize: 33,
+                      color: Colors.white
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               body: SingleChildScrollView(
@@ -84,8 +85,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                       child: Container(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        // padding: EdgeInsets.all(12),
-                        color: Colors.green[600],
+                        color: Colors.white,
                         child: ListView.builder(
                           itemCount: userRep.orders.length * 2,
                           shrinkWrap: true,
@@ -96,8 +96,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                             }
                             if (i.isOdd) {
                               return Divider(
-                                color: Colors.red,
-                                thickness: 2.0,
+                                color: Colors.green,
+                                thickness: 1.0,
                               );
                             }
                             var wishListProduct = userRep.orders[i~/2];
@@ -120,34 +120,22 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                 IconSlideAction(
                                   caption: 'Share',
                                   color: Colors.transparent,
-                                  foregroundColor: Colors.black,
-                                  icon: Icons.share,
+                                  foregroundColor: Colors.blueAccent,
+                                  icon: Icons.share_outlined,
                                   onTap: () async {
-                                    final RenderBox box = _scaffoldKeyWishList
-                                        .currentContext
-                                        .findRenderObject();
+                                    final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
                                     Product product = userRep.orders[i ~/ 2];
                                     if (Platform.isAndroid) {
-                                      var response = await get(
-                                          product.productPictureURL);
-                                      final documentDirectory = (await getExternalStorageDirectory())
-                                          .path;
-                                      File imgFile = new File(
-                                          '$documentDirectory/flutter.png');
-                                      imgFile.writeAsBytesSync(
-                                          response.bodyBytes);
+                                      var response = await get(product.productPictureURL);
+                                      final documentDirectory = (await getExternalStorageDirectory()).path;
+                                      File imgFile = new File('$documentDirectory/flutter.png');
+                                      imgFile.writeAsBytesSync(response.bodyBytes);
                                       List<String> sharingList = new List();
-                                      sharingList.add(
-                                          '$documentDirectory/flutter.png');
+                                      sharingList.add('$documentDirectory/flutter.png');
                                       //TODO: add store's name next to product's name or add a direct url share option
-                                      await Share.shareFiles(
-                                          sharingList,
-                                          text: "check this cool product now!\n" +
-                                              product.name,
-                                          sharePositionOrigin: box
-                                              .localToGlobal(
-                                              Offset.zero) & box
-                                              .size,
+                                      await Share.shareFiles(sharingList,
+                                          text: "check this cool product now!\n" + product.name,
+                                          sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                           subject: 'I found a lovely product on Gifthub!'
                                       );
                                     }
@@ -160,7 +148,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                   caption: 'Delete',
                                   color: Colors.transparent,
                                   foregroundColor: Colors.red,
-                                  icon: Icons.delete,
+                                  icon: Icons.delete_outline_outlined,
                                   onTap: () {
                                     var product;
                                     setState(() {
@@ -192,19 +180,24 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                   onTap: () {
                                     Navigator.of(context).push(new MaterialPageRoute<void>(
                                       builder: (BuildContext context) => Dismissible(
-                                        direction: DismissDirection.down,
-                                        key: const Key('key'),
+                                        key: const Key('keyH'),
+                                        direction: DismissDirection.horizontal,
                                         onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
-                                        child: Center(
-                                          child: InteractiveViewer(
-                                            boundaryMargin: EdgeInsets.all(0),
-                                            minScale: 1.0,
-                                            maxScale: 2.2,
-                                            child: Image.network(wishListProduct.productPictureURL,
-                                              fit: BoxFit.fitWidth,
-                                            )
-                                          ),
-                                        )
+                                        child: Dismissible(
+                                          direction: DismissDirection.vertical,
+                                          key: const Key('keyV'),
+                                          onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
+                                          child: Center(
+                                            child: InteractiveViewer(
+                                              boundaryMargin: EdgeInsets.all(0),
+                                              minScale: 1.0,
+                                              maxScale: 2.2,
+                                              child: Image.network(wishListProduct.productPictureURL,
+                                                fit: BoxFit.fitWidth,
+                                              )
+                                            ),
+                                          )
+                                        ),
                                       ),
                                     )
                                     );
@@ -213,13 +206,13 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                 title: Text(wishListProduct.name,
                                   style: GoogleFonts.lato(
                                     fontSize: 18.0,
-                                    color: Colors.white,
+                                    color: Colors.black,
                                   ),
                                 ),
                                 subtitle: Text(wishListProduct.price.toString() + "\$",
                                   style: GoogleFonts.lato(
                                     fontSize: 13.5,
-                                    color: Colors.white,
+                                    color: Colors.grey,
                                   ),
                                 ),
                                 visualDensity: VisualDensity.adaptivePlatformDensity,
