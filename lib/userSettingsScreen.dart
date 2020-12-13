@@ -125,7 +125,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     onDismissed: (direction) => Navigator.pop(context),
                                     child: Dismissible(
                                       key: const Key('key'),
-                                      direction: DismissDirection.vertical, //I want horizontally too
+                                      direction: DismissDirection.vertical,
                                       onDismissed: (direction) => Navigator.pop(context),
                                       child: InteractiveViewer(
                                         minScale: 1.0,
