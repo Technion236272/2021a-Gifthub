@@ -115,7 +115,7 @@ void firstSignUpSheet(var context,int screen) {
                                 disabledBorder: InputBorder.none,
                                 labelStyle: TextStyle(
                                     color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold, fontFamily: 'TimesNewRoman'),
                                 labelText: 'First Name',
                               ),
                             ),
@@ -407,7 +407,9 @@ void firstSignUpSheet(var context,int screen) {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0)),
                         onPressed: () {
-                          //TODO: sign up
+                          userRep.signInWithGoogleAddAccountInfo(firstNameController.text,
+                              lastNameController.text,
+                              phoneController.text);
                           setState(() {
                             //TODO: User is now logged in. Move to Ariel's start screen
                           });
@@ -589,8 +591,18 @@ Widget startScreenScaffold(context) => Scaffold(
                 shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(30.0),
                 ),
-                onPressed: () {
-                  firstSignUpSheet(context,3);
+                onPressed: () async {
+                  userRep.signInWithGoogle();
+                  if(await userRep.signInWithGoogleCheckIfFirstTime()){
+                    firstSignUpSheet(context, 3);
+                  }
+                  else{
+                    //TODO: User is now logged in. Move to Ariel's start screen
+                  }
+
+
+
+
                 },
               ),
             ),

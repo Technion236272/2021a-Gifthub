@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
 class UserRepository with ChangeNotifier {
@@ -102,6 +102,49 @@ class UserRepository with ChangeNotifier {
     _avatarURL = null;
     notifyListeners();
     return Future.delayed(Duration.zero);
+  }
+
+
+
+  void signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    // Create a new credential
+    final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  void signInWithGoogleAddAccountInfo(String firstName,String lastName,String phoneNumber) async {
+    _db = FirebaseFirestore.instance;
+    var list=[firstName,lastName,phoneNumber];
+    await _db.collection('Users').doc(_user.uid).set({'Info':list});
+    list=[];
+    await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
+    await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
+  }
+  Future<bool> signInWithGoogleCheckIfFirstTime() async {
+    _db = FirebaseFirestore.instance;
+    try {
+      final snapShot = await _db.collection('Users')
+          .doc(_user.uid)
+          .get();
+      if (snapShot == null || !snapShot.exists) {
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    catch(e){
+      return false;
+    }
   }
 
 
