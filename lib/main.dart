@@ -19,7 +19,10 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          home: StoreScreen()
+          home: DefaultTabController(
+              length: 2,
+              child: StoreScreen(),
+          )
       ),
     );
   }
@@ -46,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Example"),
       ),
       body: Center(
         child: Column(
