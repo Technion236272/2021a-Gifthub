@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "367880170865",
+    "firebase_url": "https://gifthub-ab89a.firebaseio.com",
+    "project_id": "gifthub-ab89a",
+    "storage_bucket": "gifthub-ab89a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:367880170865:android:47d6f10bdcf71bcd0c1ad0",
+        "android_client_info": {
+          "package_name": "com.technion.gifthub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "367880170865-240leerluactr0h343f9hpms8un4qnnd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCooQspmXXZPVgI5cHr4mYtnHZTPURzDrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "367880170865-240leerluactr0h343f9hpms8un4qnnd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
