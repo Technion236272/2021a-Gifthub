@@ -11,6 +11,10 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share/share.dart';
+import 'package:http/http.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'dart:io';
 
 class UserOrdersScreen extends StatefulWidget {
   UserOrdersScreen({Key key}) : super(key: key);
@@ -46,15 +50,20 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
             key: _scaffoldKeyOrders,
             resizeToAvoidBottomInset: false,
             resizeToAvoidBottomPadding: false,
-            backgroundColor: Colors.lightGreen[900],
+            backgroundColor: Colors.lightGreen[800],
             appBar: AppBar(
               elevation: 0.0,
-              backgroundColor: Colors.lightGreen[900],
+              backgroundColor: Colors.lightGreen[800],
               leading: IconButton(
                   icon: Icon(Icons.menu),
                   onPressed: null //TODO: implement navigation drawer
               ),
-              title: Text("Orders",
+              title: Text("           Orders",
+                style: GoogleFonts.calistoga(
+                    fontSize: 30,
+                    color: Colors.white
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             body: SingleChildScrollView(
@@ -65,7 +74,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                 children: <Widget>[
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
-                    height: 15,
+                    height: 10,
                   ),
                   ClipRRect(
                     borderRadius: BorderRadius.only(
@@ -75,238 +84,249 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
-                      padding: EdgeInsets.all(12),
-                      color: Colors.green[600],
+                      padding: EdgeInsets.all(5),
+                      color: Colors.white,
                       child: ListView.builder(
-                          itemCount: userRep.orders.length * 2,
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.all(16),
-                          itemBuilder: (BuildContext _context, int i) {
-                            if (i >= 2 * userRep.orders.length) {
-                              return null;
-                            }
-                            if (i.isOdd) {
-                              return Divider(
-                                color: Colors.red,
-                                thickness: 2.0,
-                              );
-                            }
-                            return ListTile(
-                              trailing: IconButton(
-                                icon: Icon(Icons.more_vert),
-                                onPressed: () {
-                                  showModalBottomSheet(
+                        itemCount: userRep.orders.length * 2,
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(16),
+                        itemBuilder: (BuildContext _context, int i) {
+                          if (i >= 2 * userRep.orders.length) {
+                            return null;
+                          }
+                          if (i.isOdd) {
+                            return Divider(
+                              color: Colors.green,
+                              thickness: 1.0,
+                            );
+                          }
+                          var ordersProduct = userRep.orders[i~/2];
+                          return Slidable(
+                            showAllActionsThreshold: 0.5,
+                            actionPane: SlidableDrawerActionPane(),
+                            fastThreshold: 2.0,
+                            actionExtentRatio: 0.22,
+                            direction: Axis.horizontal,
+                            actions: <Widget>[
+                              //Reorder
+                              IconSlideAction(
+                                caption: 'Reorder',
+                                color: Colors.transparent,
+                                foregroundColor: Colors.amberAccent,
+                                icon: Icons.attach_money_outlined,
+                                onTap: () {
+                                  //TODO: implement reorder option screen
+                                },
+                              ),
+                              //Write review
+                              IconSlideAction(
+                                caption: 'Write review',
+                                color: Colors.transparent,
+                                foregroundColor: Colors.lime,
+                                icon: Icons.star_half_outlined,
+                                onTap: () {
+                                  showModalBottomSheet<dynamic>(
+                                      context: context,
                                       isScrollControlled: true,
-                                      context: _scaffoldKeyOrders.currentContext,
-                                      builder: (BuildContext context) {
-                                        return Container(
-                                          height: 200,
+                                      builder: (BuildContext context1) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(_scaffoldKeyOrders.currentContext).viewInsets.bottom
+                                          ),
                                           child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
-                                              ListTile(
-                                                tileColor: Colors.white,
-                                                leading: Icon(
-                                                  Icons.attach_money,
-                                                  color: Colors.red,
-                                                ),
-                                                title: Text("Re-order",
-                                                  style: GoogleFonts.lato(),
-                                                ),
-                                                onTap: null, //TODO: navigate to product screen for order
-                                              ),
-                                              Divider(
-                                                color: Colors.red,
-                                                indent: 20,
-                                                thickness: 2.0,
-                                                endIndent: 20,
-                                              ),
-                                              ListTile(
-                                                tileColor: Colors.white,
-                                                leading: Icon(
-                                                  Icons.send,
-                                                  color: Colors.red,
-                                                ),
-                                                title: Text("Send to...",
-                                                  style: GoogleFonts.lato(),
-                                                ),
-                                                onTap: () async { //TODO: implement sharing options,
-                                                  final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
-                                                  await Share.share("check this cool product now!",
-                                                    sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-                                                    subject: 'I found a lovely product on Gifthub!'
-                                                  );
-                                                }
-                                              ),
-                                              Divider(
-                                                indent: 20,
-                                                endIndent: 20,
-                                                color: Colors.red,
-                                                thickness: 2.0,
-                                              ),
-                                              ListTile(
-                                                  tileColor: Colors.white,
-                                                  leading: Icon(
-                                                    Icons.star,
-                                                    color: Colors.red,
-                                                  ),
-                                                  title: Text("Write review...",
-                                                    style: GoogleFonts.lato(),
-                                                  ),
-                                                  onTap: () {
-                                                    Navigator.pop(context);
-                                                    showModalBottomSheet<dynamic>(
-                                                        context: context,
-                                                        isScrollControlled: true,
-                                                        builder: (BuildContext context1) {
-                                                          return Padding(
-                                                            padding: EdgeInsets.only(
-                                                                bottom: MediaQuery.of(_scaffoldKeyOrders.currentContext).viewInsets.bottom
-                                                            ),
-                                                            child: Column(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: <Widget>[
-                                                                SizedBox(height: 10,),
-                                                                RatingBar.builder(
-                                                                    initialRating: 0,
-                                                                    itemCount: 5,
-                                                                    minRating: 1,
-                                                                    direction: Axis.horizontal,
-                                                                    allowHalfRating: true,
-                                                                    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                                                                    itemBuilder: (context, __) {
-                                                                      return Icon(
-                                                                        Icons.star,
-                                                                        color: Colors.red,
-                                                                      );
-                                                                    },
-                                                                    onRatingUpdate: (rating) {
-                                                                      setState(() {
-
-                                                                      });
-                                                                    }
-                                                                ),
-                                                                SizedBox(height: 15.0,),
-                                                                Container(
-                                                                  width: MediaQuery.of(context1).size.width - 45,
-                                                                  height: 150,
-                                                                  decoration: BoxDecoration(
-                                                                    borderRadius: BorderRadius.all(Radius.circular(4.0))
-                                                                  ),
-                                                                  child: TextField(
-                                                                    decoration: InputDecoration(
-                                                                      hintText: "Write a review...",
-                                                                      focusedBorder: OutlineInputBorder(
-                                                                        borderSide: BorderSide(
-                                                                          color: Colors.red,
-                                                                          width: 1.5,
-                                                                        ),
-                                                                      ),
-                                                                      enabledBorder: OutlineInputBorder(
-                                                                        borderSide: BorderSide(
-                                                                          color: Colors.red,
-                                                                          width: 1.5,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                    maxLines: null,
-                                                                    minLines: 5,
-                                                                    keyboardType: TextInputType.multiline,
-                                                                  ),
-                                                                ),
-                                                                SizedBox(height: 5.0,),
-                                                                Align(
-                                                                  alignment: FractionalOffset.bottomCenter,
-                                                                  child: Container(
-                                                                    width: 200,
-                                                                    child: RaisedButton(
-                                                                      color: Colors.white,
-                                                                      textColor: Colors.red,
-                                                                      shape: RoundedRectangleBorder(
-                                                                          borderRadius: BorderRadius.circular(18.0),
-                                                                          side: BorderSide(
-                                                                              color: Colors.red,
-                                                                              width: 2.0,
-                                                                          )
-                                                                      ),
-                                                                      visualDensity: VisualDensity.adaptivePlatformDensity,
-                                                                      onPressed: () {
-                                                                        setState(() {
-
-                                                                        });
-                                                                      },
-                                                                      child: Text(
-                                                                        "Submit",
-                                                                        textAlign: TextAlign.center,
-                                                                        style: GoogleFonts.openSans(
-                                                                            fontSize: 16.0,
-                                                                            fontWeight: FontWeight.bold,
-                                                                            // color: Colors.red,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                SizedBox(height: 10.0,)
-                                                              ],
-                                                            ),
-                                                          );
-                                                        }
+                                              SizedBox(height: 10,),
+                                              RatingBar.builder(
+                                                  initialRating: 0,
+                                                  itemCount: 5,
+                                                  minRating: 1,
+                                                  direction: Axis.horizontal,
+                                                  allowHalfRating: true,
+                                                  itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                                  itemBuilder: (context, __) {
+                                                    return Icon(
+                                                      Icons.star,
+                                                      color: Colors.lightGreen[800],
                                                     );
+                                                  },
+                                                  onRatingUpdate: (rating) {
+                                                    setState(() {
+
+                                                    });
                                                   }
                                               ),
+                                              SizedBox(height: 15.0,),
+                                              Container(
+                                                width: MediaQuery.of(context1).size.width - 45,
+                                                height: 150,
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.all(Radius.circular(4.0))
+                                                ),
+                                                child: TextField(
+                                                  decoration: InputDecoration(
+                                                    hintText: "Write a review...",
+                                                    focusedBorder: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Colors.lightGreen[800],
+                                                        width: 1.5,
+                                                      ),
+                                                    ),
+                                                    enabledBorder: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Colors.lightGreen[800],
+                                                        width: 1.5,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  maxLines: null,
+                                                  minLines: 5,
+                                                  keyboardType: TextInputType.multiline,
+                                                ),
+                                              ),
+                                              SizedBox(height: 5.0,),
+                                              Align(
+                                                alignment: FractionalOffset.bottomCenter,
+                                                child: Container(
+                                                  width: 200,
+                                                  child: RaisedButton(
+                                                    color: Colors.white,
+                                                    textColor: Colors.lightGreen[800],
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(18.0),
+                                                        side: BorderSide(
+                                                          color: Colors.lightGreen[800],
+                                                          width: 2.0,
+                                                        )
+                                                    ),
+                                                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                                                    onPressed: () {
+                                                      setState(() {
+
+                                                      });
+                                                    },
+                                                    child: Text(
+                                                      "Submit",
+                                                      textAlign: TextAlign.center,
+                                                      style: GoogleFonts.openSans(
+                                                        fontSize: 16.0,
+                                                        fontWeight: FontWeight.bold,
+                                                        // color: Colors.red,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.0,)
                                             ],
                                           ),
                                         );
                                       }
-                                  );  //showModalBottomSheet
+                                  );
                                 },
                               ),
+                              //share
+                              IconSlideAction(
+                                caption: 'Share to...',
+                                color: Colors.transparent,
+                                foregroundColor: Colors.blueAccent,
+                                icon: Icons.share_outlined,
+                                onTap: () async {
+                                  final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
+                                  if (Platform.isAndroid) {
+                                    var response = await get(ordersProduct.productPictureURL);
+                                    final documentDirectory = (await getExternalStorageDirectory()).path;
+                                    File imgFile = new File('$documentDirectory/flutter.png');
+                                    imgFile.writeAsBytesSync(response.bodyBytes);
+                                    List<String> sharingList = new List();
+                                    sharingList.add('$documentDirectory/flutter.png');
+                                    //TODO: add store's name next to product's name or add a direct url share option
+                                    await Share.shareFiles(sharingList,
+                                        text: "check this cool product now!\n" + ordersProduct.name,
+                                        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                        subject: 'I found a lovely product on Gifthub!'
+                                    );
+                                  }
+                                },
+                              )
+                            ],
+                            secondaryActions: <Widget>[
+                              //delete
+                              IconSlideAction(
+                                caption: 'Delete',
+                                color: Colors.transparent,
+                                foregroundColor: Colors.red,
+                                icon: Icons.delete_outline_outlined,
+                                onTap: () {
+                                  var product;
+                                  setState(() {
+                                    product = userRep.orders.removeAt(i~/2);
+                                  });
+                                  _scaffoldKeyOrders.currentState.showSnackBar(
+                                    SnackBar(
+                                      content: Text('Product deleted'),
+                                      behavior: SnackBarBehavior.floating,
+                                      action: SnackBarAction(
+                                        textColor: Colors.deepPurpleAccent,
+                                        label:'Undo',
+                                        onPressed: () {
+                                          setState(() {
+                                            userRep.orders.add(product);
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  );
+                                }
+                              ),
+                            ],
+                            child: ListTile(
                               leading: CircularProfileAvatar(
-                                userRep.orders[i~/2].productPictureURL,
-                                radius: 20.0,
+                                ordersProduct.productPictureURL,
+                                radius: 26.0,
                                 onTap: () {
                                   Navigator.of(context).push(new MaterialPageRoute<void>(
-                                    builder: (BuildContext context) => new DecoratedBox(
-                                      decoration: new BoxDecoration(
-                                      image: new DecorationImage(
-                                          image: new NetworkImage(userRep.orders[i~/2].productPictureURL),
-                                          fit: BoxFit.fitWidth,
-                                        )
-                                      )
+                                    builder: (BuildContext context) => Dismissible(
+                                      key: const Key('keyV'),
+                                      direction: DismissDirection.vertical,
+                                      onDismissed: (_) => Navigator.pop(context),
+                                      child: Dismissible(
+                                        key: const Key('keyH'),
+                                        direction: DismissDirection.horizontal,
+                                        onDismissed: (_) => Navigator.pop(context),
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: NetworkImage(ordersProduct.productPictureURL),
+                                              fit: BoxFit.fitWidth,
+                                            )
+                                          )
+                                        ),
+                                      ),
                                     ),
                                   )
                                   );
                                 },
                               ),
-                              title: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(userRep.orders[i~/2].name,
-                                    style: GoogleFonts.lato(
-                                      fontSize: 16.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 6,),
-                                  Text(userRep.orders[i~/2].price.toString() + "\$  |  " +
-                                    userRep.orders[i~/2].dateOfOrder + "  |  " +
-                                    userRep.orders[i~/2].orderStatus.toString().substring(12),
-                                    style: GoogleFonts.lato(
-                                      fontSize: 11.0,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
+                              title: Text(ordersProduct.name,
+                                style: GoogleFonts.lato(
+                                  fontSize: 18.0,
+                                  color: Colors.black,
+                                ),
                               ),
-                            );
-                          }
+                              subtitle: Text(ordersProduct.price.toString() + "\$  |  " +
+                                  ordersProduct.dateOfOrder + "  |  " +
+                                  ordersProduct.orderStatus.toString().substring(12),
+                                style: GoogleFonts.lato(
+                                  fontSize: 12.0,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       ),
                     ),
                   ),
@@ -317,5 +337,11 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
         }
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scaffoldKeyOrders.currentState.dispose();
+    super.dispose();
   }
 }
