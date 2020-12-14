@@ -271,7 +271,7 @@ void firstSignUpSheet(var context,int screen) {
                                     passwordController.text,
                                     firstNameController.text,
                                     lastNameController.text,
-                                    phoneController.text);
+                                    "TODO","TODO","TODO");
                                 if (code == 'Success') {
                                   //TODO: User is now logged in. Move to Ariel's start screen
                                 }
@@ -407,9 +407,7 @@ void firstSignUpSheet(var context,int screen) {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0)),
                         onPressed: () {
-                          userRep.signInWithGoogleAddAccountInfo(firstNameController.text,
-                              lastNameController.text,
-                              phoneController.text);
+                          userRep.signInWithGoogleAddAccountInfo(firstNameController.text,lastNameController.text,"TODO","TODO","TODO");
                           setState(() {
                             //TODO: User is now logged in. Move to Ariel's start screen
                           });
@@ -597,6 +595,7 @@ Widget startScreenScaffold(context) => Scaffold(
                     firstSignUpSheet(context, 3);
                   }
                   else{
+
                     //TODO: User is now logged in. Move to Ariel's start screen
                   }
 

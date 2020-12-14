@@ -18,51 +18,68 @@ class UserRepository with ChangeNotifier {
   FirebaseStorage _storage;
   String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
   List<Product> _orders = new List();
+  String _firstName = "NO INFO";
+  String _lastName = "NO INFO";
+  String _address = "NO INFO";
+  String _apt = "NO INFO";
+  String _city = "NO INFO";
 
-  /// TODO: remove as soon as firebase initializes to contain user's personal info
-  /// lines: 19, 25 - 63.
-  /// this is just to assure clean run of user settings as of his personal info
-  String _firstName = "Daddy";
-  String _lastName = "Cool";
-  String _address = "Crazy like a fool st. 23";
-  String _apt = "2";
-  String _city = "Boney M. city";
+
+  void updateLocalUserFields() async {
+    var snapshop = await _db.collection('Users')
+        .doc(_user.uid)
+        .get();
+    var list=snapshop.data();
+    _firstName=list[0];
+    _lastName=list[1];
+    _address=list[2];
+    _apt=list[3];
+    _city=list[4];
+    //TODO: update _orders too
+  }
+  Future<void> updateFirebaseUserList() async {
+    var list=[_firstName,_lastName,_address,_apt,_city];
+    await _db.collection('Users').doc(_user.uid).set({'Info':list});
+  }
 
   String get apt => _apt;
 
   set apt(String value) {
     _apt = value;
+    updateFirebaseUserList();
   }
 
   set avatarURL(String value) {
-    _avatarURL = value;
+    addAvatar();
   }
 
   String get firstName => _firstName;
 
   set firstName(String value) {
     _firstName = value;
+    updateFirebaseUserList();
   }
 
   String get lastName => _lastName;
 
   set lastName(String value) {
     _lastName = value;
+    updateFirebaseUserList();
   }
 
   String get address => _address;
 
   set address(String value) {
     _address = value;
+    updateFirebaseUserList();
   }
 
   String get city => _city;
 
   set city(String value) {
     _city = value;
+    updateFirebaseUserList();
   }
-
-  ///UNTIL HERE.
 
   UserRepository.instance() : _auth = FirebaseAuth.instance {
     _auth.authStateChanges().listen(_authStateChanges);
@@ -82,13 +99,7 @@ class UserRepository with ChangeNotifier {
 
   List<Product> get orders => _orders;
 
-  Future<void> _addUser(DocumentReference userRef) async {
-    userRef.get().then((snapshot) {
-      if (!snapshot.exists) {
-        userRef.set({'email': _user.email, 'favorites': []});
-      }
-    });
-  }
+
 
   Future<String> signIn(String email, String password) async {
     try {
@@ -104,18 +115,18 @@ class UserRepository with ChangeNotifier {
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
       }
-
+      updateLocalUserFields();
       notifyListeners();
       return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
       notifyListeners();
       return e.message;
-      throw e;
+      //throw e;
     }
   }
 
-  Future<String> signUp(String email, String password,String firstName,String lastName,String phoneNumber) async {
+  Future<String> signUp(String email, String password,String firstName,String lastName,String address,String apt,String city) async {
 
     try {
       _status = Status.Authenticating;
@@ -130,9 +141,14 @@ class UserRepository with ChangeNotifier {
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
       }
-      var list=[firstName,lastName,phoneNumber];
-      await _db.collection('Users').doc(_user.uid).set({'Info':list});
-      list=[];
+      _firstName=firstName;
+      _lastName=lastName;
+      _address=address;
+      _apt=apt;
+      _city=city;
+
+      updateFirebaseUserList();
+      var list=[];
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
       notifyListeners();
@@ -141,7 +157,7 @@ class UserRepository with ChangeNotifier {
       _status = Status.Unauthenticated;
       notifyListeners();
       return e.message;
-      throw e;
+      //throw e;
     }
   }
 
@@ -171,11 +187,16 @@ class UserRepository with ChangeNotifier {
     await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
-  void signInWithGoogleAddAccountInfo(String firstName,String lastName,String phoneNumber) async {
+  void signInWithGoogleAddAccountInfo(String firstName,String lastName,String address,String apt,String city) async {
     _db = FirebaseFirestore.instance;
-    var list=[firstName,lastName,phoneNumber];
-    await _db.collection('Users').doc(_user.uid).set({'Info':list});
-    list=[];
+    _firstName=firstName;
+    _lastName=lastName;
+    _address=address;
+    _apt=apt;
+    _city=city;
+
+    updateFirebaseUserList();
+    var list=[];
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
   }
@@ -189,10 +210,12 @@ class UserRepository with ChangeNotifier {
         return true;
       }
       else{
+        updateLocalUserFields();
         return false;
       }
     }
     catch(e){
+      updateLocalUserFields();
       return false;
     }
   }
@@ -202,6 +225,7 @@ class UserRepository with ChangeNotifier {
   Future<void> _authStateChanges(User firebaseUser) async {
     if (firebaseUser == null) {
       _status = Status.Unauthenticated;
+      _user=null;
     } else {
       _user = firebaseUser;
       _status = Status.Authenticated;
