@@ -1,9 +1,9 @@
 import 'all_confetti_widget.dart';
 import 'my_flutter_app_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+//import 'package:firebase_core/firebase_core.dart';
 import 'user_repository.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 //For many uses:
 var gifthub_logo = Column(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -36,14 +36,17 @@ UserRepository userRep;
 final firstNameController = TextEditingController();
 final lastNameController = TextEditingController();
 final emailController = TextEditingController();
-final phoneController = TextEditingController();
+final aptController = TextEditingController();
+final cityController = TextEditingController();
+final addressController = TextEditingController();
 final passwordController = TextEditingController();
 bool checkEmailSignupFields() {
   return (emailController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
           firstNameController.text.isNotEmpty &&
           lastNameController.text.isNotEmpty &&
-          phoneController.text.isNotEmpty) &&
+      cityController.text.isNotEmpty&&addressController.text.isNotEmpty&&
+          aptController.text.isNotEmpty) &&
       RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
           .hasMatch(emailController.text) &&
       passwordController.text.length >= 6;
@@ -54,7 +57,6 @@ bool checkEmailSigninFields() {
       passwordController.text.isNotEmpty);
 }
 
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 bool emailInUse = false;
 void firstSignUpSheet(var context,int screen) {
   showModalBottomSheet<void>(
@@ -92,62 +94,90 @@ void firstSignUpSheet(var context,int screen) {
                           Container(
                             width: 150,
                             height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white70,
-                                borderRadius: BorderRadius.circular(5.0)),
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              controller: firstNameController,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              validator: (text) {
-                                if (text.isEmpty) {
-                                  return 'Cannot be empty!';
-                                } else {
-                                  return null;
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                labelStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold, fontFamily: 'TimesNewRoman'),
-                                labelText: 'First Name',
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'First Name',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: firstNameController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.name,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
                               ),
                             ),
                           ),
                           Container(
                             width: 150,
                             height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white70,
-                                borderRadius: BorderRadius.circular(5.0)),
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              controller: lastNameController,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              validator: (text) {
-                                if (text.isEmpty) {
-                                  return 'Cannot be empty!';
-                                } else {
-                                  return null;
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                labelStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
-                                labelText: 'Last Name',
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'Last Name',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: lastNameController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.name,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
                               ),
                             ),
                           ),
@@ -156,110 +186,248 @@ void firstSignUpSheet(var context,int screen) {
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          key: _formKey,
-                          keyboardType: TextInputType.emailAddress,
-                          textAlign: TextAlign.center,
-                          controller: emailController,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (text) {
-                            if (emailInUse) {
-                              emailInUse = false;
-                              return 'email in use';
-                            }
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
 
-                            if (text.isEmpty) {
-                              return 'Cannot be empty!';
-                            } else {
-                              if (!RegExp(
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Email',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: emailController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  if (!RegExp(
                                       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(text)) {
-                                return 'Email must be valid!';
-                              }
-                              return null;
-                            }
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Email',
+                                      .hasMatch(text)) {
+                                    return 'Email must be valid!';
+                                  }
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.emailAddress,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
+
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          keyboardType: TextInputType.phone,
-                          textAlign: TextAlign.center,
-                          controller: phoneController,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (text) {
-                            if (text.isEmpty) {
-                              return 'Cannot be empty!';
-                            } else {
-                              return null;
-                            }
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Phone number',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
+
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Address',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: addressController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.streetAddress,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            width: 150,
+                            height: 50,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'City',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: cityController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.streetAddress,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 150,
+                            height: 50,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'Apartment',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: aptController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.number,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+
+
+
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          textAlign: TextAlign.center,
-                          controller: passwordController,
-                          obscureText: true,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (text) {
-                            if (text.length < 6) {
-                              return 'Password length should be 6 or more!';
-                            }
-                            if (text.isEmpty) {
-                              return 'Cannot be empty!';
-                            } else {
-                              return null;
-                            }
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Password',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
+
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Password',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: passwordController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.length < 6) {
+                                  return 'Password length should be 6 or more!';
+                                }
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              obscureText: true,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
+
+
+
                       FlatButton(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0)),
@@ -271,7 +439,10 @@ void firstSignUpSheet(var context,int screen) {
                                     passwordController.text,
                                     firstNameController.text,
                                     lastNameController.text,
-                                    "TODO","TODO","TODO");
+                                    addressController.text,
+                                    aptController.text,
+                                    cityController.text,
+                                    );
                                 if (code == 'Success') {
                                   //TODO: User is now logged in. Move to Ariel's start screen
                                 }
@@ -308,106 +479,250 @@ void firstSignUpSheet(var context,int screen) {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+
                           Container(
                             width: 150,
                             height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white70,
-                                borderRadius: BorderRadius.circular(5.0)),
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              controller: firstNameController,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              validator: (text) {
-                                if (text.isEmpty) {
-                                  return 'Cannot be empty!';
-                                } else {
-                                  return null;
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                labelStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
-                                labelText: 'First Name',
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'First Name',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: firstNameController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.name,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
                               ),
                             ),
                           ),
                           Container(
                             width: 150,
                             height: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.white70,
-                                borderRadius: BorderRadius.circular(5.0)),
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              controller: lastNameController,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              validator: (text) {
-                                if (text.isEmpty) {
-                                  return 'Cannot be empty!';
-                                } else {
-                                  return null;
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                labelStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
-                                labelText: 'Last Name',
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'Last Name',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: lastNameController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.name,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
                               ),
                             ),
-                          ),
-                        ],
+                          ),],
                       ),
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          keyboardType: TextInputType.phone,
-                          textAlign: TextAlign.center,
-                          controller: phoneController,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (text) {
-                            if (text.isEmpty) {
-                              return 'Cannot be empty!';
-                            } else {
-                              return null;
-                            }
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Phone number',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
+
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Address',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: addressController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.streetAddress,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            width: 150,
+                            height: 50,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'City',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: cityController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.streetAddress,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 150,
+                            height: 50,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+
+                                  decoration: InputDecoration(
+                                    labelStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                    labelText: 'Apartment',
+                                    isDense: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white),
+                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                    ),
+                                  ),
+
+                                  controller: aptController,
+
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: (text) {
+                                    if (text.isEmpty) {
+                                      return 'Cannot be empty!';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  autofocus: false,
+                                  keyboardType: TextInputType.number,
+
+
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.lato(
+                                      fontSize: 16.0,
+                                      color: Colors.white
+                                  )
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+
+
+
+
+
                       FlatButton(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0)),
                         onPressed: () {
-                          userRep.signInWithGoogleAddAccountInfo(firstNameController.text,lastNameController.text,"TODO","TODO","TODO");
+                          userRep.signInWithGoogleAddAccountInfo(firstNameController.text,lastNameController.text,addressController.text,
+                            aptController.text,
+                            cityController.text,);
                           setState(() {
                             //TODO: User is now logged in. Move to Ariel's start screen
                           });
@@ -440,62 +755,105 @@ void firstSignUpSheet(var context,int screen) {
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          keyboardType: TextInputType.emailAddress,
-                          textAlign: TextAlign.center,
-                          controller: emailController,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (text) {
-                            if (text.isEmpty) {
-                              return 'Cannot be empty!';
-                            } else {
-                              if (!RegExp(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
+
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Email',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: emailController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  if (!RegExp(
                                       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(text)) {
-                                return 'Email must be valid!';
-                              }
-                              return null;
-                            }
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Email',
+                                      .hasMatch(text)) {
+                                    return 'Email must be valid!';
+                                  }
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.emailAddress,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
                       Container(
                         width: 330,
                         height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(5.0)),
-                        child: TextFormField(
-                          textAlign: TextAlign.center,
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                            labelText: 'Password',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: TextFormField(
+
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                labelText: 'Password',
+                                isDense: true,
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                    borderRadius: BorderRadius.all(Radius.circular(30))
+                                ),
+                              ),
+
+                              controller: passwordController,
+
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              validator: (text) {
+                                if (text.length < 6) {
+                                  return 'Password length should be 6 or more!';
+                                }
+                                if (text.isEmpty) {
+                                  return 'Cannot be empty!';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              autofocus: false,
+                              obscureText: true,
+
+
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lato(
+                                  fontSize: 16.0,
+                                  color: Colors.white
+                              )
                           ),
                         ),
                       ),
+
+
+
+
                       FlatButton(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0)),
