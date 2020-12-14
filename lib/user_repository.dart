@@ -16,8 +16,53 @@ class UserRepository with ChangeNotifier {
   Status _status = Status.Uninitialized;
   FirebaseFirestore _db;
   FirebaseStorage _storage;
-  String _avatarURL;
+  String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
   List<Product> _orders = new List();
+
+  /// TODO: remove as soon as firebase initializes to contain user's personal info
+  /// lines: 19, 25 - 63.
+  /// this is just to assure clean run of user settings as of his personal info
+  String _firstName = "Daddy";
+  String _lastName = "Cool";
+  String _address = "Crazy like a fool st. 23";
+  String _apt = "2";
+  String _city = "Boney M. city";
+
+  String get apt => _apt;
+
+  set apt(String value) {
+    _apt = value;
+  }
+
+  set avatarURL(String value) {
+    _avatarURL = value;
+  }
+
+  String get firstName => _firstName;
+
+  set firstName(String value) {
+    _firstName = value;
+  }
+
+  String get lastName => _lastName;
+
+  set lastName(String value) {
+    _lastName = value;
+  }
+
+  String get address => _address;
+
+  set address(String value) {
+    _address = value;
+  }
+
+  String get city => _city;
+
+  set city(String value) {
+    _city = value;
+  }
+
+  ///UNTIL HERE.
 
   UserRepository.instance() : _auth = FirebaseAuth.instance {
     _auth.authStateChanges().listen(_authStateChanges);
