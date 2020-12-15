@@ -5,31 +5,9 @@ import 'package:flutter/material.dart';
 import 'user_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 //For many uses:
-var gifthub_logo = Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: <Widget>[
-      Icon(
-        GiftHubIcons.gift,
-        color: Colors.red,
-        size: 100,
-      ),
-      Text(
-        'GiftHub',
-        style: TextStyle(
-            fontSize: 24,
-            fontFamily: 'TimesNewRoman',
-            fontWeight: FontWeight.bold),
-      )
-    ]);
 
-var star_gifthub = Container(
-  child: Icon(
-    Icons.star,
-    color: Colors.lightGreenAccent,
-    size: 380,
-  ),
-);
+
+
 
 UserRepository userRep;
 
@@ -92,8 +70,8 @@ void firstSignUpSheet(var context,int screen) {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -130,15 +108,15 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
                             ),
                           ),
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -175,7 +153,7 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
@@ -184,8 +162,8 @@ void firstSignUpSheet(var context,int screen) {
                         ],
                       ),
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -227,7 +205,7 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
@@ -235,8 +213,8 @@ void firstSignUpSheet(var context,int screen) {
                       ),
 
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -273,7 +251,7 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
@@ -283,8 +261,8 @@ void firstSignUpSheet(var context,int screen) {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -321,15 +299,15 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
                             ),
                           ),
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -366,7 +344,7 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
@@ -378,8 +356,8 @@ void firstSignUpSheet(var context,int screen) {
 
 
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -419,7 +397,7 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
@@ -455,7 +433,7 @@ void firstSignUpSheet(var context,int screen) {
                         color: Colors.red,
                         textColor: Colors.white,
                         child: Text('Sign up',
-                            style: TextStyle(fontSize: 23)),
+                            style: TextStyle(fontSize: MediaQuery.of(context).size.height * 0.03)),
                       )
                     ],
                   )),
@@ -465,7 +443,7 @@ void firstSignUpSheet(var context,int screen) {
             return Padding(
               padding: MediaQuery.of(context).viewInsets,
               child: Container(
-                  height: 300,
+                  height: MediaQuery.of(context).size.width * 0.37*2,
                   decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.only(
@@ -481,8 +459,8 @@ void firstSignUpSheet(var context,int screen) {
                         children: [
 
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -519,15 +497,15 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
                             ),
                           ),
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -564,7 +542,7 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
@@ -572,8 +550,8 @@ void firstSignUpSheet(var context,int screen) {
                           ),],
                       ),
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -610,7 +588,7 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
@@ -620,8 +598,8 @@ void firstSignUpSheet(var context,int screen) {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -658,15 +636,15 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
                             ),
                           ),
                           Container(
-                            width: 150,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            height: MediaQuery.of(context).size.height * 0.065,
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TextFormField(
@@ -703,7 +681,7 @@ void firstSignUpSheet(var context,int screen) {
 
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
-                                      fontSize: 16.0,
+                                      fontSize: MediaQuery.of(context).size.height * 0.02,
                                       color: Colors.white
                                   )
                               ),
@@ -729,7 +707,7 @@ void firstSignUpSheet(var context,int screen) {
                         },
                         color: Colors.red,
                         textColor: Colors.white,
-                        child: Text('Continue', style: TextStyle(fontSize: 23)),
+                        child: Text('Continue', style: TextStyle(fontSize: MediaQuery.of(context).size.height * 0.03)),
                       )
                     ],
                   )),
@@ -741,7 +719,7 @@ void firstSignUpSheet(var context,int screen) {
             return Padding(
               padding: MediaQuery.of(context).viewInsets,
               child: Container(
-                  height: 250,
+                  height: MediaQuery.of(context).size.height * 0.065*5,
                   decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.only(
@@ -753,8 +731,8 @@ void firstSignUpSheet(var context,int screen) {
                     children: [
                       Container(),
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -796,15 +774,15 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
                         ),
                       ),
                       Container(
-                        width: 330,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.37*2.25,
+                        height: MediaQuery.of(context).size.height * 0.065,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: TextFormField(
@@ -844,7 +822,7 @@ void firstSignUpSheet(var context,int screen) {
 
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lato(
-                                  fontSize: 16.0,
+                                  fontSize: MediaQuery.of(context).size.height * 0.02,
                                   color: Colors.white
                               )
                           ),
@@ -883,7 +861,7 @@ void firstSignUpSheet(var context,int screen) {
                             : null,
                         color: Colors.red,
                         textColor: Colors.white,
-                        child: Text('Login / Sign up', style: TextStyle(fontSize: 23)),
+                        child: Text('Login / Sign up', style: TextStyle(fontSize: MediaQuery.of(context).size.height * 0.03)),
                       )
                     ],
                   )),
@@ -906,41 +884,63 @@ Widget startScreenScaffold(context) => Scaffold(
             Stack(
               alignment: Alignment.center,
               children: [
-                Center(child: star_gifthub),
-                AllConfettiWidget(child: Center(child: gifthub_logo)),
+                Center(child: Container(
+                  child: Icon(
+                    Icons.star,
+                    color: Colors.lightGreenAccent,
+                    size: MediaQuery.of(context).size.height * 0.065*3.3*2.1,
+                  ),
+                )),
+                AllConfettiWidget(child: Center(child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        GiftHubIcons.gift,
+                        color: Colors.red,
+                        size: MediaQuery.of(context).size.height * 0.065*2,
+                      ),
+                      Text(
+                        'GiftHub',
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.height * 0.03,
+                            fontFamily: 'TimesNewRoman',
+                            fontWeight: FontWeight.bold),
+                      )
+                    ]))),
               ],
             ),
             Text(
-              'Enjoy the highest quality gifts. One click away',
+              'Enjoy the highest quality gifts.\nOne click away',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: MediaQuery.of(context).size.height * 0.04,
                 fontFamily: 'TimesNewRoman',
               ),
               textAlign: TextAlign.center,
             ),
             Container(
-              height: 100,
+              height: MediaQuery.of(context).size.height * 0.1,
             ),
             Container(
-              width: 300,
+              width: MediaQuery.of(context).size.width * 0.75,
               child: OutlineButton(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image(
-                      width: 30,
-                      height: 30,
+                      width: MediaQuery.of(context).size.width * 0.075,
+                      height: MediaQuery.of(context).size.height * 0.04,
                       image: AssetImage("Assets/google.png"),
                     ),
                     Container(
-                      width: 10,
+                      width: MediaQuery.of(context).size.width * 0.025,
                     ),
                     Text(
                       'Continue with Google',
                       textAlign: TextAlign.center,
                       style:
-                          TextStyle(fontSize: 24, fontFamily: 'TimesNewRoman'),
+                          TextStyle(fontSize: MediaQuery.of(context).size.height * 0.032, fontFamily: 'TimesNewRoman'),
                     )
                   ],
                 ),
@@ -964,7 +964,7 @@ Widget startScreenScaffold(context) => Scaffold(
               ),
             ),
             Container(
-              width: 300,
+              width: MediaQuery.of(context).size.width * 0.75,
               child: OutlineButton(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -972,16 +972,16 @@ Widget startScreenScaffold(context) => Scaffold(
                   children: [
                     Icon(
                       Icons.email,
-                      size: 30,
+                      size: MediaQuery.of(context).size.height * 0.065*3.1/5,
                     ),
                     Container(
-                      width: 10,
+                      width: MediaQuery.of(context).size.width * 0.025,
                     ),
                     Text(
                       'Continue with Email',
                       textAlign: TextAlign.center,
                       style:
-                      TextStyle(fontSize: 24, fontFamily: 'TimesNewRoman'),
+                      TextStyle(fontSize: MediaQuery.of(context).size.height * 0.032, fontFamily: 'TimesNewRoman'),
                     )
                   ],
                 ),
@@ -995,7 +995,7 @@ Widget startScreenScaffold(context) => Scaffold(
             ),
             Text(
               'or',
-              style: TextStyle(fontSize: 20, fontFamily: 'TimesNewRoman'),
+              style: TextStyle(fontSize: MediaQuery.of(context).size.height * 0.025, fontFamily: 'TimesNewRoman'),
               textAlign: TextAlign.center,
             )
             ,
@@ -1003,7 +1003,7 @@ Widget startScreenScaffold(context) => Scaffold(
 
               child: Text(
                 'Continue as a guest',
-                style: TextStyle(fontSize: 20, fontFamily: 'TimesNewRoman',color: Colors.black),
+                style: TextStyle(fontSize: MediaQuery.of(context).size.height * 0.03, fontFamily: 'TimesNewRoman',color: Colors.black),
                 textAlign: TextAlign.center,
               ),
 
