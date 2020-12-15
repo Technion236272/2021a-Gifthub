@@ -99,8 +99,6 @@ class UserRepository with ChangeNotifier {
 
   List<Product> get orders => _orders;
 
-
-
   Future<String> signIn(String email, String password) async {
     try {
       _status = Status.Authenticating;
@@ -110,7 +108,7 @@ class UserRepository with ChangeNotifier {
       _db = FirebaseFirestore.instance;
       _storage = FirebaseStorage.instance;
       try {
-        _avatarURL = await _storage.ref().child("Users/${_user.uid}/images/avatar").getDownloadURL();
+        _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
       }
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
@@ -238,8 +236,8 @@ class UserRepository with ChangeNotifier {
     final _picker = ImagePicker();
 
     await _picker.getImage(source: ImageSource.gallery).then((image) async {
-      await _storage.ref().child("users/${_user.email}/images/avatar").putFile(File(image.path));
-      _avatarURL = await _storage.ref().child("users/${_user.email}/images/avatar").getDownloadURL();
+      await _storage.ref().child("users/${_user.email}/avatar").putFile(File(image.path));
+      _avatarURL = await _storage.ref().child("users/${_user.email}/avatar").getDownloadURL();
     });
     notifyListeners();
   }
