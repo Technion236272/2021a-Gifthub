@@ -56,8 +56,8 @@ class _ProductScreenState extends State<ProductScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      globals.regButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red),
-                      globals.regButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined)),
+                      globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red),
+                      globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined)),
                     ]
                   )
                 ],

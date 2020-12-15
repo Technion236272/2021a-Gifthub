@@ -29,7 +29,7 @@ RatingBar fixedStarBar(double rate, {Color color= Colors.red}) {
 
 }
 
-RaisedButton regButton(String text, {Icon icon=null, Function press=null,0 Color buttonColor=Colors.red, Color textColor=Colors.white}) {
+RaisedButton regTextButton(String text, {Icon icon=null, Function press=null, Color buttonColor=Colors.red, Color textColor=Colors.white}) {
   return RaisedButton(
       elevation: 15.0,
       shape: RoundedRectangleBorder(
