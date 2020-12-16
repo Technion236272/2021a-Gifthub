@@ -1,4 +1,5 @@
 import 'all_confetti_widget.dart';
+import 'checkoutScreen.dart';
 import 'my_flutter_app_icons.dart';
 import 'package:flutter/material.dart';
 //import 'package:firebase_core/firebase_core.dart';
@@ -1006,7 +1007,15 @@ Widget startScreenScaffold(context) => Scaffold(
               ),
 
 
-              onPressed: () {},
+              onPressed: () {
+                showDialog(context: context,
+                    builder: (BuildContext context){
+
+
+                      return CustomDialogBox(total: "45",productList: null,);//TODO: insert the correct total and product list
+                    }
+                );
+              },
             )
 
 
