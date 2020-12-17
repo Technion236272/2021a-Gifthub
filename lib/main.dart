@@ -13,8 +13,13 @@ import 'package:provider/provider.dart';
 import 'wishListScreen.dart';
 import 'userSettingsScreen.dart';
 import 'package:flutter/cupertino.dart';
+import 'mainScreen.dart';
 
-void main() => runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -48,7 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     init();
-    return startScreenScaffold(context);
+    // return startScreenScaffold(context);
+    return MainScreen();
   }
 
   Future<void> init() async {
