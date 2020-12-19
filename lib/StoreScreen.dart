@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -13,19 +14,22 @@ import 'package:device_apps/device_apps.dart';
 // import 'productMock.dart';
 
 class ProductMock {
+  String _productId;
   String _userId;
   String _name;
   double _price;
   String _date;
   List _reviews = <ReviewMock>[];
 
+  String get productId => _productId;
   String get user => _userId;
   String get name => _name;
   double get price => _price;
   String get date => _date;
   List get reviews => _reviews;
 
-  ProductMock(String userId, String name, double price, String date, List reviews) : _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews;
+  ProductMock(String productId, String userId, String name, double price, String date, List reviews) :
+        _productId = productId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews;
 
 }
 
@@ -85,7 +89,7 @@ class _StoreScreenState extends State<StoreScreen> {
     _products = <ProductMock>[];
     for(var p in doc.data()['Products']){
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
-      _products.add(ProductMock(prodArgs['user'], prodArgs['name'], double.parse(prodArgs['price']), prodArgs['date'], prodArgs['reviews']));
+      _products.add(ProductMock(p, prodArgs['user'], prodArgs['name'], double.parse(prodArgs['price']), prodArgs['date'], prodArgs['reviews']));
     }
     _reviews = doc.data()['Reviews'].map<ReviewMock>((v) =>
         ReviewMock(v['user'], double.parse(v['rating']), v['content'])
@@ -237,52 +241,56 @@ class _StoreScreenState extends State<StoreScreen> {
                           ],
                         )
                       ],
+
                     ),
-                    onTap: () {}, // TODO push the product screen to navigator
+                    onTap: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductScreen(p.productId)));},
                     onLongPress: () {}, // TODO show options to view product or add to cart
                   ),
                 );
               }).toList(),
             );
-            return Material(
-                color: Colors.lightGreen,
-                child: Consumer<UserRepository>(
-                    builder: (context, userRep, _) {
-                      return Scaffold(
-                          resizeToAvoidBottomInset: false,
-                          resizeToAvoidBottomPadding: false,
-                          backgroundColor: Colors.lightGreen[600],
-                          key: _scaffoldKeyUserScreenSet,
-                          appBar: AppBar(
-                              backgroundColor: Colors.lightGreen[900],
-                              leading: IconButton(
-                                  icon: Icon(Icons.menu),
-                                  onPressed: null //TODO: implement navigation drawer
-                              ),
-                              title: Text(_storeName), //TODO: pull store name from database
-                              bottom: TabBar(
-                                tabs: [
-                                  Tab(text: "Items"),
-                                  Tab(text: "About"),
-                                ],
-                                indicatorColor: Colors.red,
-                                labelColor: Colors.white,
-                                unselectedLabelColor: Colors.grey,
-                              ),
-                              actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ? [
-                                IconButton(icon: Icon(Icons.edit_outlined), onPressed: () {}),
-                            ] : [],
-                          ),
+            return DefaultTabController(
+              length: 2,
+              child: Material(
+                  color: Colors.lightGreen,
+                  child: Consumer<UserRepository>(
+                      builder: (context, userRep, _) {
+                        return Scaffold(
+                            resizeToAvoidBottomInset: false,
+                            resizeToAvoidBottomPadding: false,
+                            backgroundColor: Colors.lightGreen[600],
+                            key: _scaffoldKeyUserScreenSet,
+                            appBar: AppBar(
+                                backgroundColor: Colors.lightGreen[900],
+                                leading: IconButton(
+                                    icon: Icon(Icons.menu),
+                                    onPressed: null //TODO: implement navigation drawer
+                                ),
+                                title: Text(_storeName), //TODO: pull store name from database
+                                bottom: TabBar(
+                                  tabs: [
+                                    Tab(text: "About"),
+                                    Tab(text: "Items"),
+                                  ],
+                                  indicatorColor: Colors.red,
+                                  labelColor: Colors.white,
+                                  unselectedLabelColor: Colors.grey,
+                                ),
+                                actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ? [
+                                  IconButton(icon: Icon(Icons.edit_outlined), onPressed: () {}),
+                              ] : [],
+                            ),
 
-                          body: TabBarView(
-                              children: [
-                                itemsTab,
-                                aboutTab,
-                              ]
-                          )
-                      );
-                    }
-                )
+                            body: TabBarView(
+                                children: [
+                                  aboutTab,
+                                  itemsTab,
+                                ]
+                            )
+                        );
+                      }
+                  )
+              ),
             );
           }
           return Center(child: CircularProgressIndicator());
