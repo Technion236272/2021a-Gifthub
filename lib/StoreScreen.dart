@@ -73,8 +73,9 @@ class _StoreScreenState extends State<StoreScreen> {
   double _storeRating = 1.0;
   List _products = <ProductMock>[];
   List _reviews = <ReviewMock>[];
-  bool editinproductsgMode = false;
+  bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet = new GlobalKey<ScaffoldState>();
+  final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
 
   _StoreScreenState(String storeId) : _storeId = storeId;
 
@@ -99,204 +100,236 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(
-      builder: (context, userRep, _) {
-        return FutureBuilder(
-          future: (() async {
-            var storeDoc = userRep.firestore.collection('Stores').doc(_storeId);
-            var prodDoc = userRep.firestore.collection('Products');
-            // var doc = await storeDoc.get();
-            await _initStoreArgs(await storeDoc.get(), prodDoc);
-          })(),
-        builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.done) {
-            final aboutTab = SingleChildScrollView(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      child: Image(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
-                        image: _storeImageURL != 'Default' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Center(
-                      child: Text(
-                          _storeDesc,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16.0,
-                            color: Colors.white,
-                          )
-                      ), //TODO: Pull from databse
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text("Store Address",
-                                textAlign: TextAlign.start,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16.0,
-                                  color: Colors.white,
-                                )),
-                          ),
-                          IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: null),
-                          IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
-                            await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
-                          }),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    globals.fixedStarBar(_storeRating),
-                    SizedBox(height: 10),
-                    Container(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width,
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.2,
-                      child: Expanded(
-                        child: ListView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: _reviews.map<ListTile>((r) =>
-                                ListTile(
-                                  title: Text(r.content, style: globals.niceFont()),
-                                  subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
-                                  leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
-                                  ),
-                                ).toList(),
-                            ),
-                      ),
-                      ),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          RaisedButton(
-                              elevation: 15.0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                                side: BorderSide(color: Colors.transparent),
-                              ),
-                              visualDensity: VisualDensity.adaptivePlatformDensity,
-                              color: Colors.red[900],
-                              textColor: Colors.white,
-                              onPressed: () {}, // TODO add push of all reviews screen
-                              child: Row(
-                                  children: [
-                                    Icon(Icons.list_alt),
-                                    Text("All Reviews"),
-                                  ]
-                              )
-                          ),
-                          RaisedButton(
-                              elevation: 15.0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                                side: BorderSide(color: Colors.transparent),
-                              ),
-                              visualDensity: VisualDensity.adaptivePlatformDensity,
-                              color: Colors.red[900],
-                              textColor: Colors.white,
-                              onPressed: () {}, //TODO add bottom drawer to add a review
-                              child: Row(
-                                  children: [
-                                    Icon(Icons.add),
-                                    Text("Add Review"),
-                                  ]
-                              )
-                          ),
-                        ]
-                    )
-                  ]
-              ),
-            );
-            final itemsTab = GridView.count(
-              childAspectRatio: 3/2,
-              crossAxisCount: 2,
-              children: _products.map((p) {
-                return Card(
-                  color: Colors.lightGreen[600],
-                  child: InkWell(
+        builder: (context, userRep, _) {
+          return FutureBuilder(
+              future: (() async {
+                var storeDoc = userRep.firestore.collection('Stores').doc(_storeId);
+                var prodDoc = userRep.firestore.collection('Products');
+                // var doc = await storeDoc.get();
+                await _initStoreArgs(await storeDoc.get(), prodDoc);
+              })(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  final aboutTab = SingleChildScrollView(
                     child: Column(
-                      children: [
-                        Image.asset('assets/images/birthday_cake.jpg'),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(p.name, style: globals.niceFont()),
-                            Text('\$' + p.price.toString(), style: globals.niceFont()),
-                          ],
-                        )
-                      ],
-
-                    ),
-                    onTap: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductScreen(p.productId)));},
-                    onLongPress: () {}, // TODO show options to view product or add to cart
-                  ),
-                );
-              }).toList(),
-            );
-            return DefaultTabController(
-              length: 2,
-              child: Material(
-                  color: Colors.lightGreen,
-                  child: Consumer<UserRepository>(
-                      builder: (context, userRep, _) {
-                        return Scaffold(
-                            resizeToAvoidBottomInset: false,
-                            resizeToAvoidBottomPadding: false,
-                            backgroundColor: Colors.lightGreen[600],
-                            key: _scaffoldKeyUserScreenSet,
-                            appBar: AppBar(
-                                backgroundColor: Colors.lightGreen[900],
-                                leading: IconButton(
-                                    icon: Icon(Icons.menu),
-                                    onPressed: null //TODO: implement navigation drawer
-                                ),
-                                title: Text(_storeName), //TODO: pull store name from database
-                                bottom: TabBar(
-                                  tabs: [
-                                    Tab(text: "About"),
-                                    Tab(text: "Items"),
-                                  ],
-                                  indicatorColor: Colors.red,
-                                  labelColor: Colors.white,
-                                  unselectedLabelColor: Colors.grey,
-                                ),
-                                actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ? [
-                                  IconButton(icon: Icon(Icons.edit_outlined), onPressed: () {}),
-                              ] : [],
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            child: Image(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width,
+                              image: _storeImageURL != 'Default' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
                             ),
-
-                            body: TabBarView(
-                                children: [
-                                  aboutTab,
-                                  itemsTab,
-                                ]
+                          ),
+                          SizedBox(height: 10),
+                          Center(
+                            child: editingMode?
+                            TextField(
+                              controller: controllers[1],
+                              style: globals.niceFont(),
                             )
-                        );
-                      }
-                  )
-              ),
-            );
-          }
-          return Center(child: CircularProgressIndicator());
+                            : Text(
+                                _storeDesc,
+                                textAlign: TextAlign.center,
+                                style: globals.niceFont(),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: editingMode?
+                                  TextField(
+                                    controller: controllers[2],
+                                    style: globals.niceFont(),
+                                  )
+                                      : Text(_storeAddr,
+                                      textAlign: TextAlign.start,
+                                      style: globals.niceFont()),
+                                ),
+                                IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: null),
+                                IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
+                                  await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
+                                }),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          globals.fixedStarBar(_storeRating),
+                          SizedBox(height: 10),
+                          Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width,
+                            height: MediaQuery
+                                .of(context)
+                                .size
+                                .height * 0.2,
+                            child: Expanded(
+                              child: ListView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: _reviews.map<ListTile>((r) =>
+                                    ListTile(
+                                      title: Text(r.content, style: globals.niceFont()),
+                                      subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
+                                      leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
+                                    ),
+                                ).toList(),
+                              ),
+                            ),
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                RaisedButton(
+                                    elevation: 15.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: BorderSide(color: Colors.transparent),
+                                    ),
+                                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                                    color: Colors.red[900],
+                                    textColor: Colors.white,
+                                    onPressed: () {},
+                                    // TODO add push of all reviews screen
+                                    child: Row(
+                                        children: [
+                                          Icon(Icons.list_alt),
+                                          Text("All Reviews"),
+                                        ]
+                                    )
+                                ),
+                                RaisedButton(
+                                    elevation: 15.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: BorderSide(color: Colors.transparent),
+                                    ),
+                                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                                    color: Colors.red[900],
+                                    textColor: Colors.white,
+                                    onPressed: () {},
+                                    //TODO add bottom drawer to add a review
+                                    child: Row(
+                                        children: [
+                                          Icon(Icons.add),
+                                          Text("Add Review"),
+                                        ]
+                                    )
+                                ),
+                              ]
+                          )
+                        ]
+                    ),
+                  );
+                  final itemsTab = GridView.count(
+                    childAspectRatio: 3 / 2,
+                    crossAxisCount: 2,
+                    children: _products.map((p) {
+                      return Card(
+                        color: Colors.lightGreen[600],
+                        child: InkWell(
+                          child: Column(
+                            children: [
+                              Expanded(child: Image.asset('assets/images/birthday_cake.jpg')),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(p.name, style: globals.niceFont()),
+                                  Text('\$' + p.price.toString(), style: globals.niceFont()),
+                                ],
+                              )
+                            ],
+
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductScreen(p.productId)));
+                          },
+                          onLongPress: () {}, // TODO show options to view product or add to cart
+                        ),
+                      );
+                    }).toList(),
+                  );
+                  return DefaultTabController(
+                    length: 2,
+                    child: Material(
+                        color: Colors.lightGreen,
+                        child: Consumer<UserRepository>(
+                            builder: (context, userRep, _) {
+                              return Scaffold(
+                                  resizeToAvoidBottomInset: false,
+                                  resizeToAvoidBottomPadding: false,
+                                  backgroundColor: Colors.lightGreen[600],
+                                  key: _scaffoldKeyUserScreenSet,
+                                  appBar: AppBar(
+                                    backgroundColor: Colors.lightGreen[900],
+                                    leading: IconButton(
+                                        icon: Icon(Icons.menu),
+                                        onPressed: null //TODO: implement navigation drawer
+                                    ),
+                                    title: editingMode ?
+                                    TextField(
+                                      controller: controllers[0],
+                                      style: globals.niceFont(),
+                                    )
+                                        : Text(_storeName),
+                                    bottom: TabBar(
+                                      tabs: [
+                                        Tab(text: "About"),
+                                        Tab(text: "Items"),
+                                      ],
+                                      indicatorColor: Colors.red,
+                                      labelColor: Colors.white,
+                                      unselectedLabelColor: Colors.grey,
+                                    ),
+                                    actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
+                                    editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
+                                      await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
+                                        var storeArgs = snapshot['Store'];
+                                        storeArgs[0] = controllers[0].text;
+                                        storeArgs[2] = controllers[1].text;
+                                        storeArgs[3] = controllers[2].text;
+                                        await userRep.firestore.collection('Stores').doc(_storeId).update({'Store': storeArgs});
+                                      });
+                                      setState(() {editingMode = false;});
+                                    },)]
+                                        : [
+                                      IconButton(icon: Icon(Icons.edit_outlined), onPressed: () {
+                                        setState(() {
+                                          editingMode = true;
+                                          controllers[0].text = _storeName;
+                                          controllers[1].text = _storeDesc;
+                                          controllers[2].text = _storeAddr;
+                                        });
+                                      }),
+                                    ]
+                                        : [],
+                                  ),
+
+                                  body: TabBarView(
+                                      children: [
+                                        aboutTab,
+                                        itemsTab,
+                                      ]
+                                  )
+                              );
+                            }
+                        )
+                    ),
+                  );
+                }
+                return Center(child: CircularProgressIndicator());
+              }
+          );
         }
-        );
-      }
     );
   }
 }
