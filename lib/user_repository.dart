@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'productMock.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
@@ -17,7 +16,7 @@ class UserRepository with ChangeNotifier {
   FirebaseFirestore _db;
   FirebaseStorage _storage;
   String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
-  List<Product> _orders = new List();
+  //List<Product> _orders = new List();
   String _firstName = "NO INFO";
   String _lastName = "NO INFO";
   String _address = "NO INFO";
@@ -97,7 +96,7 @@ class UserRepository with ChangeNotifier {
 
   String get avatarURL => _avatarURL;
 
-  List<Product> get orders => _orders;
+  //List<Product> get orders => _orders;
 
   Future<String> signIn(String email, String password) async {
     try {
@@ -111,7 +110,7 @@ class UserRepository with ChangeNotifier {
         _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
       }
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
-        _avatarURL = null;
+        _avatarURL = "";
       }
       updateLocalUserFields();
       notifyListeners();
@@ -137,7 +136,7 @@ class UserRepository with ChangeNotifier {
         _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
       }
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
-        _avatarURL = null;
+        _avatarURL = "";
       }
       _firstName=firstName;
       _lastName=lastName;
@@ -164,7 +163,7 @@ class UserRepository with ChangeNotifier {
     _status = Status.Unauthenticated;
     _auth.signOut();
     _db = null;
-    _avatarURL = null;
+    _avatarURL = "";
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
