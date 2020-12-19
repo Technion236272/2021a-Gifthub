@@ -3,6 +3,25 @@ library gifthub.globals;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'my_flutter_app_icons.dart';
+
+var gifthub_logo = Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: <Widget>[
+      Icon(
+        GiftHubIcons.gift,
+        color: Colors.red,
+        size: 100,
+      ),
+      Text(
+        'GiftHub',
+        style: TextStyle(
+            fontSize: 24,
+            fontFamily: 'TimesNewRoman',
+            fontWeight: FontWeight.bold),
+      )
+    ]);
 
 TextStyle niceFont({double size= 16.0, Color color=Colors.white}) {
   return GoogleFonts.montserrat(
@@ -11,20 +30,20 @@ TextStyle niceFont({double size= 16.0, Color color=Colors.white}) {
   );
 }
 
-RatingBar fixedStarBar(double rate, {Color color= Colors.red}) {
+RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0}) {
   return RatingBar(
     initialRating: rate,
     direction: Axis.horizontal,
     allowHalfRating: true,
     ignoreGestures: true,
-    itemCount: 5,
+    itemSize: itemSize,
     ratingWidget: RatingWidget(
       full: Icon(Icons.star, color: Colors.red),
       half: Icon(Icons.star_half, color: Colors.red),
       empty: Icon(Icons.star_border, color: Colors.red),
     ),
     onRatingUpdate: (rating) {},
-    itemPadding: EdgeInsets.symmetric(horizontal: 10.0),
+    itemPadding: EdgeInsets.zero,
   );
 
 }
