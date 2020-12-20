@@ -31,7 +31,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
   void initState() {
     super.initState();
     var userRep = Provider.of<UserRepository>(context, listen: false);
-    userRep.orders.clear();
+    // userRep.orders.clear();
     userRep.orders.add(new Product("cake", 15.0, OrderStatus.Arrived,
         "https://storcpdkenticomedia.blob.core.windows.net/media/recipemanagementsystem/media/recipe-media-files/recipes/retail/desktopimages/rainbow-cake600x600_2.jpg?ext=.jpg"));
     userRep.orders.add(new Product(
@@ -66,6 +66,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
+                      padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight * 2 + 7),
                       color: Colors.white,
                       child: ListView.builder(
                         itemCount: userRep.orders.length * 2,
