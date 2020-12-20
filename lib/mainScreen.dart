@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   String _currentAppBarTitle(int index){
-    return 0 == index ? '' : 1 == index ? "           Orders" : " Account Settings";
+    return 0 == index ? '' : 1 == index ? "           Orders" : "          Account";
   }
 
   @override
@@ -229,7 +229,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle_outlined),
-                label: 'Account Settings',
+                label: 'Account',
               ),
             ],
           ),
