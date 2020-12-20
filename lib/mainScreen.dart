@@ -19,6 +19,16 @@ import 'wishListScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
 
+/// The Main Screen:
+/// The screen which controls the nav. bar and the navigation between the 3
+/// different screens - Home, Orders and Account.
+/// it also sets an appropriate AppBar for each screen accordingly.
+/// ----------------------------------------------------------------------------
+/// The Home Screen:
+/// The screen which shows the home page of the app.
+/// It displays a limited GridView of the different products available in
+/// the app.
+
 class MainScreen extends StatefulWidget {
   MainScreen({Key key}) : super(key: key);
 
