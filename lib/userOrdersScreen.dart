@@ -31,6 +31,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
   void initState() {
     super.initState();
     var userRep = Provider.of<UserRepository>(context, listen: false);
+    userRep.orders.clear();
     userRep.orders.add(new Product("cake", 15.0, OrderStatus.Arrived,
         "https://storcpdkenticomedia.blob.core.windows.net/media/recipemanagementsystem/media/recipe-media-files/recipes/retail/desktopimages/rainbow-cake600x600_2.jpg?ext=.jpg"));
     userRep.orders.add(new Product(
@@ -51,31 +52,12 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
             resizeToAvoidBottomInset: false,
             resizeToAvoidBottomPadding: false,
             backgroundColor: Colors.lightGreen[800],
-            appBar: AppBar(
-              elevation: 0.0,
-              backgroundColor: Colors.lightGreen[800],
-              leading: IconButton(
-                  icon: Icon(Icons.menu),
-                  onPressed: null //TODO: implement navigation drawer
-              ),
-              title: Text("           Orders",
-                style: GoogleFonts.calistoga(
-                    fontSize: 30,
-                    color: Colors.white
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
             body: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: 10,
-                  ),
                   ClipRRect(
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20.0),
@@ -84,7 +66,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
-                      padding: EdgeInsets.all(5),
                       color: Colors.white,
                       child: ListView.builder(
                         itemCount: userRep.orders.length * 2,
@@ -341,7 +322,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
 
   @override
   void dispose() {
-    _scaffoldKeyOrders.currentState.dispose();
     super.dispose();
   }
 }

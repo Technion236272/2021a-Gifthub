@@ -24,18 +24,23 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primaryColor: Colors.green,
-        accentColor: Colors.red,
-        fontFamily: 'NewRomanTimes',
-        textTheme: TextTheme(
-          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-        )
+    return ChangeNotifierProvider(
+      create: (_) => UserRepository.instance(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          textSelectionHandleColor: Colors.transparent,
+          cursorColor: Colors.lightGreen[800],
+          primaryColor: Colors.green,
+          accentColor: Colors.red,
+          fontFamily: 'NewRomanTimes',
+          textTheme: TextTheme(
+            headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+            headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+          )
+        ),
+        home: MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

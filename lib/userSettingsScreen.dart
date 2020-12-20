@@ -81,21 +81,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                 resizeToAvoidBottomPadding: false,
                 backgroundColor: Colors.transparent,
                 key: _scaffoldKeyUserScreenSet,
-                appBar: AppBar(
-                  elevation: 0.0,
-                  backgroundColor: Colors.lightGreen[800],
-                  leading: IconButton(
-                      icon: Icon(Icons.menu),
-                      onPressed: null //TODO: implement navigation drawer
-                  ),
-                  title: Text(" Account Settings",
-                    style: GoogleFonts.calistoga(
-                      fontSize: 28,
-                      color: Colors.white
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
                 body: GestureDetector(
                   onTap: () {
                     FocusScope.of(context).unfocus();

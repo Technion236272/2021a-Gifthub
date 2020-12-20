@@ -29,6 +29,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
   void initState() {
     super.initState();
     var userRep = Provider.of<UserRepository>(context, listen: false);
+    userRep.orders.clear();
     userRep.orders.add(new Product("cake", 15.0, OrderStatus.Arrived,
         "https://storcpdkenticomedia.blob.core.windows.net/media/recipemanagementsystem/media/recipe-media-files/recipes/retail/desktopimages/rainbow-cake600x600_2.jpg?ext=.jpg"));
     userRep.orders.add(new Product(
@@ -56,8 +57,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                 elevation: 0.0,
                 backgroundColor: Colors.lightGreen[800],
                 leading: IconButton(
-                    icon: Icon(Icons.menu),
-                    onPressed: null //TODO: implement navigation drawer
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.of(context).pop()
                 ),
                 title: Text("       Wish List",
                   style: GoogleFonts.calistoga(
@@ -73,10 +74,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 10,
-                    ),
                     ClipRRect(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20.0),
@@ -211,7 +208,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                 ),
                                 subtitle: Text(wishListProduct.price.toString() + "\$",
                                   style: GoogleFonts.lato(
-                                    fontSize: 13.5,
+                                    fontSize: 12.0,
                                     color: Colors.grey,
                                   ),
                                 ),
