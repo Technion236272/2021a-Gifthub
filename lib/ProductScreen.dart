@@ -67,6 +67,9 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   String _productId;
   ProductMock _prod;
+  bool editingMode = false;
+  final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
+
 
   _ProductScreenState(String productId) : _productId = productId;
 
@@ -105,9 +108,41 @@ class _ProductScreenState extends State<ProductScreen> {
                           backgroundColor: Colors.lightGreen[900],
                           leading: IconButton(
                               icon: Icon(Icons.menu),
-                              onPressed: null //TODO: implement navigation drawer
+                              onPressed: () {} //TODO: implement navigation drawer
                           ),
-                          title: Text(_prod.name), //TODO: pull product name from database
+                          title: editingMode?
+                              TextField(
+                                controller: controllers[0],
+                                style: globals.niceFont(),
+                              )
+                              : Text(_prod.name),
+                          actions: /*userRep.status == Status.Authenticated && _storeId == userRep.user.uid*/ true ?
+                          editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
+                            await userRep.firestore.collection('Products').doc(_productId).get().then((snapshot) async {
+                              var prodArgs = snapshot['Product'];
+                              prodArgs['name'] = controllers[0].text;
+                              prodArgs['description'] = controllers[1].text;
+                              prodArgs['price'] = controllers[2].text;
+                              await userRep.firestore.collection('Products').doc(_productId).update({'Product': prodArgs});
+                            });
+                            setState(() {
+                              editingMode = false;
+                            });
+                          },)
+                          ]
+                              : [
+                            IconButton(icon: Icon(Icons.edit_outlined), onPressed: () async {
+                              await userRep.firestore.collection('Products').doc(_productId).get().then((snapshot) {
+                                var prodArgs = snapshot['Product'];
+                                setState(() {
+                                  controllers[0].text = prodArgs['name'];
+                                  controllers[1].text = prodArgs['description'];
+                                  controllers[2].text = prodArgs['price'];
+                                  editingMode = true;
+                                });
+                              });
+                            }),
+                          ] : [],
                         ),
 
                         body: SingleChildScrollView(
@@ -121,7 +156,22 @@ class _ProductScreenState extends State<ProductScreen> {
                                 image: AssetImage('assets/images/birthday_cake.jpg'),
                               ),
                               SizedBox(height: 20.0),
-                              Text(
+                              editingMode?
+                              TextField(
+                                controller: controllers[2],
+                                style: globals.niceFont(),
+                              )
+                                  : Text(
+                                '\$' + _prod.price.toString(),
+                                style: globals.niceFont(size: 20.0),
+                              ),
+                              SizedBox(height: 10.0),
+                              editingMode?
+                              TextField(
+                                controller: controllers[1],
+                                style: globals.niceFont(),
+                              )
+                                  : Text(
                                 _prod.description,
                                 style: globals.niceFont(size: 14.0),
                               ),
@@ -146,7 +196,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       )
                   );
                 }
-                return Center(child: CircularProgressIndicator());
+                return globals.emptyLoadingScaffold();
               });
         }
     );
