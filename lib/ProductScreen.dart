@@ -6,8 +6,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
 
@@ -54,11 +52,9 @@ class ReviewMock {
 }
 
 class ProductScreen extends StatefulWidget {
-  String _productId;
+  final _productId;
 
-  ProductScreen(String productId, {Key key}) : /*_productId = productId,*/ super(key: key){
-    _productId = "0";
-  }
+  ProductScreen(String productId, {Key key}) : _productId = productId, super(key: key);
 
   @override
   _ProductScreenState createState() => _ProductScreenState(_productId);
@@ -89,12 +85,10 @@ class _ProductScreenState extends State<ProductScreen> {
           return FutureBuilder(
               future: (() async {
                 var prodDoc = userRep.firestore.collection('Products').doc(_productId);
-                int i = 12;
                 _initProductArgs(await prodDoc.get());
               })(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.done) {
-                  int j = 0;
                   return Material(
                       color: Colors.lightGreen,
                       child: Scaffold(
