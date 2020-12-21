@@ -19,15 +19,12 @@ import 'wishListScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
 
+/// ----------------------------------------------------------------------------
 /// The Main Screen:
 /// The screen which controls the nav. bar and the navigation between the 3
 /// different screens - Home, Orders and Account.
 /// it also sets an appropriate AppBar for each screen accordingly.
 /// ----------------------------------------------------------------------------
-/// The Home Screen:
-/// The screen which shows the home page of the app.
-/// It displays a limited GridView of the different products available in
-/// the app.
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key key}) : super(key: key);
@@ -262,6 +259,13 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+/// ----------------------------------------------------------------------------
+/// The Home Screen:
+/// The screen which shows the home page of the app.
+/// It displays a limited GridView of the different products available in
+/// the app.
+/// ----------------------------------------------------------------------------
+
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
 
@@ -338,8 +342,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         highlightColor: Colors.transparent,
                         onTap: () => {}, //TODO: navigate to product screen
                         child: Container(
-                          // width: MediaQuery.of(context).size.width,
-                          // height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
                           color: Colors.redAccent,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -347,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Container(
-                                width: MediaQuery.of(context).size.width * 1/2,
+                                // width: MediaQuery.of(context).size.width * 1/2,
                                 height: MediaQuery.of(context).size.height * 1/6,
                                 color: Colors.cyan,
                                 // child: Image.network(await _getProductPicture(index, snapshot)),
@@ -362,29 +366,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('  Red Sofa', //product title goes here
-                                        textAlign: TextAlign.left,
-                                        style: GoogleFonts.lato(
-                                          fontSize: 18.0,
-                                          color: Colors.black,
+                                      Flexible(
+                                        child: Text('  Red Sofa', //product title goes here
+                                          textAlign: TextAlign.left,
+                                          style: GoogleFonts.lato(
+                                            fontSize: 18.0,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
-                                      Text('  cool sofa bro', //product sub title goes here
-                                        textAlign: TextAlign.left,
-                                        style: GoogleFonts.lato(
-                                          fontSize: 14.0,
-                                          color: Colors.grey,
+                                      Flexible(
+                                        child: Text('  cool sofa bro', //product sub title goes here
+                                          textAlign: TextAlign.left,
+                                          style: GoogleFonts.lato(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text('          150\$  ',
-                                      textAlign: TextAlign.right,
-                                      style: GoogleFonts.lato(
-                                        fontSize: 15.0,
-                                        color: Colors.black,
+                                  Flexible(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text('150\$',
+                                        textAlign: TextAlign.right,
+                                        style: GoogleFonts.lato(
+                                          fontSize: 15.0,
+                                          color: Colors.black,
+                                        ),
                                       ),
                                     ),
                                   )
