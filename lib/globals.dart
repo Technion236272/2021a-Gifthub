@@ -65,3 +65,25 @@ RaisedButton regTextButton(String text, {Icon icon=null, Function press=null, Co
       )
   );
 }
+
+class Constants{
+  Constants._();
+  static const double padding =20;
+  static const double avatarRadius =45;
+}
+
+Scaffold emptyLoadingScaffold() {
+  return Scaffold(
+    backgroundColor: Colors.lightGreen[600],
+    appBar: AppBar(
+      backgroundColor: Colors.lightGreen[900],
+      leading: IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {},
+      ),
+      title: Text("Loading..."),
+    ),
+
+    body: Center(child: CircularProgressIndicator()),
+  );
+}
