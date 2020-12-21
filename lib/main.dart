@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gifthub_2021a/user_repository.dart';
@@ -6,14 +8,18 @@ import 'ChatScreen.dart';
 import 'package:flutter/cupertino.dart';
 
 void main() {
-
   runApp(MyApp());
 }
-
+initFirebase() async {
+  await Firebase.initializeApp();
+}
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
-    Firebase.initializeApp();
+    initFirebase();
+    Random r = new Random();
+    var b=r.nextBool();
     return ChangeNotifierProvider(
       create: (_) => UserRepository.instance(),
       child: MaterialApp(
@@ -26,7 +32,7 @@ class MyApp extends StatelessWidget {
             ),
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          home: ChatScreen()
+          home: ChatScreen(sellerID:"TEST SID",userID: b?"3I8TXyFiBVMIEmwbjxQKNCGK8oE3":"5KToU3PtcrXGYOk6a9tLYfIolHl2",)
       ),
     );
   }
