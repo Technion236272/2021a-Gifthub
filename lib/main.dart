@@ -58,8 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     init();
-    // return startScreenScaffold(context);
-    return MainScreen();
+    return startScreenScaffold(context);
+    // return MainScreen();
   }
 
   Future<void> init() async {

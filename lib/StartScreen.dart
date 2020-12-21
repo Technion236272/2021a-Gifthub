@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 //import 'package:firebase_core/firebase_core.dart';
 import 'user_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'mainScreen.dart';
 //For many uses:
 var gifthub_logo = Column(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -444,7 +445,10 @@ void firstSignUpSheet(var context,int screen) {
                                     cityController.text,
                                     );
                                 if (code == 'Success') {
-                                  //TODO: User is now logged in. Move to Ariel's start screen
+                                  setState(() {});
+                                  Navigator.pushAndRemoveUntil(context,
+                                      new MaterialPageRoute<void>(builder: (context) => MainScreen()),
+                                      (r) => false);
                                 }
                                 if (code == 'email-already-in-use') {}
                                 emailInUse = true;
@@ -724,7 +728,9 @@ void firstSignUpSheet(var context,int screen) {
                             aptController.text,
                             cityController.text,);
                           setState(() {
-                            //TODO: User is now logged in. Move to Ariel's start screen
+                            Navigator.pushAndRemoveUntil(context,
+                                new MaterialPageRoute<void>(builder: (context) => MainScreen()),
+                                    (r) => false);
                           });
                         },
                         color: Colors.red,
@@ -864,7 +870,10 @@ void firstSignUpSheet(var context,int screen) {
                                     emailController.text,
                                     passwordController.text);
                                 if (message == 'Success') {
-                                  //TODO: User is now logged in. Move to Ariel's start screen
+                                  setState(() {});
+                                  Navigator.pushAndRemoveUntil(context,
+                                      new MaterialPageRoute<void>(builder: (context) => MainScreen()),
+                                          (r) => false);
                                 }
                                 if (message ==
                                     'The password is invalid or the user does not have a password.') {
@@ -953,8 +962,9 @@ Widget startScreenScaffold(context) => Scaffold(
                     firstSignUpSheet(context, 3);
                   }
                   else{
-
-                    //TODO: User is now logged in. Move to Ariel's start screen
+                    Navigator.pushAndRemoveUntil(context,
+                        new MaterialPageRoute<void>(builder: (context) => MainScreen()),
+                            (r) => false);
                   }
 
 
