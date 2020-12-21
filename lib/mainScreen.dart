@@ -200,7 +200,54 @@ class _MainScreenState extends State<MainScreen> {
               icon: userRep.status == Status.Authenticated ?
                 Icon(Icons.logout) : Icon(Icons.login_outlined),
               onPressed: userRep.status == Status.Authenticated
-                ? () async => await userRep.signOut()
+                ? () async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (_) => AlertDialog(
+                      title: Text('Logout?',
+                        style: GoogleFonts.lato(
+                          fontSize: 18.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                      content: Text('Are you sure you want to logout?',
+                        style: GoogleFonts.lato(
+                          fontSize: 16.0,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      backgroundColor: Colors.white,
+                      elevation: 24.0,
+                      actions: [
+                        FlatButton(
+                          child: Text("Yes",
+                            style: GoogleFonts.lato(
+                              fontSize: 14.0,
+                              color: Colors.green,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await userRep.signOut();
+                            setState(() {});
+                            Navigator.pop(context);
+                          },
+                        ),
+                        FlatButton(
+                          child: Text("No",
+                            style: GoogleFonts.lato(
+                              fontSize: 14.0,
+                              color: Colors.red,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    )
+                  );
+                }
                 : _signInDialog
             ),
             title: Text(_currentAppBarTitle(_currentIndex),
@@ -223,7 +270,7 @@ class _MainScreenState extends State<MainScreen> {
                     behavior: SnackBarBehavior.floating,
                     content: Text('only verified users can access this screen',
                       style: GoogleFonts.lato(
-                        fontSize: 12.0
+                        fontSize: 13.0
                       ),
                     ),
                     action: SnackBarAction(
