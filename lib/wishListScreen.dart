@@ -53,6 +53,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
               resizeToAvoidBottomInset: false,
               backgroundColor: Colors.lightGreen[800],
               appBar: AppBar(
+                centerTitle: true,
                 automaticallyImplyLeading: false,
                 elevation: 0.0,
                 backgroundColor: Colors.lightGreen[800],
@@ -60,7 +61,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                     icon: Icon(Icons.arrow_back),
                     onPressed: () => Navigator.of(context).pop()
                 ),
-                title: Text("       Wish List",
+                title: Text("Wish List",
                   style: GoogleFonts.calistoga(
                       fontSize: 33,
                       color: Colors.white

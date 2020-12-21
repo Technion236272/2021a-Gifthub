@@ -45,8 +45,127 @@ class _MainScreenState extends State<MainScreen> {
     UserSettingsScreen()
   ];
 
+  void _signInDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.23,
+              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
+              decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black,offset: Offset(0,10),
+                        blurRadius: 10
+                    ),
+                  ]
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: Image(
+                      width: MediaQuery.of(context).size.width * 0.06,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      image: AssetImage("Assets/google.png"),
+                    ),
+                    title: Text('Continue with Google',
+                      style: GoogleFonts.lato(
+                        fontSize: 18.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                    onTap: () async {
+                      userRep.signInWithGoogle();
+                      if (await userRep.signInWithGoogleCheckIfFirstTime()){
+                        firstSignUpSheet(context, 3);
+                      } else {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.004,
+                    child: Divider(
+                      color: Colors.red[400],
+                      indent: 10,
+                      thickness: 1.0,
+                      endIndent: 10,
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('Continue with Email',
+                      style: GoogleFonts.lato(
+                        fontSize: 18.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                    leading: Icon(Icons.email_outlined,
+                      color: Colors.black87,
+                    ),
+                    onTap: () => firstSignUpSheet(context,5),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+                left: 20,
+                right: 20,
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  radius: 45,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(45)),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      height: MediaQuery.of(context).size.height * 0.12,
+                      color: Colors.lightGreenAccent,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              GiftHubIcons.gift,
+                              color: Colors.red,
+                              size: MediaQuery.of(context).size.height * 0.06,
+                            ),
+                            Text('GiftHub',
+                              style: TextStyle(
+                                  fontSize: MediaQuery.of(context).size.height * 0.03,
+                                  fontFamily: 'TimesNewRoman',
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _currentAppBarTitle(int index){
-    return 0 == index ? '' : 1 == index ? "           Orders" : "          Account";
+    return 0 == index ? '' : 1 == index ? "Orders" : "Account";
   }
 
   @override
@@ -60,6 +179,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
           appBar: AppBar(
+            centerTitle: true,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
@@ -82,122 +202,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: userRep.status == Status.Authenticated
                 ? () async {
                 await userRep.signOut();
-              } : () => showDialog(
-                  context: context,
-                  builder: (BuildContext context) => Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    backgroundColor: Colors.transparent,
-                    child: Stack(
-                      children: <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 0.23,
-                          margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black,offset: Offset(0,10),
-                                blurRadius: 10
-                              ),
-                            ]
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              ListTile(
-                                tileColor: Colors.white,
-                                leading: Image(
-                                  width: MediaQuery.of(context).size.width * 0.06,
-                                  height: MediaQuery.of(context).size.height * 0.06,
-                                  image: AssetImage("Assets/google.png"),
-                                ),
-                                title: Text('Continue with Google',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 18.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                onTap: () async {
-                                  userRep.signInWithGoogle();
-                                  if (await userRep.signInWithGoogleCheckIfFirstTime()){
-                                    firstSignUpSheet(context, 3);
-                                  } else {
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                              ),
-                              Container(
-                                height: MediaQuery.of(context).size.height * 0.004,
-                                child: Divider(
-                                  color: Colors.red[400],
-                                  indent: 10,
-                                  thickness: 1.0,
-                                  endIndent: 10,
-                                ),
-                              ),
-                              ListTile(
-                                title: Text('Continue with Email',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 18.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                leading: Icon(Icons.email_outlined,
-                                  color: Colors.black87,
-                                ),
-                                onTap: () => firstSignUpSheet(context,5),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          left: 20,
-                          right: 20,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            radius: 45,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.all(Radius.circular(45)),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                height: MediaQuery.of(context).size.height * 0.12,
-                                color: Colors.lightGreenAccent,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        GiftHubIcons.gift,
-                                        color: Colors.red,
-                                        size: MediaQuery.of(context).size.height * 0.06,
-                                      ),
-                                      Text('GiftHub',
-                                        style: TextStyle(
-                                            fontSize: MediaQuery.of(context).size.height * 0.03,
-                                            fontFamily: 'TimesNewRoman',
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+              } : _signInDialog
             ),
             title: Text(_currentAppBarTitle(_currentIndex),
               style: GoogleFonts.calistoga(
@@ -213,6 +218,24 @@ class _MainScreenState extends State<MainScreen> {
             selectedItemColor: Colors.white,
             currentIndex: _currentIndex,
             onTap: (i) {
+              if(i > 0 && userRep.status != Status.Authenticated){
+                _scaffoldKeyMainScreen.currentState.showSnackBar(
+                  SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text('only verified users can access this screen',
+                      style: GoogleFonts.lato(
+                        fontSize: 12.0
+                      ),
+                    ),
+                    action: SnackBarAction(
+                      textColor: Colors.deepPurpleAccent,
+                      label: 'Log in',
+                      onPressed: _signInDialog,
+                    ),
+                  )
+                );
+                return;
+              }
               setState(() {
                 _currentIndex = i;
               });
