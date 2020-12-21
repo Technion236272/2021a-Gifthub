@@ -167,6 +167,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      setState(() {});
+    });
     return Material(
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) =>
@@ -197,9 +200,8 @@ class _MainScreenState extends State<MainScreen> {
               icon: userRep.status == Status.Authenticated ?
                 Icon(Icons.logout) : Icon(Icons.login_outlined),
               onPressed: userRep.status == Status.Authenticated
-                ? () async {
-                await userRep.signOut();
-              } : _signInDialog
+                ? () async => await userRep.signOut()
+                : _signInDialog
             ),
             title: Text(_currentAppBarTitle(_currentIndex),
               style: GoogleFonts.calistoga(
