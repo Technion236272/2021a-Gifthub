@@ -177,8 +177,8 @@ class _ProductScreenState extends State<ProductScreen> {
                               ),
                               SizedBox(height: 10.0),
                               InkWell(
-                                child: Text("Visit seller", style: globals.niceFont(size: 14.0, color: Colors.red[900]),), // TODO should be the seller's name from firestore
-                                onTap: () => {Navigator.of(context).push(MaterialPageRoute(builder: (context) => StoreScreen(_prod.user)))}, //TODO should be a push of the seller's store screen
+                                child: Text("Visit seller", style: globals.niceFont(size: 14.0, color: Colors.red[900]),),
+                                onTap: () => {Navigator.of(context).push(MaterialPageRoute(builder: (context) => StoreScreen(_prod.user)))},
                               ),
                               SizedBox(height: 20.0),
                               globals.fixedStarBar(4.0),
