@@ -74,15 +74,16 @@ class Constants{
 
 Scaffold emptyLoadingScaffold() {
   return Scaffold(
-      backgroundColor: Colors.lightGreen[600],
-      appBar: AppBar(
-        backgroundColor: Colors.lightGreen[900],
-        leading: IconButton(
-            icon: Icon(Icons.menu),
-        ),
-        title: Text("Loading..."),
+    backgroundColor: Colors.lightGreen[600],
+    appBar: AppBar(
+      backgroundColor: Colors.lightGreen[900],
+      leading: IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {},
       ),
+      title: Text("Loading..."),
+    ),
 
-      body: Center(child: CircularProgressIndicator()),
+    body: Center(child: CircularProgressIndicator()),
   );
 }
