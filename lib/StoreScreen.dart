@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -12,6 +11,7 @@ import 'globals.dart' as globals;
 import 'user_repository.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:intl/intl.dart';
+import 'AllReviewsScreen.dart';
 // import 'productMock.dart';
 
 class ProductMock {
@@ -73,9 +73,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   double _storeRating = 1.0;
   List _products = <ProductMock>[];
   List _reviews = <ReviewMock>[];
-  bool editingMode = false, isInProductTab = false;
+  bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
+  final reviewCtrl = TextEditingController();
 
   _StoreScreenState(String storeId) : _storeId = storeId;
     
@@ -96,6 +97,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     _reviews = doc.data()['Reviews'].map<ReviewMock>((v) =>
         ReviewMock(v['user'], double.parse(v['rating']), v['content'])
     ).toList();
+  }
+
+  double _getStoreRating() {
+    double sum = 0.0;
+    for(ReviewMock r in _reviews){
+      sum += r.rating;
+    }
+    return sum / _reviews.length;
   }
 
   @override
@@ -123,7 +132,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   .of(context)
                                   .size
                                   .width,
-                              image: _storeImageURL != 'Default' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
+                              image: _storeImageURL != 'this is URL' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
                             ),
                           ),
                           SizedBox(height: 10),
@@ -199,12 +208,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     visualDensity: VisualDensity.adaptivePlatformDensity,
                                     color: Colors.red[900],
                                     textColor: Colors.white,
-                                    onPressed: () {},
-                                    // TODO add push of all reviews screen
+                                    onPressed: () {
+                                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => AllReviewsScreen(_reviews)));
+                                    },
                                     child: Row(
                                         children: [
                                           Icon(Icons.list_alt),
-                                          Text("All Reviews"),
+                                          Text("All ${_reviews.length} Reviews"),
                                         ]
                                     )
                                 ),
@@ -217,7 +227,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     visualDensity: VisualDensity.adaptivePlatformDensity,
                                     color: Colors.red[900],
                                     textColor: Colors.white,
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      _getReviewBottomSheet();
+                                    },
                                     //TODO add bottom drawer to add a review
                                     child: Row(
                                         children: [
@@ -291,7 +303,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
-                                    actions: /*userRep.status == Status.Authenticated && _storeId == userRep.user.uid*/ true ?
+                                    actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
@@ -342,6 +354,102 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 }
                 return globals.emptyLoadingScaffold();
               }
+          );
+        }
+    );
+  }
+
+  void _getReviewBottomSheet() {
+    double _currReviewRating;
+    showModalBottomSheet<dynamic>(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context1) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(_scaffoldKeyUserScreenSet.currentContext).viewInsets.bottom
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox(height: 10,),
+                globals.changingStarBar(0, onUpdate: (rating) {_currReviewRating = rating;}, color: Colors.lightGreen[800]),
+                SizedBox(height: 15.0,),
+                Container(
+                  width: MediaQuery.of(context1).size.width - 45,
+                  height: 150,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(4.0))
+                  ),
+                  child: TextField(
+                    controller: reviewCtrl,
+                    decoration: InputDecoration(
+                      hintText: "Write a review...",
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightGreen[800],
+                          width: 1.5,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightGreen[800],
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    maxLines: null,
+                    minLines: 5,
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+                SizedBox(height: 5.0,),
+                Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: Container(
+                    width: 200,
+                    child: RaisedButton(
+                      color: Colors.white,
+                      textColor: Colors.lightGreen[800],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(
+                            color: Colors.lightGreen[800],
+                            width: 2.0,
+                          )
+                      ),
+                      visualDensity: VisualDensity.adaptivePlatformDensity,
+                      onPressed: () async {
+                        var db = FirebaseFirestore.instance;
+                        await db.collection('Stores').doc(_storeId).update({
+                          'Reviews': FieldValue.arrayUnion([{
+                            'user': '',
+                            'rating': _currReviewRating.toString(),
+                            'content': reviewCtrl.text,
+                          }])
+                        }).catchError((e) {});
+                        Navigator.of(context).pop();
+                        setState(() {
+                          reviewCtrl.text = '';
+                        });
+                      },
+                      child: Text(
+                        "Submit",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.openSans(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          // color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10.0,)
+              ],
+            ),
           );
         }
     );
