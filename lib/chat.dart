@@ -5,11 +5,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
+import 'globals.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gifthub_2021a/user_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
@@ -19,47 +21,21 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 
 
-class Chat extends StatelessWidget {
+
+class Chat extends StatefulWidget {
   final String peerId;
   final String peerAvatar;
   final String userId;
-
-  Chat({Key key,@required this.userId, @required this.peerId, @required this.peerAvatar})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'CHAT',
-          style: TextStyle(color: secondaryTextColor, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: ChatScreen(
-        userId:userId,
-        peerId: peerId,
-        peerAvatar: peerAvatar,
-      ),
-    );
-  }
-}
-
-class ChatScreen extends StatefulWidget {
-  final String peerId;
-  final String peerAvatar;
-  final String userId;
-  ChatScreen({Key key, @required this.userId,@required this.peerId, @required this.peerAvatar})
+  Chat({Key key, @required this.userId,@required this.peerId, @required this.peerAvatar})
       : super(key: key);
 
   @override
   State createState() =>
-      ChatScreenState(userId: userId,peerId: peerId, peerAvatar: peerAvatar);
+      ChatState(userId: userId,peerId: peerId, peerAvatar: peerAvatar);
 }
 
-class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState({Key key, @required this.userId,@required this.peerId, @required this.peerAvatar});
+class ChatState extends State<Chat> {
+  ChatState({Key key, @required this.userId,@required this.peerId, @required this.peerAvatar});
 
   String peerId;
   String peerAvatar;
@@ -67,8 +43,8 @@ class ChatScreenState extends State<ChatScreen> {
   String userId;
   List<QueryDocumentSnapshot> listMessage = new List.from([]);
   int _limit = 20;
-  final int _limitIncrement = 20;
-  String groupChatId;
+  //final int _limitIncrement = 20;
+  String groupChatId='';
 
 
   File imageFile;
@@ -78,7 +54,7 @@ class ChatScreenState extends State<ChatScreen> {
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
-
+/*
   _scrollListener() {
     if (listScrollController.offset >=
             listScrollController.position.maxScrollExtent &&
@@ -97,20 +73,21 @@ class ChatScreenState extends State<ChatScreen> {
         print("reach the top");
       });
     }
-  }
+  }*/
 
   @override
   void initState() {
     super.initState();
+    //listScrollController.addListener(_scrollListener);
     focusNode.addListener(onFocusChange);
-    listScrollController.addListener(_scrollListener);
-
-    groupChatId = '';
-
-    isLoading = false;
     imageUrl = '';
-
-    readLocal();
+    isLoading = false;
+    id = userId ?? '';
+    if (id.hashCode <= peerId.hashCode) {
+      groupChatId = id+"-"+peerId;
+    } else {
+      groupChatId = peerId+"-"+id;
+    }
   }
 
   void onFocusChange() {
@@ -120,16 +97,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  readLocal() async {
-    id = userId ?? '';
-    if (id.hashCode <= peerId.hashCode) {
-      groupChatId = '$id-$peerId';
-    } else {
-      groupChatId = '$peerId-$id';
-    }
 
-    setState(() {});
-  }
 
   Future getImage() async {
     ImagePicker imagePicker = ImagePicker();
@@ -142,6 +110,7 @@ class ChatScreenState extends State<ChatScreen> {
       setState(() {
         isLoading = true;
       });
+
       uploadFile();
     }
   }
@@ -151,7 +120,7 @@ class ChatScreenState extends State<ChatScreen> {
   Future uploadFile() async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
     var reference = FirebaseStorage.instance.ref().child("chatImages/"+fileName);
-    var storageTaskSnapshot = await reference.putFile(imageFile);
+    var storageTaskSnapshot = await reference.putFile(imageFile); //TODO: there is a bug on the old phone, cant send an image, stuck on this line.
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
       imageUrl = downloadUrl;
       setState(() {
@@ -194,9 +163,10 @@ class ChatScreenState extends State<ChatScreen> {
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(
-          msg: 'Nothing to send',
-          backgroundColor: Colors.black,
-          textColor: Colors.red);
+          msg: 'Please enter a message before sending.',
+          backgroundColor: mainColor,
+          textColor: Colors.white,
+      toastLength: Toast.LENGTH_LONG);
     }
   }
 
@@ -236,14 +206,14 @@ class ChatScreenState extends State<ChatScreen> {
                     document.data()['content'],
                     style: TextStyle(color: secondaryTextColor),
                   ),
-                  padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                  width: 200.0,
+                  padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
+                  width: s50(context)*4,
                   decoration: BoxDecoration(
                       color: secondaryColor,
                       borderRadius: BorderRadius.circular(8.0)),
                   margin: EdgeInsets.only(
-                      bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                      right: 10.0),
+                      bottom: isLastMessageRight(index) ? s10(context)*2 : s10(context),
+                      right: s10(context)),
                 )
               : //document.data()['type'] == 1
                   // Image
@@ -256,9 +226,9 @@ class ChatScreenState extends State<ChatScreen> {
                                 valueColor:
                                     AlwaysStoppedAnimation<Color>(appColor),
                               ),
-                              width: 200.0,
-                              height: 200.0,
-                              padding: EdgeInsets.all(70.0),
+                              width: s50(context)*4,
+                              height: s50(context)*4,
+                              padding: EdgeInsets.all(s50(context)*1.5),
                               decoration: BoxDecoration(
                                 color: secondaryColor,
                                 borderRadius: BorderRadius.all(
@@ -267,15 +237,15 @@ class ChatScreenState extends State<ChatScreen> {
                               ),
                             ),
                             errorWidget: (context, url, error) => Material(
-                              child: Icon(Icons.error,size: 200,),
+                              child: Icon(Icons.error,size: s50(context)*4,),
                               borderRadius: BorderRadius.all(
                                 Radius.circular(8.0),
                               ),
                               clipBehavior: Clip.hardEdge,
                             ),
                             imageUrl: document.data()['content'],
-                            width: 200.0,
-                            height: 200.0,
+                            width: s50(context)*4,
+                            height: s50(context)*4,
                             fit: BoxFit.cover,
                           ),
                           borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -288,8 +258,8 @@ class ChatScreenState extends State<ChatScreen> {
                         padding: EdgeInsets.all(0),
                       ),
                       margin: EdgeInsets.only(
-                          bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                          right: 10.0),
+                          bottom: isLastMessageRight(index) ? s10(context)*2 : s10(context),
+                          right: s10(context)),
                     )
 
 
@@ -312,13 +282,13 @@ class ChatScreenState extends State<ChatScreen> {
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(appColor),
                             ),
-                            width: 35.0,
-                            height: 35.0,
-                            padding: EdgeInsets.all(10.0),
+                            width: s10(context)*3.5,
+                            height: s10(context)*3.5,
+                            padding: EdgeInsets.all(s10(context)),
                           ),
                           imageUrl: peerAvatar,
-                          width: 35.0,
-                          height: 35.0,
+                          width: s10(context)*3.5,
+                          height: s10(context)*3.5,
                           fit: BoxFit.cover,
                         ),
                         borderRadius: BorderRadius.all(
@@ -326,19 +296,19 @@ class ChatScreenState extends State<ChatScreen> {
                         ),
                         clipBehavior: Clip.hardEdge,
                       )
-                    : Container(width: 35.0),
+                    : Container(width: s10(context)*3.5),
                 document.data()['type'] == 0
                     ? Container(
                         child: Text(
                           document.data()['content'],
                           style: TextStyle(color: Colors.white),
                         ),
-                        padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                        width: 200.0,
+                        padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
+                        width: s50(context)*4,
                         decoration: BoxDecoration(
                             color: mainColor,
                             borderRadius: BorderRadius.circular(8.0)),
-                        margin: EdgeInsets.only(left: 10.0),
+                        margin: EdgeInsets.only(left: s10(context)),
                       )
                     :
                         Container(
@@ -350,9 +320,9 @@ class ChatScreenState extends State<ChatScreen> {
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                           appColor),
                                     ),
-                                    width: 200.0,
-                                    height: 200.0,
-                                    padding: EdgeInsets.all(70.0),
+                                    width: s50(context)*4,
+                                    height: s50(context)*4,
+                                    padding: EdgeInsets.all(s10(context)*7),
                                     decoration: BoxDecoration(
                                       color: secondaryColor,
                                       borderRadius: BorderRadius.all(
@@ -369,8 +339,8 @@ class ChatScreenState extends State<ChatScreen> {
                                     clipBehavior: Clip.hardEdge,
                                   ),
                                   imageUrl: document.data()['content'],
-                                  width: 200.0,
-                                  height: 200.0,
+                                  width: s50(context)*4,
+                                  height: s50(context)*4,
                                   fit: BoxFit.cover,
                                 ),
                                 borderRadius:
@@ -382,7 +352,7 @@ class ChatScreenState extends State<ChatScreen> {
                               },
                               padding: EdgeInsets.all(0),
                             ),
-                            margin: EdgeInsets.only(left: 10.0),
+                            margin: EdgeInsets.only(left: s10(context)),
                           )
                         ,
               ],
@@ -401,13 +371,13 @@ class ChatScreenState extends State<ChatScreen> {
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic),
                     ),
-                    margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
+                    margin: EdgeInsets.only(left: s50(context), top: s5(context), bottom: s5(context)),
                   )
                 : Container()
           ],
           crossAxisAlignment: CrossAxisAlignment.start,
         ),
-        margin: EdgeInsets.only(bottom: 10.0),
+        margin: EdgeInsets.only(bottom: s10(context)),
       );
     }
   }
@@ -434,45 +404,33 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<bool> onBackPress() {
-
-    Navigator.pop(context);
-
-
-    return Future.value(false);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              // List of messages
-              buildListMessage(),
+    return Stack(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            // List of messages
+            buildListMessage(),
 
 
 
-              // Input content
-              buildInput(),
-            ],
-          ),
+            // Input content
+            buildInput(),
+          ],
+        ),
 
-          // Loading
-          buildLoading()
-        ],
-      ),
-      onWillPop: onBackPress,
+        // Loading
+        isLoading ? Center(child:CircularProgressIndicator()) : Container()
+      ],
     );
+
+
+
   }
 
 
-  Widget buildLoading() {
-    return Positioned(
-      child: isLoading ? CircularProgressIndicator() : Container(),
-    );
-  }
 
   Widget buildInput() {
     return Container(
@@ -524,7 +482,7 @@ class ChatScreenState extends State<ChatScreen> {
         ],
       ),
       width: double.infinity,
-      height: 50.0,
+      height: s50(context),
       decoration: BoxDecoration(
           border: Border(top: BorderSide(color: darkG, width: 0.5)),
           color: Colors.white),
@@ -554,7 +512,7 @@ class ChatScreenState extends State<ChatScreen> {
                 } else {
                   listMessage.addAll(snapshot.data.documents);
                   return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(s10(context)),
                     itemBuilder: (context, index) =>
                         buildItem(index, snapshot.data.documents[index]),
                     itemCount: snapshot.data.documents.length,
