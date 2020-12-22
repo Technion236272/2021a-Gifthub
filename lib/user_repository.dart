@@ -10,13 +10,15 @@ import 'productMock.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
+const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
+
 class UserRepository with ChangeNotifier {
   FirebaseAuth _auth;
   User _user;
   Status _status = Status.Uninitialized;
   FirebaseFirestore _db;
-  FirebaseStorage _storage;
-  String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
+  FirebaseStorage _storage = FirebaseStorage.instance; //TODO: check if it should be initialized here. Avatar upload didn't work otherwise.
+  String _avatarURL = defaultAvatar;
   List<Product> _orders = new List();
   String _firstName = "NO INFO";
   String _lastName = "NO INFO";
@@ -211,7 +213,7 @@ class UserRepository with ChangeNotifier {
       if (snapShot == null || !snapShot.exists) {
         return true;
       }
-      else{
+      else {
         updateLocalUserFields();
         return false;
       }
@@ -243,4 +245,18 @@ class UserRepository with ChangeNotifier {
     });
     notifyListeners();
   }
+
+  /// sets avatar for a user
+  /// in use at: userSettingsScreen.dart
+  Future<void> setAvatar(String avatar) async {
+    try {
+      await _storage.ref().child(_auth.currentUser.uid).putFile(File(avatar));
+      _avatarURL = await _storage.ref().child(_auth.currentUser.uid).getDownloadURL();
+    } catch(_) {
+      //nothing
+    } finally {
+      notifyListeners();
+    }
+  }
+
 }

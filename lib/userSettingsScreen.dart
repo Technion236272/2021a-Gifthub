@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'user_repository.dart';
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
@@ -11,8 +12,9 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:firebase_storage/firebase_storage.dart';
 
-const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
+
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);
@@ -40,12 +42,15 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   bool _cityChanged = false;
   bool _avatarChanged = false;
   bool _editingMode = false;
+  bool _confirmEditingPressed = false;
   String _newFirstName = "";
   String _newLastName = "";
   String _newAddress = "";
   String _newApt = "";
   String _newCity = "";
   String _newAvatarURL = "";
+  String _picPath = "";
+  bool _uploadingAvatar = false;
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -103,7 +108,16 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             Stack(
                               alignment: Alignment.center,
                               children: <Widget> [
-                                CircularProfileAvatar(
+                                _uploadingAvatar ? Container(
+                                  // padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1),
+                                  width: MediaQuery.of(context).size.height * 0.1 * 2,
+                                  height: MediaQuery.of(context).size.height * 0.1 * 2,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(child: CircularProgressIndicator())
+                                ) : CircularProfileAvatar(
                                   _editingMode
                                     ? _newAvatarURL
                                     : userRep.avatarURL ?? defaultAvatar,
@@ -143,7 +157,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     )
                                   ) : null
                                 ),
-                                _editingMode
+                                _editingMode && !_uploadingAvatar
                                 ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -521,16 +535,27 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   child: RaisedButton(
-                                    elevation: 15.0,
+                                    elevation: 20.0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                       side: BorderSide(color: Colors.transparent),
                                     ),
                                     visualDensity: VisualDensity.adaptivePlatformDensity,
-                                    color: _editingMode ? Colors.green[900] : Colors.grey[900],
+                                    color: _editingMode && !_confirmEditingPressed ? Colors.green[900] : Colors.grey[900],
                                     textColor: Colors.white,
-                                    onPressed: _editingMode
-                                      ? () {
+                                    onPressed: _uploadingAvatar ? null
+                                      : _editingMode
+                                      ? () async {
+                                      setState(() {
+                                        _confirmEditingPressed = true;
+                                      });
+                                      if(_avatarChanged) {
+                                        setState(() {
+                                          _uploadingAvatar = true;
+                                        });
+                                        await userRep.setAvatar(_picPath);
+                                        _avatarChanged = false;
+                                      }
                                       setState(() {
                                         if(_firstNameChanged) {
                                           userRep.firstName = _newFirstName;
@@ -557,18 +582,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           _newCity = "";
                                           _cityChanged = false;
                                         }
-                                        if(_avatarChanged){
-                                          userRep.avatarURL = _newAvatarURL;
-                                          // _newAvatarURL = "";
-                                          _avatarChanged = false;
-                                        }
                                         _editingMode = false;
                                       });
+                                      setState(() {
+                                        _uploadingAvatar = false;
+                                      });
+                                      // return Future.delayed(Duration(seconds: 3));
                                     }
                                     : () {
                                       _unfocusAll();
                                       setState(() {
                                         _editingMode = true;
+                                        _confirmEditingPressed = false;
                                       });
                                     },
                                     child: Row(
@@ -577,14 +602,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       crossAxisAlignment:CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          _editingMode ? "Update   " : "Edit   ",
+                                          _editingMode && !_confirmEditingPressed ? "Update   " : "Edit   ",
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.openSans(
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.bold
                                           ),
                                         ),
-                                        Icon(_editingMode ? Icons.check_outlined : Icons.edit_outlined,
+                                        Icon(_editingMode && !_confirmEditingPressed ? Icons.check_outlined : Icons.edit_outlined,
                                           color: Colors.white,
                                           size: 17.0,
                                         ),
@@ -637,7 +662,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              //TODO: initialize firebase so that pictures can be added
               ListTile(
                 tileColor: Colors.white,
                 leading: Icon(
@@ -662,8 +686,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     );
                   } else {
                     setState(() {
-                      _newAvatarURL = photo.path;
+                      _uploadingAvatar = true;
+                    });
+                    _picPath = photo.path;
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).putFile(File(photo.path));
+                    var pic = await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).getDownloadURL();
+                    setState(() {
+                      _newAvatarURL = pic;
                       _avatarChanged = true;
+                    });
+                    setState(() {
+                      _uploadingAvatar = false;
                     });
                   }
                 },
@@ -693,8 +727,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     );
                   } else {
                     setState(() {
-                      _newAvatarURL = photo.path;
+                      _uploadingAvatar = true;
+                    });
+                    _picPath = photo.path;
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).putFile(File(photo.path));
+                    var pic = await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).getDownloadURL();
+                    setState(() {
+                      _newAvatarURL = pic;
                       _avatarChanged = true;
+                    });
+                    setState(() {
+                      _uploadingAvatar = false;
                     });
                   }
                 },
@@ -757,7 +801,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               color: Colors.red,
                             ),
                           ),
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.pop(context);
                           },
                         )
