@@ -38,14 +38,32 @@ RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 
     ignoreGestures: true,
     itemSize: itemSize,
     ratingWidget: RatingWidget(
-      full: Icon(Icons.star, color: Colors.red),
-      half: Icon(Icons.star_half, color: Colors.red),
-      empty: Icon(Icons.star_border, color: Colors.red),
+      full: Icon(Icons.star, color: color),
+      half: Icon(Icons.star_half, color: color),
+      empty: Icon(Icons.star_border, color: color),
     ),
     onRatingUpdate: (rating) {},
     itemPadding: EdgeInsets.zero,
   );
+}
 
+RatingBar changingStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0, Function onUpdate = null}) {
+  return RatingBar.builder(
+      initialRating: rate,
+      itemCount: 5,
+      minRating: 1,
+      direction: Axis.horizontal,
+      allowHalfRating: true,
+      itemSize: itemSize,
+      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+      itemBuilder: (context, __) {
+        return Icon(
+          Icons.star,
+          color: color,
+        );
+      },
+      onRatingUpdate: onUpdate,
+  );
 }
 
 RaisedButton regTextButton(String text, {Icon icon=null, Function press=null, Color buttonColor=Colors.red, Color textColor=Colors.white}) {
