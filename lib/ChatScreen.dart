@@ -29,11 +29,13 @@ class _ChatScreenState extends State<ChatScreen> {
       new GlobalKey<ScaffoldState>();
   String sellerID;
   String userID;
-
+  var document;
+  var imageUrl;
+  bool inChat=false;
   @override
   _ChatScreenState(String sellerID, String userID)
       : sellerID = sellerID,
-        userID = userID {}
+        userID = userID,inChat=false {}
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,18 @@ class _ChatScreenState extends State<ChatScreen> {
             backgroundColor: Colors.lightGreen[800],
             leading: IconButton(
                 icon: Icon(Icons.arrow_back),
-                onPressed: null //TODO: implement return
+                onPressed: (){
+                  if(inChat){
+
+                    setState(() {
+                      inChat=false;
+                    });
+                  }
+                  else{
+                    //TODO: return to previous screen
+                  }
+
+                }
                 ),
             title: Text(
               "Chat",
@@ -83,7 +96,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 height: MediaQuery.of(context).size.height,
                 color: Colors.white,
                 child: Container(
-                  child: StreamBuilder(
+                  child: inChat? Chat(
+                      userId: userID,
+                      peerId: document.id,
+                      peerAvatar: imageUrl
+                  ):StreamBuilder(
                     stream: Firestore.instance.collection('Users').snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
@@ -182,14 +199,13 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Chat(
-                        userId: userID,
-                        peerId: document.id,
-                        peerAvatar: imageUrl,
-                      )));
+
+          setState(() {
+            this.userID= userID;
+            this.document= document;
+            this.imageUrl= imageUrl;
+            this.inChat=true;
+          });
         },
         color: Colors.grey,
         padding: EdgeInsets.fromLTRB(s25(context), s10(context), s25(context), s10(context)),
