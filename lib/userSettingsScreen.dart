@@ -108,7 +108,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             Stack(
                               alignment: Alignment.center,
                               children: <Widget> [
-                                _uploadingAvatar ? Container(
+                                _uploadingAvatar ?
+                                Container(
                                   // padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1),
                                   width: MediaQuery.of(context).size.height * 0.1 * 2,
                                   height: MediaQuery.of(context).size.height * 0.1 * 2,
@@ -116,11 +117,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     color: Colors.transparent,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Center(child: CircularProgressIndicator())
-                                ) : CircularProfileAvatar(
-                                  _editingMode
-                                    ? _newAvatarURL
-                                    : userRep.avatarURL ?? defaultAvatar,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+                                    )
+                                  )
+                                )
+                                : CircularProfileAvatar(
+                                  _editingMode ? _newAvatarURL : userRep.avatarURL ?? defaultAvatar,
                                   borderColor: Colors.black,
                                   borderWidth: 1.3,
                                   radius: MediaQuery.of(context).size.height * 0.1,
