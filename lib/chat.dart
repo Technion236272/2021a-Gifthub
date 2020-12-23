@@ -204,7 +204,7 @@ class ChatState extends State<Chat> {
               ? Container(
                   child: Text(
                     document.data()['content'],
-                    style: TextStyle(color: secondaryTextColor),
+                    style: GoogleFonts.lato(fontSize: 15, color: secondaryTextColor),
                   ),
                   padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
                   width: s50(context)*4,
@@ -301,7 +301,7 @@ class ChatState extends State<Chat> {
                     ? Container(
                         child: Text(
                           document.data()['content'],
-                          style: TextStyle(color: Colors.white),
+                          style: GoogleFonts.lato(fontSize: 15, color: secondaryTextColor),
                         ),
                         padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
                         width: s50(context)*4,
@@ -365,11 +365,7 @@ class ChatState extends State<Chat> {
                       DateFormat('dd MMM kk:mm').format(
                           DateTime.fromMillisecondsSinceEpoch(
                               int.parse(document.data()['timestamp']))),
-                      style: TextStyle(
-                          color: darkG,
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic),
+                      style: niceFont(size: 12,color: darkG),
                     ),
                     margin: EdgeInsets.only(left: s50(context), top: s5(context), bottom: s5(context)),
                   )
