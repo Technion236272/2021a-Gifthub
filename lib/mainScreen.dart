@@ -351,8 +351,9 @@ class _HomeScreenState extends State<HomeScreen> {
     await FirebaseFirestore.instance.collection("Products").doc(
         "$i").get().then((value) async {
       var productData = value.data();
-      imageURL = await _firebaseStorage.ref().child(
-          productData['Product']['user'] + '_' + '$i').getDownloadURL();
+      print(productData['Product']['user'] + '_' + i.toString());
+      imageURL = await FirebaseStorage.instance.ref().child(
+          productData['Product']['user'] + '_' + i.toString()).getDownloadURL();
     });
     return imageURL;
   }
@@ -391,87 +392,101 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                     return GridView.count(
                       primary: false,
-                      crossAxisCount: 1,
+                      crossAxisCount: 2,
                       padding: const EdgeInsets.all(20),
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 5,
                       children: List.generate(
                         min(16, totalProducts.data - 1),
                         (index) {
+                          var productData = snapshot.data.docs[index].data();
+                          String prodName = productData['Product']['name'];
+                          String prodDescription = productData['Product']['description'];
+                          String prodPrice = productData['Product']['price'];
                           return FutureBuilder(
                             future: _getImage(index),
                             builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
                             //TODO: check why imageURL never has data!
-                            (!imageURL.hasData || imageURL.connectionState != ConnectionState.done)
+                            ///found the answer - pictures in DB storage end with .jpg, .png...
+                            (imageURL.connectionState != ConnectionState.done)
                             ? _circularProgressIndicator
-                            : InkWell(
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () => {}, //TODO: navigate to product screen
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height,
-                                color: Colors.redAccent,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      height: MediaQuery.of(context).size.height * 1/4,
-                                      color: Colors.cyan,
-                                      child: Image.network(imageURL.data ?? defaultAvatar,
-                                        fit: BoxFit.fitWidth,
+                            : Card(
+                              elevation: 10.0,
+                              child: InkWell(
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () => {}, //TODO: navigate to product screen
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: MediaQuery.of(context).size.height,
+                                  color: Colors.redAccent,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height * 1/6,
+                                        color: Colors.cyan,
+                                        child: Image.network(imageURL.data ?? defaultAvatar,
+                                          fit: BoxFit.fitWidth,
+                                        ),
                                       ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Flexible(
-                                              child: Text('  ' + (snapshot.data.docs[index].data()['Product']['name'] ?? ''), //product title goes here
-                                                textAlign: TextAlign.left,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Flexible(
+                                                child: Text('  ' +
+                                                  ((prodName.length <= 17)
+                                                  ? prodName
+                                                  : (prodName.substring(0,16) + '...')), //product title goes here
+                                                  textAlign: TextAlign.left,
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 14.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Flexible(
+                                                child: Text('  ' +
+                                                  ((prodDescription.length > 19)
+                                                  ? (prodDescription.substring(0,20) + '...')
+                                                  : prodDescription), //product description goes here
+                                                  textAlign: TextAlign.left,
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 11.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Flexible(
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: Text(
+                                                prodPrice + '\$', //product price goes here
+                                                textAlign: TextAlign.right,
                                                 style: GoogleFonts.lato(
-                                                  fontSize: 28.0,
+                                                  fontSize: 11.0,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                             ),
-                                            Flexible(
-                                              child: Text('  ' + (snapshot.data.docs[index].data()['Product']['description'] ?? ''), //product description goes here
-                                                textAlign: TextAlign.left,
-                                                style: GoogleFonts.lato(
-                                                  fontSize: 21.0,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Flexible(
-                                          child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Text(
-                                              snapshot.data.docs[index].data()['Product']['price'] + '\$ ', //product price goes here
-                                              textAlign: TextAlign.right,
-                                              style: GoogleFonts.lato(
-                                                fontSize: 20.0,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
