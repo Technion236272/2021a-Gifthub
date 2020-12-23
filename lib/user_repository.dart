@@ -16,7 +16,7 @@ class UserRepository with ChangeNotifier {
   User _user;
   Status _status = Status.Uninitialized;
   FirebaseFirestore _db = FirebaseFirestore.instance;
-  FirebaseStorage _storage = FirebaseStorage.instance; //TODO: check if it should be initialized here. Avatar upload didn't work otherwise.
+  FirebaseStorage _storage = FirebaseStorage.instance;
   String _avatarURL = defaultAvatar;
   List<Product> _orders = new List();
   String _firstName = "";

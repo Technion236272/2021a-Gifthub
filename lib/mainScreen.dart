@@ -229,7 +229,9 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           onPressed: () async {
                             await userRep.signOut();
-                            setState(() {});
+                            setState(() {
+                              _currentIndex = 0;
+                            });
                             Navigator.pop(context);
                           },
                         ),
