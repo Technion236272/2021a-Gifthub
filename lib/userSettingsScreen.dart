@@ -12,9 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:firebase_storage/firebase_storage.dart';
-
-
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);

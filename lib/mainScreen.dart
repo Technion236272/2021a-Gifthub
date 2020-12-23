@@ -18,6 +18,7 @@ import 'userOrdersScreen.dart';
 import 'wishListScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
+import 'package:flappy_search_bar/flappy_search_bar.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -179,7 +180,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
           appBar: AppBar(
-            centerTitle: true,
+            centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
@@ -323,23 +324,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _totalProducts = 0;
   FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
+  final Center _circularProgressIndicator = Center(
+    child: SizedBox(
+        width: 60,
+        height: 60,
+        child: CircularProgressIndicator(
+          valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+        )
+    ),
+  );
 
   @override
   void initState() {
     super.initState();
-    _getTotalProducts();
   }
 
-  Future<void> _getTotalProducts() async {
+  Future<int> _getTotalProducts() async {
     var x = await FirebaseFirestore.instance.collection("Products").doc("Counter").get();
     var y = x.data();
-    _totalProducts = y['Counter'];
+    return y['Counter'];
   }
 
-  Future<String> _getProductPicture(int i, AsyncSnapshot<QuerySnapshot> snapshot) async {
-    return await _firebaseStorage.ref(snapshot.data.docs[6].get("user") + '_' + i.toString()).child(i.toString()).getDownloadURL();
+  Future<String> _getImage(int i) async {
+    String imageURL;
+    await FirebaseFirestore.instance.collection("Products").doc(
+        "$i").get().then((value) async {
+      var productData = value.data();
+      imageURL = await _firebaseStorage.ref().child(
+          productData['Product']['user'] + '_' + '$i').getDownloadURL();
+    });
+    return imageURL;
   }
 
   @override
@@ -351,14 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Align(
             alignment: Alignment.topCenter,
             child: Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.35,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.width * 0.35,
               color: Colors.lightGreen[800],
             ),
           ),
@@ -369,93 +378,109 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Container(
               color: Colors.white,
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance.collection("Products").snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (!snapshot.hasData) {
-                    print("notice me, snapshot doesn't have data");
-                    return Container();
-                  }
-                  return GridView.count(
-                    primary: false,
-                    crossAxisCount: 2,
-                    padding: const EdgeInsets.all(20),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    children: List.generate(
-                      min(16, _totalProducts),
-                      (index) =>
-                      InkWell(
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () => {}, //TODO: navigate to product screen
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.redAccent,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                // width: MediaQuery.of(context).size.width * 1/2,
-                                height: MediaQuery.of(context).size.height * 1/6,
-                                color: Colors.cyan,
-                                // child: Image.network(await _getProductPicture(index, snapshot)),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Flexible(
-                                        child: Text('  Red Sofa', //product title goes here
-                                          textAlign: TextAlign.left,
-                                          style: GoogleFonts.lato(
-                                            fontSize: 18.0,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      Flexible(
-                                        child: Text('  cool sofa bro', //product sub title goes here
-                                          textAlign: TextAlign.left,
-                                          style: GoogleFonts.lato(
-                                            fontSize: 14.0,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Flexible(
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text('150\$',
-                                        textAlign: TextAlign.right,
-                                        style: GoogleFonts.lato(
-                                          fontSize: 15.0,
-                                          color: Colors.black,
-                                        ),
+              child: FutureBuilder(
+                future: _getTotalProducts(),
+                builder:(BuildContext context, AsyncSnapshot<int> totalProducts) =>
+                (!totalProducts.hasData || totalProducts.connectionState != ConnectionState.done)
+                ? _circularProgressIndicator
+                : FutureBuilder(
+                  future: FirebaseFirestore.instance.collection("Products").get(),
+                  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                      return _circularProgressIndicator;
+                    }
+                    return GridView.count(
+                      primary: false,
+                      crossAxisCount: 1,
+                      padding: const EdgeInsets.all(20),
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      children: List.generate(
+                        min(16, totalProducts.data - 1),
+                        (index) {
+                          return FutureBuilder(
+                            future: _getImage(index),
+                            builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
+                            //TODO: check why imageURL never has data!
+                            (!imageURL.hasData || imageURL.connectionState != ConnectionState.done)
+                            ? _circularProgressIndicator
+                            : InkWell(
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () => {}, //TODO: navigate to product screen
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                color: Colors.redAccent,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: MediaQuery.of(context).size.height * 1/4,
+                                      color: Colors.cyan,
+                                      child: Image.network(imageURL.data ?? defaultAvatar,
+                                        fit: BoxFit.fitWidth,
                                       ),
                                     ),
-                                  )
-                                ],
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Flexible(
+                                              child: Text('  ' + (snapshot.data.docs[index].data()['Product']['name'] ?? ''), //product title goes here
+                                                textAlign: TextAlign.left,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 28.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: Text('  ' + (snapshot.data.docs[index].data()['Product']['description'] ?? ''), //product description goes here
+                                                textAlign: TextAlign.left,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 21.0,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Flexible(
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              snapshot.data.docs[index].data()['Product']['price'] + '\$ ', //product price goes here
+                                              textAlign: TextAlign.right,
+                                              style: GoogleFonts.lato(
+                                                fontSize: 20.0,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
-                      )
-                    ),
-                  );
-                }
+                            ),
+                          );
+                        }
+                      ),
+                    );
+                  }
+                ),
               ),
             ),
           ),
