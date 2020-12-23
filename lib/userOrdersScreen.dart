@@ -108,104 +108,104 @@ class _UserOrdersScreenState extends State<UserOrdersScreen>{
                                 icon: Icons.star_half_outlined,
                                 onTap: () {
                                   showModalBottomSheet<dynamic>(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      builder: (BuildContext context1) {
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                              bottom: MediaQuery.of(_scaffoldKeyOrders.currentContext).viewInsets.bottom
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              SizedBox(height: 10,),
-                                              RatingBar.builder(
-                                                  initialRating: 0,
-                                                  itemCount: 5,
-                                                  minRating: 1,
-                                                  direction: Axis.horizontal,
-                                                  allowHalfRating: true,
-                                                  itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                                                  itemBuilder: (context, __) {
-                                                    return Icon(
-                                                      Icons.star,
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context1) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(
+                                            bottom: MediaQuery.of(_scaffoldKeyOrders.currentContext).viewInsets.bottom
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            SizedBox(height: 10,),
+                                            RatingBar.builder(
+                                                initialRating: 0,
+                                                itemCount: 5,
+                                                minRating: 1,
+                                                direction: Axis.horizontal,
+                                                allowHalfRating: true,
+                                                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                                itemBuilder: (context, __) {
+                                                  return Icon(
+                                                    Icons.star,
+                                                    color: Colors.lightGreen[800],
+                                                  );
+                                                },
+                                                onRatingUpdate: (rating) {
+                                                  setState(() {
+
+                                                  });
+                                                }
+                                            ),
+                                            SizedBox(height: 15.0,),
+                                            Container(
+                                              width: MediaQuery.of(context1).size.width - 45,
+                                              height: 150,
+                                              decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.all(Radius.circular(4.0))
+                                              ),
+                                              child: TextField(
+                                                decoration: InputDecoration(
+                                                  hintText: "Write a review...",
+                                                  focusedBorder: OutlineInputBorder(
+                                                    borderSide: BorderSide(
                                                       color: Colors.lightGreen[800],
-                                                    );
-                                                  },
-                                                  onRatingUpdate: (rating) {
+                                                      width: 1.5,
+                                                    ),
+                                                  ),
+                                                  enabledBorder: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.lightGreen[800],
+                                                      width: 1.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                                maxLines: null,
+                                                minLines: 5,
+                                                keyboardType: TextInputType.multiline,
+                                              ),
+                                            ),
+                                            SizedBox(height: 5.0,),
+                                            Align(
+                                              alignment: FractionalOffset.bottomCenter,
+                                              child: Container(
+                                                width: 200,
+                                                child: RaisedButton(
+                                                  color: Colors.white,
+                                                  textColor: Colors.lightGreen[800],
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(18.0),
+                                                      side: BorderSide(
+                                                        color: Colors.lightGreen[800],
+                                                        width: 2.0,
+                                                      )
+                                                  ),
+                                                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                                                  onPressed: () {
                                                     setState(() {
 
                                                     });
-                                                  }
-                                              ),
-                                              SizedBox(height: 15.0,),
-                                              Container(
-                                                width: MediaQuery.of(context1).size.width - 45,
-                                                height: 150,
-                                                decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.all(Radius.circular(4.0))
-                                                ),
-                                                child: TextField(
-                                                  decoration: InputDecoration(
-                                                    hintText: "Write a review...",
-                                                    focusedBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                        color: Colors.lightGreen[800],
-                                                        width: 1.5,
-                                                      ),
-                                                    ),
-                                                    enabledBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                        color: Colors.lightGreen[800],
-                                                        width: 1.5,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  maxLines: null,
-                                                  minLines: 5,
-                                                  keyboardType: TextInputType.multiline,
-                                                ),
-                                              ),
-                                              SizedBox(height: 5.0,),
-                                              Align(
-                                                alignment: FractionalOffset.bottomCenter,
-                                                child: Container(
-                                                  width: 200,
-                                                  child: RaisedButton(
-                                                    color: Colors.white,
-                                                    textColor: Colors.lightGreen[800],
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(18.0),
-                                                        side: BorderSide(
-                                                          color: Colors.lightGreen[800],
-                                                          width: 2.0,
-                                                        )
-                                                    ),
-                                                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                                                    onPressed: () {
-                                                      setState(() {
-
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      "Submit",
-                                                      textAlign: TextAlign.center,
-                                                      style: GoogleFonts.openSans(
-                                                        fontSize: 16.0,
-                                                        fontWeight: FontWeight.bold,
-                                                        // color: Colors.red,
-                                                      ),
+                                                  },
+                                                  child: Text(
+                                                    "Submit",
+                                                    textAlign: TextAlign.center,
+                                                    style: GoogleFonts.openSans(
+                                                      fontSize: 16.0,
+                                                      fontWeight: FontWeight.bold,
+                                                      // color: Colors.red,
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(height: 10.0,)
-                                            ],
-                                          ),
-                                        );
-                                      }
+                                            ),
+                                            SizedBox(height: 10.0,)
+                                          ],
+                                        ),
+                                      );
+                                    }
                                   );
                                 },
                               ),
