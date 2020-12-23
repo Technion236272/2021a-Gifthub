@@ -1,9 +1,7 @@
 import 'dart:ui';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
@@ -87,6 +85,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ),
                     onTap: () async {
+                      var userRep = Provider.of<UserRepository>(context);
                       userRep.signInWithGoogle();
                       if (await userRep.signInWithGoogleCheckIfFirstTime()){
                         firstSignUpSheet(context, 3);
@@ -253,7 +252,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             title: Text(_currentAppBarTitle(_currentIndex),
               style: GoogleFonts.calistoga(
-                  fontSize: 2 == _currentIndex ? 28 : 30,
+                  fontSize: 30,
                   color: Colors.white
               ),
               textAlign: TextAlign.center,
@@ -324,7 +323,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
         width: 60,
@@ -351,7 +349,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await FirebaseFirestore.instance.collection("Products").doc(
         "$i").get().then((value) async {
       var productData = value.data();
-      print(productData['Product']['user'] + '_' + i.toString());
       imageURL = await FirebaseStorage.instance.ref().child(
           productData['Product']['user'] + '_' + i.toString()).getDownloadURL();
     });
@@ -408,6 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
                             //TODO: check why imageURL never has data!
                             ///found the answer - pictures in DB storage end with .jpg, .png...
+                            //TODO: add: !imageURL.hasData || imageURL.connec...
                             (imageURL.connectionState != ConnectionState.done)
                             ? _circularProgressIndicator
                             : Card(

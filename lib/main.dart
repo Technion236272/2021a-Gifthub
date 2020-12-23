@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> init() async {
     await Firebase.initializeApp();
-    userRep = UserRepository.instance();
+    // userRep = UserRepository.instance();
   }
 
 }

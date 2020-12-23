@@ -32,22 +32,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final FocusNode _addressInputFocusNode = FocusNode();
   final FocusNode _aptInputFocusNode = FocusNode();
   final FocusNode _cityInputFocusNode = FocusNode();
-  bool _firstNameChanged = false;
-  bool _lastNameChanged = false;
-  bool _addressChanged = false;
-  bool _aptChanged = false;
-  bool _cityChanged = false;
   bool _avatarChanged = false;
   bool _editingMode = false;
   bool _confirmEditingPressed = false;
-  String _newFirstName = "";
-  String _newLastName = "";
-  String _newAddress = "";
-  String _newApt = "";
-  String _newCity = "";
   String _newAvatarURL = "";
   String _picPath = "";
   bool _uploadingAvatar = false;
+  bool _deletedAvatar = false;
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -59,11 +50,20 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _newAvatarURL = Provider.of<UserRepository>(context, listen: false).avatarURL ?? defaultAvatar;
+    var userRep = Provider.of<UserRepository>(context, listen: false);
+    _newAvatarURL = userRep.avatarURL ?? defaultAvatar;
+    _firstNameController.text = userRep.firstName;
+    _lastNameController.text = userRep.lastName;
+    _addressController.text = userRep.address;
+    _cityController.text = userRep.city;
+    _aptController.text = userRep.apt;
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      setState(() {});
+    });
     return Material(
       child: Consumer<UserRepository>(
         builder:(context, userRep, _) {
@@ -236,21 +236,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                             ),
                                             onChanged: (text) => {},
                                             textAlign: TextAlign.center,
-                                            controller: _firstNameChanged
-                                              ? (_firstNameController..text = _newFirstName)
-                                              : (_firstNameController..text = userRep.firstName),
+                                            controller: _firstNameController,
                                             inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -]'))
+                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
                                             ],
                                             focusNode: _firstNameInputFocusNode,
-                                            onSubmitted: (text) {
-                                              if(text.isNotEmpty) {
-                                                setState(() {
-                                                  _newFirstName = text;
-                                                  _firstNameChanged = true;
-                                                });
-                                              }
-                                            },
                                             style: GoogleFonts.lato(
                                               fontSize: 16.0,
                                               color: Colors.black,
@@ -304,20 +294,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -]'))
+                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
                                             ],
                                             textAlign: TextAlign.center,
-                                            controller: _lastNameChanged
-                                              ? (_lastNameController..text = _newLastName)
-                                              : (_lastNameController..text = userRep.lastName),
-                                            onSubmitted: (text) {
-                                              if (text.isNotEmpty){
-                                                setState(() {
-                                                  _newLastName = text;
-                                                  _lastNameChanged = true;
-                                                });
-                                              }
-                                            },
+                                            controller: _lastNameController,
                                             onChanged: (text) => {},
                                             style: GoogleFonts.lato(
                                               fontSize: 16.0,
@@ -361,23 +341,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       ),
                                     ),
                                     focusNode: _addressInputFocusNode,
-                                    controller: _addressChanged
-                                        ? (_addressController..text = _newAddress)
-                                        : (_addressController..text = userRep.address),
+                                    controller: _addressController,
                                     autofocus: false,
                                     keyboardType: TextInputType.streetAddress,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
                                     ],
                                     onChanged: (text) => {},
-                                    onSubmitted: (text) {
-                                      if(text.isNotEmpty) {
-                                        setState(() {
-                                          _newAddress = text;
-                                          _addressChanged = true;
-                                        });
-                                      }
-                                    },
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                       fontSize: 16.0,
@@ -431,21 +401,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 ),
                                                 onChanged: (text) => {},
                                                 textAlign: TextAlign.center,
-                                                controller: _aptChanged
-                                                    ? (_aptController..text = _newApt)
-                                                    : (_aptController..text = userRep.apt),
+                                                controller: _aptController,
                                                 inputFormatters: [
                                                   FilteringTextInputFormatter.allow(RegExp('[0-9]'))
                                                 ],
                                                 focusNode: _aptInputFocusNode,
-                                                onSubmitted: (text) {
-                                                  if(text.isNotEmpty) {
-                                                    setState(() {
-                                                      _newApt = text;
-                                                      _aptChanged = true;
-                                                    });
-                                                  }
-                                                },
                                                 style: GoogleFonts.lato(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -496,21 +456,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 ),
                                                 onChanged: (text) => {},
                                                 textAlign: TextAlign.center,
-                                                controller: _cityChanged
-                                                    ? (_cityController..text = _newCity)
-                                                    : (_cityController..text = userRep.city),
+                                                controller: _cityController,
                                                 inputFormatters: [
                                                   FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
                                                 ],
                                                 focusNode: _cityInputFocusNode,
-                                                onSubmitted: (text) {
-                                                  if(text.isNotEmpty) {
-                                                    setState(() {
-                                                      _newCity = text;
-                                                      _cityChanged = true;
-                                                    });
-                                                  }
-                                                },
                                                 style: GoogleFonts.lato(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -554,37 +504,34 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         setState(() {
                                           _uploadingAvatar = true;
                                         });
-                                        await userRep.setAvatar(_picPath);
+                                        if(_deletedAvatar){
+                                          await userRep.deleteAvatar();
+                                          userRep.avatarURL = defaultAvatar;
+                                        } else {
+                                          await userRep.setAvatar(_picPath);
+                                        }
                                         _avatarChanged = false;
+                                        _deletedAvatar = false;
                                       }
                                       setState(() {
-                                        if(_firstNameChanged) {
-                                          userRep.firstName = _newFirstName;
-                                          _newFirstName = "";
-                                          _firstNameChanged = false;
+                                        if(_firstNameController.text.isNotEmpty) {
+                                          userRep.firstName = _firstNameController.text;
                                         }
-                                        if(_lastNameChanged){
-                                          userRep.lastName = _newLastName;
-                                          _newLastName = "";
-                                          _lastNameChanged = false;
+                                        if(_lastNameController.text.isNotEmpty) {
+                                          userRep.lastName = _lastNameController.text;
                                         }
-                                        if(_addressChanged){
-                                          userRep.address = _newAddress;
-                                          _newAddress = "";
-                                          _addressChanged = false;
+                                        if(_addressController.text.isNotEmpty) {
+                                          userRep.address = _addressController.text;
                                         }
-                                        if(_aptChanged){
-                                          userRep.address = _newApt;
-                                          _newApt = "";
-                                          _aptChanged = false;
+                                        if(_aptController.text.isNotEmpty) {
+                                          userRep.apt = _aptController.text;
                                         }
-                                        if(_cityChanged){
-                                          userRep.city = _newCity;
-                                          _newCity = "";
-                                          _cityChanged = false;
+                                        if(_cityController.text.isNotEmpty){
+                                          userRep.city = _cityController.text;
                                         }
                                         _editingMode = false;
                                       });
+                                      userRep.updateFirebaseUserList();
                                       setState(() {
                                         _uploadingAvatar = false;
                                       });
@@ -790,6 +737,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             setState(() {
                               _newAvatarURL = defaultAvatar;
                               _avatarChanged = true;
+                              _deletedAvatar = true;
                             });
                             Navigator.pop(context);
                             Navigator.pop(context);
