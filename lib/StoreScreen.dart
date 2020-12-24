@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,19 +22,21 @@ import 'AllReviewsScreen.dart';
 class StoreScreen extends StatefulWidget {
   final _storeId;
 
-  StoreScreen(String storeId, {Key key}) : _storeId = /*storeId,*/ "9C6irKocUFMZCvlcfqneZrFL0UM2", super(key: key);
+  StoreScreen(String storeId, {Key key}) : _storeId = storeId, super(key: key);
 
   @override
   _StoreScreenState createState() => _StoreScreenState(_storeId);
 }
 
-class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStateMixin{
+class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStateMixin {
   String _storeId;
-  String _storeName = "Default";
-  String _storeImageURL = "Default";
-  String _storeDesc = "Default Desc";
-  String _storeAddr = "Default";
-  String _storePhone = "Default";
+  String _storeName;
+  String _storeImageURL;
+  NetworkImage _storeImage;
+  Size _storeImageSize;
+  String _storeDesc;
+  String _storeAddr;
+  String _storePhone;
   double _storeRating = 1.0;
   List _products = <globals.Product>[];
   List _reviews = <globals.Review>[];
@@ -42,21 +46,51 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   final reviewCtrl = TextEditingController();
 
   _StoreScreenState(String storeId) : _storeId = storeId;
-    
+
 
   void _initStoreArgs(DocumentSnapshot doc, CollectionReference ref) async {
-    var storeArgs  = doc.data()['Store'];
+    var storeArgs = doc.data()['Store'];
     _storeName = storeArgs[0];
-    _storeImageURL = storeArgs[1];
-    _storeDesc = storeArgs[2];
-    _storeAddr = storeArgs[3];
-    _storePhone = storeArgs[4];
-    _storeRating = double.parse(storeArgs[5]);
+    Completer<Size> completer = Completer<Size>();
+    try {
+      _storeImageURL = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
+      _storeImage = NetworkImage(_storeImageURL);
+      _storeImage.resolve(ImageConfiguration()).addListener(ImageStreamListener(
+              (i, b) {
+            completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
+          }
+      ));
+    } catch (e) {
+      _storeImageURL = null;
+      _storeImage = null;
+      Image
+          .asset('Assets/Untitled.png')
+          .image
+          .resolve(ImageConfiguration())
+          .addListener(ImageStreamListener(
+              (i, b) {
+            completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
+          }
+      ));
+    } finally {
+      _storeImageSize = await completer.future;
+    }
+    _storeDesc = storeArgs[1];
+    _storeAddr = storeArgs[2];
+    _storePhone = storeArgs[3];
+    _storeRating = double.parse(storeArgs[4]);
     _products = <globals.Product>[];
-    for(var p in doc.data()['Products']){
+    for (var p in doc.data()['Products']) {
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
-      _products.add(globals.Product(p, prodArgs['user'], prodArgs['name'], prodArgs['price'], prodArgs['date'], prodArgs['reviews'], prodArgs['category'], prodArgs['description']));
-
+      _products.add(globals.Product(
+          p,
+          prodArgs['user'],
+          prodArgs['name'],
+          double.parse(prodArgs['price']),
+          prodArgs['date'],
+          prodArgs['reviews'],
+          prodArgs['category'],
+          prodArgs['description']));
     }
     _reviews = doc.data()['Reviews'].map<globals.Review>((v) =>
         globals.Review(v['user'], double.parse(v['rating']), v['content'])
@@ -65,7 +99,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   double _getStoreRating() {
     double sum = 0.0;
-    for(globals.Review r in _reviews){
+    for (globals.Review r in _reviews) {
       sum += r.rating;
     }
     return sum / _reviews.length;
@@ -90,59 +124,59 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          editingMode?
-                              InkWell(
-                                onLongPress: () async {
-                                  PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
-                                  Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
-                                  if (null == photo) {
-                                    _scaffoldKeyUserScreenSet.currentState.showSnackBar(
-                                        SnackBar(
-                                          content: Text("No image selected",
-                                            style: GoogleFonts.notoSans(fontSize: 14.0),
-                                          ),
-                                          behavior: SnackBarBehavior.floating,
-                                          duration: Duration(milliseconds: 2500),
-                                        )
-                                    );
-                                  } else {
-                                    await FirebaseStorage.instance.ref().child('storeImage/' + _storeId).putFile(File(photo.path));
-                                    String s = await FirebaseStorage.instance.ref().child('storeImage/' + _storeId).getDownloadURL();
-                                    setState(() {
-                                      _storeImageURL = s;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  child: Image(
-                                    width: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width,
-                                    image: _storeImageURL != 'this is URL' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
-                                  ),
-                                ),
-                              )
+                          editingMode ?
+                          InkWell(
+                            onLongPress: () async {
+                              PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
+                              // Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
+                              if (null == photo) {
+                                _scaffoldKeyUserScreenSet.currentState.showSnackBar(
+                                    SnackBar(
+                                      content: Text("No image selected",
+                                        style: GoogleFonts.notoSans(fontSize: 14.0),
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: Duration(milliseconds: 2500),
+                                    )
+                                );
+                              } else {
+                                await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).putFile(File(photo.path));
+                                String s = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
+                                setState(() {
+                                  _storeImageURL = s;
+                                });
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(width: 5),
+                              ),
+                              child: Image(
+                                image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
+                                width: min(min(MediaQuery
+                                    .of(context).size.width, _storeImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                              ),
+                            ),)
                               : Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 5),
+                            ),
                             child: Image(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width,
-                              image: _storeImageURL != 'this is URL' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
+                              width: min(min(MediaQuery.of(context).size.width, _storeImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                              image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
                             ),
                           ),
                           SizedBox(height: 10),
                           Center(
-                            child: editingMode?
+                            child: editingMode ?
                             TextField(
                               controller: controllers[1],
                               style: globals.niceFont(),
                             )
-                            : Text(
-                                _storeDesc,
-                                textAlign: TextAlign.center,
-                                style: globals.niceFont(),
+                                : Text(
+                              _storeDesc,
+                              textAlign: TextAlign.center,
+                              style: globals.niceFont(),
                             ),
                           ),
                           SizedBox(height: 10),
@@ -151,7 +185,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: editingMode?
+                                  child: editingMode ?
                                   TextField(
                                     controller: controllers[2],
                                     style: globals.niceFont(),
@@ -248,7 +282,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         child: InkWell(
                           child: Column(
                             children: [
-                              Expanded(child: Image.asset('assets/images/birthday_cake.jpg')),
+                              Expanded(child: Image.asset('Assets/Untitled.png')),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -299,7 +333,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
-                                    actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
+                                    // actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
+                                    actions: true ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
@@ -354,6 +389,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         }
     );
   }
+
   void _getReviewBottomSheet() {
     double _currReviewRating;
     showModalBottomSheet<dynamic>(
@@ -362,7 +398,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         builder: (BuildContext context1) {
           return Padding(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.of(_scaffoldKeyUserScreenSet.currentContext).viewInsets.bottom
+                bottom: MediaQuery
+                    .of(_scaffoldKeyUserScreenSet.currentContext)
+                    .viewInsets
+                    .bottom
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -370,10 +409,15 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 SizedBox(height: 10,),
-                globals.changingStarBar(0, onUpdate: (rating) {_currReviewRating = rating;}, color: Colors.lightGreen[800]),
+                globals.changingStarBar(0, onUpdate: (rating) {
+                  _currReviewRating = rating;
+                }, color: Colors.lightGreen[800]),
                 SizedBox(height: 15.0,),
                 Container(
-                  width: MediaQuery.of(context1).size.width - 45,
+                  width: MediaQuery
+                      .of(context1)
+                      .size
+                      .width - 45,
                   height: 150,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(4.0))
@@ -423,7 +467,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             'user': '',
                             'rating': _currReviewRating.toString(),
                             'content': reviewCtrl.text,
-                          }])
+                          }
+                          ])
                         }).catchError((e) {});
                         Navigator.of(context).pop();
                         setState(() {
