@@ -74,7 +74,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                 alignment: Alignment.topCenter,
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 110,
+                  height: MediaQuery.of(context).size.width * 0.35,
                   color: Colors.lightGreen[800],
                 ),
               ),
@@ -383,12 +383,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             Container(
-                                              height: MediaQuery.of(context).size.height * 0.065,
+                                              height: MediaQuery.of(context).size.height * 0.07,
                                               width: MediaQuery.of(context).size.width * 0.3,
                                               child: TextField(
                                                 autofocus: false,
                                                 readOnly: !_editingMode,
+                                                keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                  counterText: "",
                                                   isDense: true,
                                                   enabledBorder: OutlineInputBorder(
                                                       borderSide: BorderSide(color: Colors.grey),
@@ -402,6 +404,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 onChanged: (text) => {},
                                                 textAlign: TextAlign.center,
                                                 controller: _aptController,
+                                                maxLength: 6,
                                                 inputFormatters: [
                                                   FilteringTextInputFormatter.allow(RegExp('[0-9]'))
                                                 ],
@@ -438,7 +441,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             Container(
-                                              height: MediaQuery.of(context).size.height * 0.065,
+                                              height: MediaQuery.of(context).size.height * 0.07,
                                               width: MediaQuery.of(context).size.width * 0.7 - 10,
                                               child: TextField(
                                                 autofocus: false,
@@ -475,7 +478,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 )
                               ],
                             ),
-                            SizedBox(height: 80,),
+                            SizedBox(height: 70,),
                             Align(
                               alignment: FractionalOffset.bottomCenter,
                               child: Container(
