@@ -38,6 +38,7 @@ dependencies:
   path_provider: ^1.6.11
   http: ^0.12.0+4
   flutter_slidable: ^0.5.7
+  device_apps: ^1.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -59,6 +60,7 @@ flutter:
   uses-material-design: true
   assets:
     - Assets/google.png
+    - assets/images/birthday_cake.jpg
   fonts:
     - family: GiftHubIcon
       fonts:

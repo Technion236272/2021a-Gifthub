@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -81,8 +82,9 @@ class UserRepository with ChangeNotifier {
     updateFirebaseUserList();
   }
 
-  UserRepository.instance() : _auth = FirebaseAuth.instance {
-    _auth.authStateChanges().listen(_authStateChanges);
+  UserRepository.instance() : _db = FirebaseFirestore.instance,
+                              _storage = FirebaseStorage.instance,
+                              _auth = FirebaseAuth.instance {_auth.authStateChanges().listen(_authStateChanges);
   }
 
   Status get status => _status;
@@ -105,10 +107,8 @@ class UserRepository with ChangeNotifier {
       notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-      _db = FirebaseFirestore.instance;
-      _storage = FirebaseStorage.instance;
       try {
-        _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
+        _avatarURL = await _storage.ref().child("Users/${_user.uid}/images/avatar").getDownloadURL();
       }
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
@@ -131,8 +131,6 @@ class UserRepository with ChangeNotifier {
       notifyListeners();
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-      _db = FirebaseFirestore.instance;
-      _storage = FirebaseStorage.instance;
       try {
         _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
       }
@@ -163,7 +161,6 @@ class UserRepository with ChangeNotifier {
   Future signOut() async {
     _status = Status.Unauthenticated;
     _auth.signOut();
-    _db = null;
     _avatarURL = null;
     notifyListeners();
     return Future.delayed(Duration.zero);
@@ -236,8 +233,8 @@ class UserRepository with ChangeNotifier {
     final _picker = ImagePicker();
 
     await _picker.getImage(source: ImageSource.gallery).then((image) async {
-      await _storage.ref().child("users/${_user.email}/avatar").putFile(File(image.path));
-      _avatarURL = await _storage.ref().child("users/${_user.email}/avatar").getDownloadURL();
+      await _storage.ref().child("userImages/${_user.uid}").putFile(File(image.path));
+      _avatarURL = await _storage.ref().child("userImages/${_user.uid}").getDownloadURL();
     });
     notifyListeners();
   }
