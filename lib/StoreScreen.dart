@@ -281,8 +281,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   appBar: AppBar(
                                     backgroundColor: Colors.lightGreen[900],
                                     leading: IconButton(
-                                        icon: Icon(Icons.menu),
-                                        onPressed: null //TODO: implement navigation drawer
+                                        icon: Icon(Icons.keyboard_arrow_left_outlined),
+                                        onPressed: () {Navigator.of(context).pop();}
                                     ),
                                     title: editingMode ?
                                     TextField(
