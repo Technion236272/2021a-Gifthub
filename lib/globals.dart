@@ -1,9 +1,56 @@
 library gifthub.globals;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'my_flutter_app_icons.dart';
+
+class Product {
+  String _productId;
+  String _userId;
+  String _name;
+  double _price;
+  String _date;
+  List _reviews = <Review>[];
+  String _category;
+  String _description;
+
+  String get productId => _productId;
+  String get user => _userId;
+  String get name => _name;
+  double get price => _price;
+  String get date => _date;
+  List get reviews => _reviews;
+  String get category => _category;
+  String get description => _description;
+
+  Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description)
+      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews, _category = category, _description = description;
+
+}
+
+class Review {
+  String _userName;
+  double _rating;
+  String _content;
+
+  Review(String userName, double rating, String content) : _userName = userName, _rating = rating, _content = content ;
+
+  Review.fromDoc(DocumentSnapshot doc) {
+    var reviewArgs = doc.data();
+    _userName = reviewArgs['user'];
+    _rating = double.parse(reviewArgs['rating']);
+    _content = reviewArgs['content'];
+  }
+
+  String get userName => _userName;
+  double get rating => _rating;
+  String get content => _content;
+
+}
+
+List userCart;
 
 var gifthub_logo = Column(
     mainAxisAlignment: MainAxisAlignment.center,

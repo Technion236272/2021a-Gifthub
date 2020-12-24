@@ -4,8 +4,10 @@ import 'StoreScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'user_repository.dart';
+import 'globals.dart' as globals;
 
 void main() {
+  globals.userCart = <globals.Product>[];
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }

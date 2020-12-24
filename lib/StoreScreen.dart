@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'globals.dart' as globals;
@@ -14,45 +17,45 @@ import 'package:intl/intl.dart';
 import 'AllReviewsScreen.dart';
 // import 'productMock.dart';
 
-class ProductMock {
-  String _productId;
-  String _userId;
-  String _name;
-  double _price;
-  String _date;
-  List _reviews = <ReviewMock>[];
-
-  String get productId => _productId;
-  String get user => _userId;
-  String get name => _name;
-  double get price => _price;
-  String get date => _date;
-  List get reviews => _reviews;
-
-  ProductMock(String productId, String userId, String name, double price, String date, List reviews) :
-        _productId = productId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews;
-
-}
-
-class ReviewMock {
-  String _userName;
-  double _rating;
-  String _content;
-
-  ReviewMock(String userName, double rating, String content) : _userName = userName, _rating = rating, _content = content ;
-
-  ReviewMock.fromDoc(DocumentSnapshot doc) {
-    var reviewArgs = doc.data();
-    _userName = reviewArgs['user'];
-    _rating = double.parse(reviewArgs['rating']);
-    _content = reviewArgs['content'];
-  }
-
-  String get userName => _userName;
-  double get rating => _rating;
-  String get content => _content;
-
-}
+// class ProductMock {
+//   String _productId;
+//   String _userId;
+//   String _name;
+//   double _price;
+//   String _date;
+//   List _reviews = <ReviewMock>[];
+//
+//   String get productId => _productId;
+//   String get user => _userId;
+//   String get name => _name;
+//   double get price => _price;
+//   String get date => _date;
+//   List get reviews => _reviews;
+//
+//   ProductMock(String productId, String userId, String name, double price, String date, List reviews) :
+//         _productId = productId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews;
+//
+// }
+//
+// class ReviewMock {
+//   String _userName;
+//   double _rating;
+//   String _content;
+//
+//   ReviewMock(String userName, double rating, String content) : _userName = userName, _rating = rating, _content = content ;
+//
+//   ReviewMock.fromDoc(DocumentSnapshot doc) {
+//     var reviewArgs = doc.data();
+//     _userName = reviewArgs['user'];
+//     _rating = double.parse(reviewArgs['rating']);
+//     _content = reviewArgs['content'];
+//   }
+//
+//   String get userName => _userName;
+//   double get rating => _rating;
+//   String get content => _content;
+//
+// }
 
 class StoreScreen extends StatefulWidget {
   final _storeId;
@@ -71,8 +74,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   String _storeAddr = "Default";
   String _storePhone = "Default";
   double _storeRating = 1.0;
-  List _products = <ProductMock>[];
-  List _reviews = <ReviewMock>[];
+  List _products = <globals.Product>[];
+  List _reviews = <globals.Review>[];
   bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
@@ -89,19 +92,20 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     _storeAddr = storeArgs[3];
     _storePhone = storeArgs[4];
     _storeRating = double.parse(storeArgs[5]);
-    _products = <ProductMock>[];
+    _products = <globals.Product>[];
     for(var p in doc.data()['Products']){
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
-      _products.add(ProductMock(p, prodArgs['user'], prodArgs['name'], double.parse(prodArgs['price']), prodArgs['date'], prodArgs['reviews']));
+      _products.add(globals.Product(p, prodArgs['user'], prodArgs['name'], prodArgs['price'], prodArgs['date'], prodArgs['reviews'], prodArgs['category'], prodArgs['description']));
+
     }
-    _reviews = doc.data()['Reviews'].map<ReviewMock>((v) =>
-        ReviewMock(v['user'], double.parse(v['rating']), v['content'])
+    _reviews = doc.data()['Reviews'].map<globals.Review>((v) =>
+        globals.Review(v['user'], double.parse(v['rating']), v['content'])
     ).toList();
   }
 
   double _getStoreRating() {
     double sum = 0.0;
-    for(ReviewMock r in _reviews){
+    for(globals.Review r in _reviews){
       sum += r.rating;
     }
     return sum / _reviews.length;
@@ -126,7 +130,40 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Container(
+                          editingMode?
+                              InkWell(
+                                onLongPress: () async {
+                                  PickedFile photo = await ImagePicker().getImage(source: ImageSource.camera);
+                                  Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
+                                  if (null == photo) {
+                                    _scaffoldKeyUserScreenSet.currentState.showSnackBar(
+                                        SnackBar(
+                                          content: Text("No image selected",
+                                            style: GoogleFonts.notoSans(fontSize: 14.0),
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: Duration(milliseconds: 2500),
+                                        )
+                                    );
+                                  } else {
+                                    await FirebaseStorage.instance.ref().child('storeImage/' + _storeId).putFile(File(photo.path));
+                                    String s = await FirebaseStorage.instance.ref().child('storeImage/' + _storeId).getDownloadURL();
+                                    setState(() {
+                                      _storeImageURL = s;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  child: Image(
+                                    width: MediaQuery
+                                        .of(context)
+                                        .size
+                                        .width,
+                                    image: _storeImageURL != 'this is URL' ? NetworkImage(_storeImageURL) : AssetImage('assets/images/birthday_cake.jpg'),
+                                  ),
+                                ),
+                              )
+                              : Container(
                             child: Image(
                               width: MediaQuery
                                   .of(context)
