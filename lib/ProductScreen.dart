@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gifthub_2021a/user_repository.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
@@ -65,11 +69,15 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   String _productId;
   globals.Product _prod;
+  String _prodImageURL;
   bool editingMode = false;
+  final GlobalKey<ScaffoldState> _scaffoldKeyProductScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
 
 
-  _ProductScreenState(String productId) : _productId = productId;
+  _ProductScreenState(String productId) : _productId = productId {
+    _prodImageURL = 'productImages/' + _productId;
+  }
 
   void _initProductArgs(DocumentSnapshot doc) {
     var _prodArgs = doc.data()['Product'];
@@ -115,7 +123,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                 style: globals.niceFont(),
                               )
                               : Text(_prod.name),
-                          actions: /*userRep.status == Status.Authenticated && _storeId == userRep.user.uid*/ true ?
+                          actions: userRep.status == Status.Authenticated && _prod.user == userRep.user.uid ?
                           editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                             await userRep.firestore.collection('Products').doc(_productId).get().then((snapshot) async {
                               var prodArgs = snapshot['Product'];
@@ -147,7 +155,35 @@ class _ProductScreenState extends State<ProductScreen> {
                         body: SingleChildScrollView(
                           child: Column(
                             children: [
-                              Image(
+                              editingMode?
+                              InkWell(
+                                onLongPress: () async {
+                                  PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
+                                  Navigator.pop(_scaffoldKeyProductScreenSet.currentContext);
+                                  if (null == photo) {
+                                    _scaffoldKeyProductScreenSet.currentState.showSnackBar(
+                                        SnackBar(
+                                          content: Text("No image selected",
+                                            style: GoogleFonts.notoSans(fontSize: 14.0),
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: Duration(milliseconds: 2500),
+                                        )
+                                    );
+                                  } else {
+                                    await FirebaseStorage.instance.ref().child(_prodImageURL).putFile(File(photo.path));
+                                    setState(() { });
+                                  }
+                                },
+                                child: Image(
+                                  width: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .width,
+                                  image: AssetImage('assets/images/birthday_cake.jpg'),
+                                ),
+                              )
+                                  : Image(
                                 width: MediaQuery
                                     .of(context)
                                     .size
