@@ -6,8 +6,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
 
@@ -66,7 +64,7 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   String _productId;
-  ProductMock _prod;
+  globals.Product _prod;
   bool editingMode = false;
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
 
@@ -75,7 +73,8 @@ class _ProductScreenState extends State<ProductScreen> {
 
   void _initProductArgs(DocumentSnapshot doc) {
     var _prodArgs = doc.data()['Product'];
-    _prod = ProductMock(
+    _prod = globals.Product(
+        _productId,
         _prodArgs['user'],
         _prodArgs['name'],
         double.parse(_prodArgs['price']),
@@ -187,7 +186,9 @@ class _ProductScreenState extends State<ProductScreen> {
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () {}), // TODO add "contact seller" function
-                                    globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () {}), // TODO add "add to cart" function
+                                    globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () {
+                                      globals.userCart.add(_prod);
+                                    }),
                                   ]
                               )
                             ],

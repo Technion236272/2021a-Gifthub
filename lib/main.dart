@@ -4,8 +4,11 @@ import 'package:gifthub_2021a/user_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'user_repository.dart';
+import 'globals.dart' as globals;
 
 void main() {
+  globals.userCart = <globals.Product>[];
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
