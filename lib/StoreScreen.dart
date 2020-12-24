@@ -133,7 +133,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           editingMode?
                               InkWell(
                                 onLongPress: () async {
-                                  PickedFile photo = await ImagePicker().getImage(source: ImageSource.camera);
+                                  PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
                                   Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
                                   if (null == photo) {
                                     _scaffoldKeyUserScreenSet.currentState.showSnackBar(
@@ -340,7 +340,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
-                                    actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
+                                    // actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
+                                    actions: true ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
