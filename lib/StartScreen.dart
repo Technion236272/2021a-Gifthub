@@ -870,161 +870,163 @@ Widget startScreenScaffold(context) => Material(
         builder: (context, userRep, _) => Scaffold(
           //resizeToAvoidBottomInset: true,
           body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Center(
-                        child: Container(
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.lightGreenAccent,
-                        size: MediaQuery.of(context).size.height *
-                            0.065 *
-                            3.3 *
-                            2.1,
-                      ),
-                    )),
-                    AllConfettiWidget(
-                        child: Center(
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                          Icon(
-                            GiftHubIcons.gift,
-                            color: Colors.red,
-                            size:
-                                MediaQuery.of(context).size.height * 0.065 * 2,
-                          ),
-                          Text(
-                            'GiftHub',
-                            style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.height * 0.03,
-                                fontFamily: 'TimesNewRoman',
-                                fontWeight: FontWeight.bold),
-                          )
-                        ]))),
-                  ],
-                ),
-                Text(
-                  'Enjoy the highest quality gifts.\nOne click away',
-                  style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.height * 0.04,
-                    fontFamily: 'TimesNewRoman',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.1,
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.75,
-                  child: OutlineButton(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          width: MediaQuery.of(context).size.width * 0.075,
-                          height: MediaQuery.of(context).size.height * 0.04,
-                          image: AssetImage("Assets/google.png"),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.025,
-                        ),
-                        Text(
-                          'Continue with Google',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.height * 0.032,
-                              fontFamily: 'TimesNewRoman'),
-                        )
-                      ],
-                    ),
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
-                    onPressed: () async {
-                      userRep.signInWithGoogle();
-                      if (await userRep.signInWithGoogleCheckIfFirstTime()) {
-                        firstSignUpSheet(context, 3);
-                      } else {
-                        //TODO: User is now logged in. Move to Ariel's start screen
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            new MaterialPageRoute<void>(
-                                builder: (context) => MainScreen()),
-                            (r) => false);
-                      }
-                    },
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.75,
-                  child: OutlineButton(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.email,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Center(
+                          child: Container(
+                        child: Icon(
+                          Icons.star,
+                          color: Colors.lightGreenAccent,
                           size: MediaQuery.of(context).size.height *
                               0.065 *
-                              3.1 /
-                              5,
+                              3.3 *
+                              2.1,
                         ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.025,
-                        ),
-                        Text(
-                          'Continue with Email',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.height * 0.032,
-                              fontFamily: 'TimesNewRoman'),
-                        )
-                      ],
-                    ),
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
-                    onPressed: () {
-                      firstSignUpSheet(context, 5);
-                    },
+                      )),
+                      AllConfettiWidget(
+                          child: Center(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                            Icon(
+                              GiftHubIcons.gift,
+                              color: Colors.red,
+                              size:
+                                  MediaQuery.of(context).size.height * 0.065 * 2,
+                            ),
+                            Text(
+                              'GiftHub',
+                              style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.height * 0.03,
+                                  fontFamily: 'TimesNewRoman',
+                                  fontWeight: FontWeight.bold),
+                            )
+                          ]))),
+                    ],
                   ),
-                ),
-                Text(
-                  'or',
-                  style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.height * 0.025,
-                      fontFamily: 'TimesNewRoman'),
-                  textAlign: TextAlign.center,
-                ),
-                TextButton(
-                  child: Text(
-                    'Continue as a guest',
+                  Text(
+                    'Enjoy the highest quality gifts.\nOne click away',
                     style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.height * 0.03,
-                        fontFamily: 'TimesNewRoman',
-                        color: Colors.black),
+                      fontSize: MediaQuery.of(context).size.height * 0.04,
+                      fontFamily: 'TimesNewRoman',
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        new MaterialPageRoute<void>(
-                            builder: (context) => MainScreen()),
-                        (r) => false);
-                  },
-                )
-              ],
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.1,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.75,
+                    child: OutlineButton(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image(
+                            width: MediaQuery.of(context).size.width * 0.075,
+                            height: MediaQuery.of(context).size.height * 0.04,
+                            image: AssetImage("Assets/google.png"),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.025,
+                          ),
+                          Text(
+                            'Continue with Google',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.height * 0.032,
+                                fontFamily: 'TimesNewRoman'),
+                          )
+                        ],
+                      ),
+                      shape: new RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(30.0),
+                      ),
+                      onPressed: () async {
+                        await userRep.signInWithGoogle();
+                        if (await userRep.signInWithGoogleCheckIfFirstTime()) {
+                          firstSignUpSheet(context, 3);
+                        } else {
+                          //TODO: User is now logged in. Move to Ariel's start screen
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              new MaterialPageRoute<void>(
+                                  builder: (context) => MainScreen()),
+                              (r) => false);
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.75,
+                    child: OutlineButton(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.email,
+                            size: MediaQuery.of(context).size.height *
+                                0.065 *
+                                3.1 /
+                                5,
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.025,
+                          ),
+                          Text(
+                            'Continue with Email',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.height * 0.032,
+                                fontFamily: 'TimesNewRoman'),
+                          )
+                        ],
+                      ),
+                      shape: new RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(30.0),
+                      ),
+                      onPressed: () {
+                        firstSignUpSheet(context, 5);
+                      },
+                    ),
+                  ),
+                  Text(
+                    'or',
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.height * 0.025,
+                        fontFamily: 'TimesNewRoman'),
+                    textAlign: TextAlign.center,
+                  ),
+                  TextButton(
+                    child: Text(
+                      'Continue as a guest',
+                      style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.height * 0.03,
+                          fontFamily: 'TimesNewRoman',
+                          color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          new MaterialPageRoute<void>(
+                              builder: (context) => MainScreen()),
+                          (r) => false);
+                    },
+                  )
+                ],
+              ),
             ),
           ),
         ),
