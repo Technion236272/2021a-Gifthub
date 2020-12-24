@@ -56,12 +56,9 @@ class ReviewMock {
 }
 
 class ProductScreen extends StatefulWidget {
-  String _productId;
+  final _productId;
 
-  ProductScreen(String productId, {Key key}) : /*_productId = productId,*/ super(key: key){
-    _productId = "0";
-  }
-
+  ProductScreen(String productId, {Key key}) : _productId = productId, super(key: key);
   @override
   _ProductScreenState createState() => _ProductScreenState(_productId);
 }
@@ -99,12 +96,10 @@ class _ProductScreenState extends State<ProductScreen> {
           return FutureBuilder(
               future: (() async {
                 var prodDoc = userRep.firestore.collection('Products').doc(_productId);
-                int i = 12;
                 _initProductArgs(await prodDoc.get());
               })(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.done) {
-                  int j = 0;
                   return Material(
                       color: Colors.lightGreen,
                       child: Scaffold(
@@ -113,10 +108,6 @@ class _ProductScreenState extends State<ProductScreen> {
                         backgroundColor: Colors.lightGreen[600],
                         appBar: AppBar(
                           backgroundColor: Colors.lightGreen[900],
-                          leading: IconButton(
-                              icon: Icon(Icons.menu),
-                              onPressed: () {} //TODO: implement navigation drawer
-                          ),
                           title: editingMode?
                               TextField(
                                 controller: controllers[0],

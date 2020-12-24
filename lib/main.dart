@@ -4,6 +4,7 @@ import 'package:gifthub_2021a/user_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'StoreScreen.dart';
 import 'user_repository.dart';
 import 'globals.dart' as globals;
 
@@ -41,5 +42,4 @@ class MyApp extends StatelessWidget {
     await Firebase.initializeApp();
     // userRep = UserRepository.instance();
   }
-
 }

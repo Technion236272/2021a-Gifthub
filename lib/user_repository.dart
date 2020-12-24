@@ -107,6 +107,7 @@ class UserRepository with ChangeNotifier {
       notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
+
       try {
         _avatarURL = await _storage.ref().child("Users/${_user.uid}/images/avatar").getDownloadURL();
       }
