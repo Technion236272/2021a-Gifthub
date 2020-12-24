@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'user_repository.dart';
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
@@ -11,8 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);
@@ -33,19 +32,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final FocusNode _addressInputFocusNode = FocusNode();
   final FocusNode _aptInputFocusNode = FocusNode();
   final FocusNode _cityInputFocusNode = FocusNode();
-  bool _firstNameChanged = false;
-  bool _lastNameChanged = false;
-  bool _addressChanged = false;
-  bool _aptChanged = false;
-  bool _cityChanged = false;
   bool _avatarChanged = false;
   bool _editingMode = false;
-  String _newFirstName = "";
-  String _newLastName = "";
-  String _newAddress = "";
-  String _newApt = "";
-  String _newCity = "";
+  bool _confirmEditingPressed = false;
   String _newAvatarURL = "";
+  String _picPath = "";
+  bool _uploadingAvatar = false;
+  bool _deletedAvatar = false;
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -57,11 +50,20 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _newAvatarURL = Provider.of<UserRepository>(context, listen: false).avatarURL ?? defaultAvatar;
+    var userRep = Provider.of<UserRepository>(context, listen: false);
+    _newAvatarURL = userRep.avatarURL ?? defaultAvatar;
+    _firstNameController.text = userRep.firstName;
+    _lastNameController.text = userRep.lastName;
+    _addressController.text = userRep.address;
+    _cityController.text = userRep.city;
+    _aptController.text = userRep.apt;
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      setState(() {});
+    });
     return Material(
       child: Consumer<UserRepository>(
         builder:(context, userRep, _) {
@@ -72,7 +74,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                 alignment: Alignment.topCenter,
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 110,
+                  height: MediaQuery.of(context).size.width * 0.35,
                   color: Colors.lightGreen[800],
                 ),
               ),
@@ -81,21 +83,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                 resizeToAvoidBottomPadding: false,
                 backgroundColor: Colors.transparent,
                 key: _scaffoldKeyUserScreenSet,
-                appBar: AppBar(
-                  elevation: 0.0,
-                  backgroundColor: Colors.lightGreen[800],
-                  leading: IconButton(
-                      icon: Icon(Icons.menu),
-                      onPressed: null //TODO: implement navigation drawer
-                  ),
-                  title: Text(" Account Settings",
-                    style: GoogleFonts.calistoga(
-                      fontSize: 28,
-                      color: Colors.white
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
                 body: GestureDetector(
                   onTap: () {
                     FocusScope.of(context).unfocus();
@@ -118,10 +105,23 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             Stack(
                               alignment: Alignment.center,
                               children: <Widget> [
-                                CircularProfileAvatar(
-                                  _editingMode
-                                    ? _newAvatarURL
-                                    : userRep.avatarURL ?? defaultAvatar,
+                                _uploadingAvatar ?
+                                Container(
+                                  // padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1),
+                                  width: MediaQuery.of(context).size.height * 0.1 * 2,
+                                  height: MediaQuery.of(context).size.height * 0.1 * 2,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+                                    )
+                                  )
+                                )
+                                : CircularProfileAvatar(
+                                  _editingMode ? _newAvatarURL : userRep.avatarURL ?? defaultAvatar,
                                   borderColor: Colors.black,
                                   borderWidth: 1.3,
                                   radius: MediaQuery.of(context).size.height * 0.1,
@@ -158,7 +158,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     )
                                   ) : null
                                 ),
-                                _editingMode
+                                _editingMode && !_uploadingAvatar
                                 ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -236,21 +236,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                             ),
                                             onChanged: (text) => {},
                                             textAlign: TextAlign.center,
-                                            controller: _firstNameChanged
-                                              ? (_firstNameController..text = _newFirstName)
-                                              : (_firstNameController..text = userRep.firstName),
+                                            controller: _firstNameController,
                                             inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -]'))
+                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
                                             ],
                                             focusNode: _firstNameInputFocusNode,
-                                            onSubmitted: (text) {
-                                              if(text.isNotEmpty) {
-                                                setState(() {
-                                                  _newFirstName = text;
-                                                  _firstNameChanged = true;
-                                                });
-                                              }
-                                            },
                                             style: GoogleFonts.lato(
                                               fontSize: 16.0,
                                               color: Colors.black,
@@ -304,20 +294,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-zA-Z -]'))
+                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
                                             ],
                                             textAlign: TextAlign.center,
-                                            controller: _lastNameChanged
-                                              ? (_lastNameController..text = _newLastName)
-                                              : (_lastNameController..text = userRep.lastName),
-                                            onSubmitted: (text) {
-                                              if (text.isNotEmpty){
-                                                setState(() {
-                                                  _newLastName = text;
-                                                  _lastNameChanged = true;
-                                                });
-                                              }
-                                            },
+                                            controller: _lastNameController,
                                             onChanged: (text) => {},
                                             style: GoogleFonts.lato(
                                               fontSize: 16.0,
@@ -361,23 +341,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       ),
                                     ),
                                     focusNode: _addressInputFocusNode,
-                                    controller: _addressChanged
-                                        ? (_addressController..text = _newAddress)
-                                        : (_addressController..text = userRep.address),
+                                    controller: _addressController,
                                     autofocus: false,
                                     keyboardType: TextInputType.streetAddress,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
                                     ],
                                     onChanged: (text) => {},
-                                    onSubmitted: (text) {
-                                      if(text.isNotEmpty) {
-                                        setState(() {
-                                          _newAddress = text;
-                                          _addressChanged = true;
-                                        });
-                                      }
-                                    },
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                       fontSize: 16.0,
@@ -413,12 +383,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             Container(
-                                              height: MediaQuery.of(context).size.height * 0.065,
+                                              height: MediaQuery.of(context).size.height * 0.07,
                                               width: MediaQuery.of(context).size.width * 0.3,
                                               child: TextField(
                                                 autofocus: false,
                                                 readOnly: !_editingMode,
+                                                keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                  counterText: "",
                                                   isDense: true,
                                                   enabledBorder: OutlineInputBorder(
                                                       borderSide: BorderSide(color: Colors.grey),
@@ -431,21 +403,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 ),
                                                 onChanged: (text) => {},
                                                 textAlign: TextAlign.center,
-                                                controller: _aptChanged
-                                                    ? (_aptController..text = _newApt)
-                                                    : (_aptController..text = userRep.apt),
+                                                controller: _aptController,
+                                                maxLength: 6,
                                                 inputFormatters: [
                                                   FilteringTextInputFormatter.allow(RegExp('[0-9]'))
                                                 ],
                                                 focusNode: _aptInputFocusNode,
-                                                onSubmitted: (text) {
-                                                  if(text.isNotEmpty) {
-                                                    setState(() {
-                                                      _newApt = text;
-                                                      _aptChanged = true;
-                                                    });
-                                                  }
-                                                },
                                                 style: GoogleFonts.lato(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -478,7 +441,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               ),
                                             ),
                                             Container(
-                                              height: MediaQuery.of(context).size.height * 0.065,
+                                              height: MediaQuery.of(context).size.height * 0.07,
                                               width: MediaQuery.of(context).size.width * 0.7 - 10,
                                               child: TextField(
                                                 autofocus: false,
@@ -496,21 +459,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 ),
                                                 onChanged: (text) => {},
                                                 textAlign: TextAlign.center,
-                                                controller: _cityChanged
-                                                    ? (_cityController..text = _newCity)
-                                                    : (_cityController..text = userRep.city),
+                                                controller: _cityController,
                                                 inputFormatters: [
                                                   FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
                                                 ],
                                                 focusNode: _cityInputFocusNode,
-                                                onSubmitted: (text) {
-                                                  if(text.isNotEmpty) {
-                                                    setState(() {
-                                                      _newCity = text;
-                                                      _cityChanged = true;
-                                                    });
-                                                  }
-                                                },
                                                 style: GoogleFonts.lato(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -525,7 +478,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 )
                               ],
                             ),
-                            SizedBox(height: 80,),
+                            SizedBox(height: 70,),
                             Align(
                               alignment: FractionalOffset.bottomCenter,
                               child: Container(
@@ -536,54 +489,62 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   child: RaisedButton(
-                                    elevation: 15.0,
+                                    elevation: 20.0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                       side: BorderSide(color: Colors.transparent),
                                     ),
                                     visualDensity: VisualDensity.adaptivePlatformDensity,
-                                    color: _editingMode ? Colors.green[900] : Colors.grey[900],
+                                    color: _editingMode && !_confirmEditingPressed ? Colors.green[900] : Colors.grey[900],
                                     textColor: Colors.white,
-                                    onPressed: _editingMode
-                                      ? () {
+                                    onPressed: _uploadingAvatar ? null
+                                      : _editingMode
+                                      ? () async {
                                       setState(() {
-                                        if(_firstNameChanged) {
-                                          userRep.firstName = _newFirstName;
-                                          _newFirstName = "";
-                                          _firstNameChanged = false;
+                                        _confirmEditingPressed = true;
+                                      });
+                                      if(_avatarChanged) {
+                                        setState(() {
+                                          _uploadingAvatar = true;
+                                        });
+                                        if(_deletedAvatar){
+                                          await userRep.deleteAvatar();
+                                          userRep.avatarURL = defaultAvatar;
+                                        } else {
+                                          await userRep.setAvatar(_picPath);
                                         }
-                                        if(_lastNameChanged){
-                                          userRep.lastName = _newLastName;
-                                          _newLastName = "";
-                                          _lastNameChanged = false;
+                                        _avatarChanged = false;
+                                        _deletedAvatar = false;
+                                      }
+                                      setState(() {
+                                        if(_firstNameController.text.isNotEmpty) {
+                                          userRep.firstName = _firstNameController.text;
                                         }
-                                        if(_addressChanged){
-                                          userRep.address = _newAddress;
-                                          _newAddress = "";
-                                          _addressChanged = false;
+                                        if(_lastNameController.text.isNotEmpty) {
+                                          userRep.lastName = _lastNameController.text;
                                         }
-                                        if(_aptChanged){
-                                          userRep.address = _newApt;
-                                          _newApt = "";
-                                          _aptChanged = false;
+                                        if(_addressController.text.isNotEmpty) {
+                                          userRep.address = _addressController.text;
                                         }
-                                        if(_cityChanged){
-                                          userRep.city = _newCity;
-                                          _newCity = "";
-                                          _cityChanged = false;
+                                        if(_aptController.text.isNotEmpty) {
+                                          userRep.apt = _aptController.text;
                                         }
-                                        if(_avatarChanged){
-                                          userRep.avatarURL = _newAvatarURL;
-                                          // _newAvatarURL = "";
-                                          _avatarChanged = false;
+                                        if(_cityController.text.isNotEmpty){
+                                          userRep.city = _cityController.text;
                                         }
                                         _editingMode = false;
                                       });
+                                      userRep.updateFirebaseUserList();
+                                      setState(() {
+                                        _uploadingAvatar = false;
+                                      });
+                                      // return Future.delayed(Duration(seconds: 3));
                                     }
                                     : () {
                                       _unfocusAll();
                                       setState(() {
                                         _editingMode = true;
+                                        _confirmEditingPressed = false;
                                       });
                                     },
                                     child: Row(
@@ -592,14 +553,14 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       crossAxisAlignment:CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          _editingMode ? "Update   " : "Edit   ",
+                                          _editingMode && !_confirmEditingPressed ? "Update   " : "Edit   ",
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.openSans(
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.bold
                                           ),
                                         ),
-                                        Icon(_editingMode ? Icons.check_outlined : Icons.edit_outlined,
+                                        Icon(_editingMode && !_confirmEditingPressed ? Icons.check_outlined : Icons.edit_outlined,
                                           color: Colors.white,
                                           size: 17.0,
                                         ),
@@ -652,7 +613,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              //TODO: initialize firebase so that pictures can be added
               ListTile(
                 tileColor: Colors.white,
                 leading: Icon(
@@ -677,8 +637,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     );
                   } else {
                     setState(() {
-                      _newAvatarURL = photo.path;
+                      _uploadingAvatar = true;
+                    });
+                    _picPath = photo.path;
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).putFile(File(photo.path));
+                    var pic = await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).getDownloadURL();
+                    setState(() {
+                      _newAvatarURL = pic;
                       _avatarChanged = true;
+                    });
+                    setState(() {
+                      _uploadingAvatar = false;
                     });
                   }
                 },
@@ -708,8 +678,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                     );
                   } else {
                     setState(() {
-                      _newAvatarURL = photo.path;
+                      _uploadingAvatar = true;
+                    });
+                    _picPath = photo.path;
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).putFile(File(photo.path));
+                    var pic = await userRep.storage.ref("tempAvatarImages").child(userRep.auth.currentUser.uid).getDownloadURL();
+                    setState(() {
+                      _newAvatarURL = pic;
                       _avatarChanged = true;
+                    });
+                    setState(() {
+                      _uploadingAvatar = false;
                     });
                   }
                 },
@@ -760,6 +740,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             setState(() {
                               _newAvatarURL = defaultAvatar;
                               _avatarChanged = true;
+                              _deletedAvatar = true;
                             });
                             Navigator.pop(context);
                             Navigator.pop(context);
@@ -772,7 +753,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               color: Colors.red,
                             ),
                           ),
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.pop(context);
                           },
                         )

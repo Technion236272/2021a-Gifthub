@@ -5,81 +5,77 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'productMock.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
+const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
+
 class UserRepository with ChangeNotifier {
   FirebaseAuth _auth;
   User _user;
   Status _status = Status.Uninitialized;
-  FirebaseFirestore _db;
-  FirebaseStorage _storage;
-  String _avatarURL = "http://www.nretnil.com/avatar/LawrenceEzekielAmos.png";
+  FirebaseFirestore _db = FirebaseFirestore.instance;
+  FirebaseStorage _storage = FirebaseStorage.instance;
+  String _avatarURL = defaultAvatar;
   List<Product> _orders = new List();
-  String _firstName = "NO INFO";
-  String _lastName = "NO INFO";
-  String _address = "NO INFO";
-  String _apt = "NO INFO";
-  String _city = "NO INFO";
+  String _firstName = "";
+  String _lastName = "";
+  String _address = "";
+  String _apt = "";
+  String _city = "";
 
 
   void updateLocalUserFields() async {
-    var snapshop = await _db.collection('Users')
-        .doc(_user.uid)
-        .get();
-    var list=snapshop.data();
-    _firstName=list[0];
-    _lastName=list[1];
-    _address=list[2];
-    _apt=list[3];
-    _city=list[4];
+    var snapshot = await FirebaseFirestore.instance.collection('Users').doc(_user.uid).get();
+    var list = snapshot.data();
+    _firstName = list['Info'][0];
+    _lastName = list['Info'][1];
+    _address = list['Info'][2];
+    _apt = list['Info'][3];
+    _city = list['Info'][4];
+    _avatarURL = await FirebaseStorage.instance.ref().child(_user.uid).getDownloadURL() ?? defaultAvatar;
     //TODO: update _orders too
   }
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_address,_apt,_city];
     await _db.collection('Users').doc(_user.uid).set({'Info':list});
+    notifyListeners();
   }
 
   String get apt => _apt;
 
   set apt(String value) {
     _apt = value;
-    updateFirebaseUserList();
   }
 
   set avatarURL(String value) {
-    addAvatar();
+    this._avatarURL = value;
   }
 
   String get firstName => _firstName;
 
   set firstName(String value) {
     _firstName = value;
-    updateFirebaseUserList();
   }
 
   String get lastName => _lastName;
 
   set lastName(String value) {
     _lastName = value;
-    updateFirebaseUserList();
   }
 
   String get address => _address;
 
   set address(String value) {
     _address = value;
-    updateFirebaseUserList();
   }
 
   String get city => _city;
 
   set city(String value) {
     _city = value;
-    updateFirebaseUserList();
   }
 
   UserRepository.instance() : _db = FirebaseFirestore.instance,
@@ -109,7 +105,7 @@ class UserRepository with ChangeNotifier {
       _status = Status.Authenticated;
 
       try {
-        _avatarURL = await _storage.ref().child("Users/${_user.uid}/images/avatar").getDownloadURL();
+        _avatarURL = await _storage.ref('userImages').child(_user.uid).getDownloadURL();
       }
       on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
@@ -126,24 +122,18 @@ class UserRepository with ChangeNotifier {
   }
 
   Future<String> signUp(String email, String password,String firstName,String lastName,String address,String apt,String city) async {
-
     try {
       _status = Status.Authenticating;
       notifyListeners();
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-      try {
-        _avatarURL = await _storage.ref().child("Users/${_user.uid}/avatar").getDownloadURL();
-      }
-      on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
-        _avatarURL = null;
-      }
+      _db = FirebaseFirestore.instance;
+      _storage = FirebaseStorage.instance;
       _firstName=firstName;
       _lastName=lastName;
       _address=address;
       _apt=apt;
       _city=city;
-
       updateFirebaseUserList();
       var list=[];
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
@@ -162,14 +152,12 @@ class UserRepository with ChangeNotifier {
   Future signOut() async {
     _status = Status.Unauthenticated;
     _auth.signOut();
-    _avatarURL = null;
+    _db = null;
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
 
-
-
-  void signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     // Trigger the authentication flow
     final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
     // Obtain the auth details from the request
@@ -180,7 +168,6 @@ class UserRepository with ChangeNotifier {
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-
     await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
@@ -191,52 +178,64 @@ class UserRepository with ChangeNotifier {
     _address=address;
     _apt=apt;
     _city=city;
-
     updateFirebaseUserList();
     var list=[];
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
     await _db.collection('Stores').doc(_user.uid).set({'Store':list});
   }
+
   Future<bool> signInWithGoogleCheckIfFirstTime() async {
     _db = FirebaseFirestore.instance;
     try {
-      final snapShot = await _db.collection('Users')
-          .doc(_user.uid)
-          .get();
+      final snapShot = await _db.collection('Users').doc(_user.uid).get();
       if (snapShot == null || !snapShot.exists) {
         return true;
-      }
-      else{
+      } else {
         updateLocalUserFields();
         return false;
       }
-    }
-    catch(e){
+    } catch(e) {
       updateLocalUserFields();
       return false;
     }
   }
 
-
-
   Future<void> _authStateChanges(User firebaseUser) async {
     if (firebaseUser == null) {
       _status = Status.Unauthenticated;
-      _user=null;
+      _user = null;
     } else {
       _user = firebaseUser;
       _status = Status.Authenticated;
     }
   }
 
-  Future addAvatar() async {
-    final _picker = ImagePicker();
+  /// sets avatar for a user
+  /// in use at: userSettingsScreen.dart
+  /// written by Ariel
+  Future<void> setAvatar(String avatar) async {
+    try {
+      await _storage.ref('userImages').child(_auth.currentUser.uid).putFile(File(avatar));
+      _avatarURL = await _storage.ref('userImages').child(_auth.currentUser.uid).getDownloadURL();
+    } catch(_) {
+      //nothing
+    } finally {
+      notifyListeners();
+    }
+  }
 
-    await _picker.getImage(source: ImageSource.gallery).then((image) async {
-      await _storage.ref().child("userImages/${_user.uid}").putFile(File(image.path));
-      _avatarURL = await _storage.ref().child("userImages/${_user.uid}").getDownloadURL();
-    });
-    notifyListeners();
+  /// deletes avatar for a user
+  /// in use at: userSettingsScreen.dart
+  /// written by Ariel
+  Future<void> deleteAvatar() async {
+    try {
+      await _storage.ref("userImages").child(_user.uid).delete();
+      _avatarURL = defaultAvatar;
+    } catch (_) {
+      //nothing
+    } finally {
+      notifyListeners();
+    }
   }
 }
