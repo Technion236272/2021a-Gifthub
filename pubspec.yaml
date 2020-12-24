@@ -40,11 +40,16 @@ dependencies:
   flutter_slidable: ^0.5.7
   device_apps: ^1.2.0
   flappy_search_bar: ^1.7.2
+  flutter_launcher_icons: ^0.8.1
+  cupertino_icons: ^1.0.0
+  confetti: ^0.5.4+1
+
+flutter_icons:
+  image_path: "Assets/Untitled.png"
+  android: true
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.0
-  confetti: ^0.5.4+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
