@@ -69,6 +69,7 @@ flutter:
     - Assets/google.png
     - Assets/images/birthday_cake.jpg
     - Assets/Untitled.png
+    - Assets/no image product.png
   fonts:
     - family: GiftHubIcon
       fonts:
