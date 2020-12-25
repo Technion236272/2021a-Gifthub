@@ -18,6 +18,7 @@ import 'user_repository.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:intl/intl.dart';
 import 'AllReviewsScreen.dart';
+import 'package:tuple/tuple.dart';
 
 class StoreScreen extends StatefulWidget {
   final _storeId;
@@ -277,27 +278,40 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                     childAspectRatio: 3 / 2,
                     crossAxisCount: 2,
                     children: _products.map((p) {
-                      return Card(
-                        color: Colors.lightGreen[600],
-                        child: InkWell(
-                          child: Column(
-                            children: [
-                              Expanded(child: Image.asset('Assets/Untitled.png')),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(p.name, style: globals.niceFont()),
-                                  Text('\$' + p.price.toString(), style: globals.niceFont()),
-                                ],
-                              )
-                            ],
-
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductScreen(p.productId)));
-                          },
-                          onLongPress: () {}, // TODO show options to view product or add to cart
-                        ),
+                      return FutureBuilder<Tuple2>(
+                        future: () async {
+                          var prodImage;
+                          try {
+                            var prodImageURL = await FirebaseStorage.instance.ref().child('productImages/' + p.productId).getDownloadURL();
+                            prodImage = NetworkImage(prodImageURL);
+                          } catch (e) {
+                            prodImage = null;
+                          }
+                          return Tuple2<globals.Product, NetworkImage>(p, prodImage);
+                        } (),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            return Card(
+                              elevation: 5.0,
+                              color: Colors.lightGreen[800],
+                              child: InkWell(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(child: snapshot.data.item2 != null? snapshot.data.item2 : Image.asset('Assets/Untitled.png')),
+                                    Text(p.name, style: globals.niceFont()),
+                                    Text('\$' + p.price.toString(), style: globals.niceFont())
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductScreen(p.productId)));
+                                },
+                                onLongPress: () {}, // TODO show options to view product or add to cart
+                              ),
+                            );
+                          }
+                          return Center(child: CircularProgressIndicator());
+                        },
                       );
                     }).toList(),
                   );
@@ -315,8 +329,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   appBar: AppBar(
                                     backgroundColor: Colors.lightGreen[900],
                                     leading: IconButton(
-                                        icon: Icon(Icons.menu),
-                                        onPressed: null //TODO: implement navigation drawer
+                                        icon: Icon(Icons.keyboard_arrow_left_outlined),
+                                        onPressed: () {Navigator.of(context).pop();}
                                     ),
                                     title: editingMode ?
                                     TextField(
@@ -333,8 +347,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
-                                    // actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
-                                    actions: true ?
+                                    actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
