@@ -20,7 +20,7 @@ import 'AllReviewsScreen.dart';
 class StoreScreen extends StatefulWidget {
   final _storeId;
 
-  StoreScreen(String storeId, {Key key}) : _storeId = /*storeId,*/ "9C6irKocUFMZCvlcfqneZrFL0UM2", super(key: key);
+  StoreScreen(String storeId, {Key key}) : _storeId = storeId, super(key: key);
 
   @override
   _StoreScreenState createState() => _StoreScreenState(_storeId);
@@ -279,17 +279,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   backgroundColor: Colors.lightGreen[600],
                                   key: _scaffoldKeyUserScreenSet,
                                   appBar: AppBar(
-                                    backgroundColor: Colors.lightGreen[900],
-                                    leading: IconButton(
-                                        icon: Icon(Icons.keyboard_arrow_left_outlined),
-                                        onPressed: () {Navigator.of(context).pop();}
-                                    ),
+                                    backgroundColor: Colors.lightGreen[800],
                                     title: editingMode ?
                                     TextField(
                                       controller: controllers[0],
-                                      style: globals.niceFont(),
+                                      style: globals.calistogaFont(),
                                     )
-                                        : Text(_storeName),
+                                        : Text(_storeName, style: globals.calistogaFont(),),
                                     bottom: TabBar(
                                       tabs: [
                                         Tab(text: "About"),

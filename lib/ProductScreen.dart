@@ -107,13 +107,13 @@ class _ProductScreenState extends State<ProductScreen> {
                         resizeToAvoidBottomPadding: false,
                         backgroundColor: Colors.lightGreen[600],
                         appBar: AppBar(
-                          backgroundColor: Colors.lightGreen[900],
+                          backgroundColor: Colors.lightGreen[800],
                           title: editingMode?
                               TextField(
                                 controller: controllers[0],
-                                style: globals.niceFont(),
+                                style: globals.calistogaFont(),
                               )
-                              : Text(_prod.name),
+                              : Text(_prod.name, style: globals.calistogaFont(),),
                           actions: userRep.status == Status.Authenticated && _prod.user == userRep.user.uid ?
                           editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                             await userRep.firestore.collection('Products').doc(_productId).get().then((snapshot) async {
