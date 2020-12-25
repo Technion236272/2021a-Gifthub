@@ -43,6 +43,25 @@ class _MainScreenState extends State<MainScreen> {
     UserOrdersScreen(),
     UserSettingsScreen()
   ];
+  SnackBar _snackBarUserUnauthenticated;
+
+  @override
+  void initState() {
+    super.initState();
+    _snackBarUserUnauthenticated = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      content: Text('only verified users can access this screen',
+        style: GoogleFonts.lato(
+            fontSize: 13.0
+        ),
+      ),
+      action: SnackBarAction(
+        textColor: Colors.deepPurpleAccent,
+        label: 'Log in',
+        onPressed: this._signInDialog,
+      ),
+    );
+  }
 
   void _signInDialog() {
     showDialog(
@@ -56,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.23,
+              height: MediaQuery.of(context).size.height * 0.208,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
@@ -205,11 +224,14 @@ class _MainScreenState extends State<MainScreen> {
               ),
               IconButton(
                 icon: Icon(Icons.favorite),
-                onPressed: () => Navigator.of(context).push(
+                onPressed: () =>
+                userRep.status == Status.Authenticated
+                ? Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) => WishListScreen()
                   )
                 )
+                : _scaffoldKeyMainScreen.currentState.showSnackBar(_snackBarUserUnauthenticated)
               ),
             ],
             leading: IconButton(
@@ -284,19 +306,7 @@ class _MainScreenState extends State<MainScreen> {
             onTap: (i) {
               if(i > 0 && userRep.status != Status.Authenticated){
                 _scaffoldKeyMainScreen.currentState.showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    content: Text('only verified users can access this screen',
-                      style: GoogleFonts.lato(
-                        fontSize: 13.0
-                      ),
-                    ),
-                    action: SnackBarAction(
-                      textColor: Colors.deepPurpleAccent,
-                      label: 'Log in',
-                      onPressed: _signInDialog,
-                    ),
-                  )
+                  _snackBarUserUnauthenticated
                 );
                 return;
               }
