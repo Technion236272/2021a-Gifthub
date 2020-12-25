@@ -1018,6 +1018,7 @@ Widget startScreenScaffold(context) => Material(
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () {
+                      userRep.status = Status.Unauthenticated;
                       Navigator.pushAndRemoveUntil(
                           context,
                           new MaterialPageRoute<void>(

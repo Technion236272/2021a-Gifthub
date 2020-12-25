@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/StartScreen.dart';
+import 'package:gifthub_2021a/StoreScreen.dart';
 import 'user_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
@@ -19,6 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
 // import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'checkoutScreen.dart';
+import 'StartScreen.dart';
 import 'globals.dart' as globals;
 
 /// ----------------------------------------------------------------------------
@@ -38,11 +40,32 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyMainScreen = new GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
+  static String _userID = "";
   final List<Widget> _children = [
     HomeScreen(),
     UserOrdersScreen(),
+    StoreScreen(_userID),
     UserSettingsScreen()
   ];
+  SnackBar _snackBarUserUnauthenticated;
+
+  @override
+  void initState() {
+    super.initState();
+    _snackBarUserUnauthenticated = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      content: Text('only verified users can access this screen',
+        style: GoogleFonts.lato(
+            fontSize: 13.0
+        ),
+      ),
+      action: SnackBarAction(
+        textColor: Colors.deepPurpleAccent,
+        label: 'Log in',
+        onPressed: this._signInDialog,
+      ),
+    );
+  }
 
   void _signInDialog() {
     showDialog(
@@ -56,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.23,
+              height: MediaQuery.of(context).size.height * 0.208,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
@@ -164,8 +187,8 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  String _currentAppBarTitle(int index){
-    return 0 == index ? '' : 1 == index ? "Orders" : "Account";
+  String _currentAppBarTitle(int index) {
+    return 0 == index ? '' : 1 == index ? "Orders" : 2 == index ? "My Store" : "Account";
   }
 
   @override
@@ -181,7 +204,7 @@ class _MainScreenState extends State<MainScreen> {
           resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
-          appBar: AppBar(
+          appBar: 2 == _currentIndex ? null : AppBar(
             centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
@@ -205,11 +228,14 @@ class _MainScreenState extends State<MainScreen> {
               ),
               IconButton(
                 icon: Icon(Icons.favorite),
-                onPressed: () => Navigator.of(context).push(
+                onPressed: () =>
+                userRep.status == Status.Authenticated
+                ? Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) => WishListScreen()
                   )
                 )
+                : _scaffoldKeyMainScreen.currentState.showSnackBar(_snackBarUserUnauthenticated)
               ),
             ],
             leading: IconButton(
@@ -282,21 +308,17 @@ class _MainScreenState extends State<MainScreen> {
             selectedItemColor: Colors.white,
             currentIndex: _currentIndex,
             onTap: (i) {
-              if(i > 0 && userRep.status != Status.Authenticated){
+              if(2 == i && userRep.status == Status.Authenticated){
+                ///set store id to current user id:
+                _MainScreenState._userID = userRep.user.uid;
+                setState(() {
+                  _currentIndex = i;
+                });
+                return;
+              }
+              if(i > 0 && userRep.status != Status.Authenticated) {
                 _scaffoldKeyMainScreen.currentState.showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    content: Text('only verified users can access this screen',
-                      style: GoogleFonts.lato(
-                        fontSize: 13.0
-                      ),
-                    ),
-                    action: SnackBarAction(
-                      textColor: Colors.deepPurpleAccent,
-                      label: 'Log in',
-                      onPressed: _signInDialog,
-                    ),
-                  )
+                  _snackBarUserUnauthenticated
                 );
                 return;
               }
@@ -313,6 +335,10 @@ class _MainScreenState extends State<MainScreen> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.attach_money_outlined),
                 label: 'Orders',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.storefront_outlined),
+                label: 'My Store',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle_outlined),
@@ -438,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       builder: (context) => ProductScreen(index.toString())
                                     )
                                   );
-                                }, //TODO: navigate to product screen
+                                },
                                 child: Container(
                                   width: MediaQuery.of(context).size.width,
                                   height: MediaQuery.of(context).size.height,

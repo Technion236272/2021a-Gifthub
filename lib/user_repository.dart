@@ -35,8 +35,14 @@ class UserRepository with ChangeNotifier {
     _address = list['Info'][2];
     _apt = list['Info'][3];
     _city = list['Info'][4];
-    _avatarURL = await FirebaseStorage.instance.ref().child(_user.uid).getDownloadURL() ?? defaultAvatar;
-    //TODO: update _orders too
+    try {
+      _avatarURL = await FirebaseStorage.instance.ref()
+          .child(_user.uid)
+          .getDownloadURL() ?? defaultAvatar;
+    } catch (_){
+      _avatarURL = defaultAvatar;
+    }
+      //TODO: update _orders too
   }
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_address,_apt,_city];
@@ -84,6 +90,10 @@ class UserRepository with ChangeNotifier {
   }
 
   Status get status => _status;
+
+  set status(Status value) {
+    _status = value;
+  }
 
   User get user => _user;
 
