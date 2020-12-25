@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -66,17 +68,17 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   String _productId;
   globals.Product _prod;
-  String _prodImageURL;
+  String _productImageURL;
+  NetworkImage _productImage;
+  Size _productImageSize;
   bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyProductScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
 
 
-  _ProductScreenState(String productId) : _productId = productId {
-    _prodImageURL = 'productImages/' + _productId;
-  }
+  _ProductScreenState(String productId) : _productId = productId { }
 
-  void _initProductArgs(DocumentSnapshot doc) {
+  void _initProductArgs(DocumentSnapshot doc) async {
     var _prodArgs = doc.data()['Product'];
     _prod = globals.Product(
         _productId,
@@ -87,6 +89,30 @@ class _ProductScreenState extends State<ProductScreen> {
         _prodArgs['reviews'],
         _prodArgs['category'],
         _prodArgs['description']);
+    Completer<Size> completer = Completer<Size>();
+    try {
+      _productImageURL = await FirebaseStorage.instance.ref().child('productImages/' + _productId).getDownloadURL();
+      _productImage = NetworkImage(_productImageURL);
+      _productImage.resolve(ImageConfiguration()).addListener(ImageStreamListener(
+              (i, b) {
+            completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
+          }
+      ));
+    } catch (e) {
+      _productImageURL = null;
+      _productImage = null;
+      Image
+          .asset('Assets/Untitled.png')
+          .image
+          .resolve(ImageConfiguration())
+          .addListener(ImageStreamListener(
+              (i, b) {
+            completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
+          }
+      ));
+    } finally {
+      _productImageSize = await completer.future;
+    }
   }
 
   @override
@@ -96,7 +122,7 @@ class _ProductScreenState extends State<ProductScreen> {
           return FutureBuilder(
               future: (() async {
                 var prodDoc = userRep.firestore.collection('Products').doc(_productId);
-                _initProductArgs(await prodDoc.get());
+                await _initProductArgs(await prodDoc.get());
               })(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.done) {
@@ -150,7 +176,6 @@ class _ProductScreenState extends State<ProductScreen> {
                               InkWell(
                                 onLongPress: () async {
                                   PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
-                                  Navigator.pop(_scaffoldKeyProductScreenSet.currentContext);
                                   if (null == photo) {
                                     _scaffoldKeyProductScreenSet.currentState.showSnackBar(
                                         SnackBar(
@@ -162,24 +187,28 @@ class _ProductScreenState extends State<ProductScreen> {
                                         )
                                     );
                                   } else {
-                                    await FirebaseStorage.instance.ref().child(_prodImageURL).putFile(File(photo.path));
+                                    await FirebaseStorage.instance.ref().child('productImages/' + _productId).putFile(File(photo.path));
                                     setState(() { });
                                   }
                                 },
-                                child: Image(
-                                  width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width,
-                                  image: AssetImage('assets/images/birthday_cake.jpg'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(width: 5),
+                                  ),
+                                  child: Image(
+                                    image: _productImage != null ? _productImage : AssetImage('Assets/Untitled.png'),
+                                    width: min(min(MediaQuery
+                                        .of(context).size.width, _productImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                                  ),
+                                ),)
+                                  : Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 5),
                                 ),
-                              )
-                                  : Image(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width,
-                                image: AssetImage('assets/images/birthday_cake.jpg'),
+                                child: Image(
+                                  width: min(min(MediaQuery.of(context).size.width, _productImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                                  image: _productImage != null ? _productImage : AssetImage('Assets/Untitled.png'),
+                                ),
                               ),
                               SizedBox(height: 20.0),
                               editingMode?

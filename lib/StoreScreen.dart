@@ -51,7 +51,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   void _initStoreArgs(DocumentSnapshot doc, CollectionReference ref) async {
     var storeArgs = doc.data()['Store'];
-    _storeName = storeArgs[0];
+    _storeName = storeArgs['name'];
+    _storeDesc = storeArgs['description'];
+    _storeAddr = storeArgs['address'];
+    _storePhone = storeArgs['phone'];
     Completer<Size> completer = Completer<Size>();
     try {
       _storeImageURL = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
@@ -76,10 +79,6 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     } finally {
       _storeImageSize = await completer.future;
     }
-    _storeDesc = storeArgs[1];
-    _storeAddr = storeArgs[2];
-    _storePhone = storeArgs[3];
-    _storeRating = double.parse(storeArgs[4]);
     _products = <globals.Product>[];
     for (var p in doc.data()['Products']) {
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
@@ -116,6 +115,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 var prodDoc = userRep.firestore.collection('Products');
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
+                _storeRating = _getStoreRating();
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
@@ -283,11 +283,11 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           var prodImage;
                           try {
                             var prodImageURL = await FirebaseStorage.instance.ref().child('productImages/' + p.productId).getDownloadURL();
-                            prodImage = NetworkImage(prodImageURL);
+                            prodImage = Image.network(prodImageURL);
                           } catch (e) {
                             prodImage = null;
                           }
-                          return Tuple2<globals.Product, NetworkImage>(p, prodImage);
+                          return Tuple2<globals.Product, Image>(p, prodImage);
                         } (),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.done) {
@@ -351,9 +351,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
-                                        storeArgs[0] = controllers[0].text;
-                                        storeArgs[2] = controllers[1].text;
-                                        storeArgs[3] = controllers[2].text;
+                                        storeArgs['name'] = controllers[0].text;
+                                        storeArgs['description'] = controllers[1].text;
+                                        storeArgs['address'] = controllers[2].text;
                                         await userRep.firestore.collection('Stores').doc(_storeId).update({'Store': storeArgs});
                                       });
                                       setState(() {
@@ -531,11 +531,13 @@ class AddProductDialogBox extends StatefulWidget {
 }
 
 class _AddProductDialogBoxState extends State<AddProductDialogBox> {
-  bool clickedButNoName = false, clickedButNoPrice = false;
+  bool clickedButNoName = false, clickedButNoPrice = false, isImagePicked = false;
+  PickedFile pickedImage;
 
   @override
   void initState() {
     clickedButNoName = clickedButNoPrice = false;
+    pickedImage = null;
     super.initState();
   }
 
@@ -587,7 +589,8 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                     hintText: "name*",
                     errorText: clickedButNoName ? "Enter product name" : null,
                   ),
-                  onChanged: (s) {setState(() {
+                    textAlign: TextAlign.center,
+                    onChanged: (s) {setState(() {
                     clickedButNoName = s == '';
                   });}
                 ),
@@ -600,6 +603,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                   decoration: InputDecoration(
                     hintText: "description",
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
@@ -611,10 +615,22 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                     hintText: "price*",
                     errorText: clickedButNoPrice ? "Enter product price" : null,
                   ),
+                  textAlign: TextAlign.center,
                   onChanged: (s) {setState(() {
                     clickedButNoPrice = s == '';
                   });},
                 ),
+              ),
+              Center(child: Text(!isImagePicked ? "No image picked!" : "Image picked!", style: globals.niceFont(color: Colors.black),)),
+              RaisedButton(
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    var image = await ImagePicker().getImage(source: ImageSource.gallery);
+                    isImagePicked = true;
+                    setState(() {pickedImage = image;});
+                  },
+                  child: Text("pick image", style: globals.niceFont()),
               ),
               InkWell(
                 onTap: () async {
@@ -647,6 +663,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                   }).catchError((e) {
                     return;
                   });
+                  await FirebaseStorage.instance.ref().child('productImages/' + prodId.toString()).putFile(File(pickedImage.path));
                   Navigator.of(context).pop();
                 },
                 child: Container(
