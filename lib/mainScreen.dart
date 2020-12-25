@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'dart:ui';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -82,15 +81,16 @@ class _MainScreenState extends State<MainScreen> {
               height: MediaQuery.of(context).size.height * 0.223,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black,offset: Offset(0,10),
-                        blurRadius: 10
-                    ),
-                  ]
+                shape: BoxShape.rectangle,
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black,
+                    offset: Offset(0,10),
+                    blurRadius: 10
+                  ),
+                ]
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -113,7 +113,7 @@ class _MainScreenState extends State<MainScreen> {
                     onTap: () async {
                       var userRep = Provider.of<UserRepository>(context);
                       userRep.signInWithGoogle();
-                      if (await userRep.signInWithGoogleCheckIfFirstTime()){
+                      if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                         firstSignUpSheet(context, 3);
                       } else {
                         Navigator.of(context).pop();
@@ -446,93 +446,99 @@ class _HomeScreenState extends State<HomeScreen> {
                           return FutureBuilder(
                             future: _getImage(index),
                             builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
-                            //TODO: check why imageURL never has data!
-                            ///found the answer - pictures in DB storage end with .jpg, .png...
-                            //TODO: add: !imageURL.hasData || imageURL.connec...
+                            ///if imageURL has no data then defaulted asset image is displayed
+                            ///under 'Assets/no image product.png'
                             (imageURL.connectionState != ConnectionState.done)
                             ? _circularProgressIndicator
                             : Card(
                               elevation: 10.0,
-                              child: InkWell(
-                                focusColor: Colors.transparent,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    new MaterialPageRoute<void>(
-                                      builder: (context) => ProductScreen(index.toString())
-                                    )
-                                  );
-                                },
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  height: MediaQuery.of(context).size.height,
-                                  color: Colors.redAccent,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height * 1/6,
-                                        color: Colors.cyan,
-                                        child: Image.network(imageURL.data ?? defaultAvatar,
-                                          fit: BoxFit.fitWidth,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                                child: InkWell(
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      new MaterialPageRoute<void>(
+                                        builder: (context) => ProductScreen(index.toString())
+                                      )
+                                    );
+                                  },
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    color: Colors.transparent,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: MediaQuery.of(context).size.height * 1/6,
+                                          color: Colors.transparent,
+                                          child: imageURL.hasData
+                                          ? Image.network(imageURL.data,
+                                            fit: BoxFit.fitWidth,
+                                          )
+                                          : Image.asset('Assets/no image product.png',
+                                            fit: BoxFit.fitWidth,
+                                          ),
                                         ),
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Flexible(
-                                                child: Text('  ' +
-                                                  ((prodName.length <= 17)
-                                                  ? prodName
-                                                  : (prodName.substring(0,16) + '...')), //product title goes here
-                                                  textAlign: TextAlign.left,
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Flexible(
+                                                  child: Text('  ' +
+                                                    ((prodName.length <= 17)
+                                                    ? prodName
+                                                    : (prodName.substring(0,16) + '...')), //product title goes here
+                                                    textAlign: TextAlign.left,
+                                                    style: GoogleFonts.lato(
+                                                      fontSize: 14.0,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Flexible(
+                                                  child: Text('  ' +
+                                                    ((prodDescription.length > 19)
+                                                    ? (prodDescription.substring(0,20) + '...')
+                                                    : prodDescription), //product description goes here
+                                                    textAlign: TextAlign.left,
+                                                    style: GoogleFonts.lato(
+                                                      fontSize: 11.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Flexible(
+                                              child: Align(
+                                                alignment: Alignment.centerRight,
+                                                child: Text(
+                                                  prodPrice + '\$', //product price goes here
+                                                  textAlign: TextAlign.right,
                                                   style: GoogleFonts.lato(
-                                                    fontSize: 14.0,
+                                                    fontSize: 11.0,
                                                     color: Colors.black,
                                                   ),
                                                 ),
                                               ),
-                                              Flexible(
-                                                child: Text('  ' +
-                                                  ((prodDescription.length > 19)
-                                                  ? (prodDescription.substring(0,20) + '...')
-                                                  : prodDescription), //product description goes here
-                                                  textAlign: TextAlign.left,
-                                                  style: GoogleFonts.lato(
-                                                    fontSize: 11.0,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Flexible(
-                                            child: Align(
-                                              alignment: Alignment.centerRight,
-                                              child: Text(
-                                                prodPrice + '\$', //product price goes here
-                                                textAlign: TextAlign.right,
-                                                style: GoogleFonts.lato(
-                                                  fontSize: 11.0,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ],
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
