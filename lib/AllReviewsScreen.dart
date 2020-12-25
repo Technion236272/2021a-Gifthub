@@ -21,14 +21,14 @@ class _AllReviewsScreenState extends State<AllReviewsScreen> {
     return Scaffold(
       backgroundColor: Colors.lightGreen[600],
       appBar: AppBar(
-        backgroundColor: Colors.lightGreen[900],
+        backgroundColor: Colors.lightGreen[800],
         leading: IconButton(
           icon: Icon(Icons.keyboard_arrow_left_outlined),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        title: Text("All reviews"),
+        title: Text("All reviews", style: globals.calistogaFont(),),
       ),
 
       body: ListView(

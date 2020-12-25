@@ -77,6 +77,12 @@ TextStyle niceFont({double size= 16.0, Color color=Colors.white}) {
   );
 }
 
+TextStyle calistogaFont({double size = 24.0, Color color=Colors.white}) {
+  return GoogleFonts.calistoga(
+    fontSize: size,
+    color: color,
+  );
+}
 RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0}) {
   return RatingBar(
     initialRating: rate,
@@ -141,12 +147,12 @@ Scaffold emptyLoadingScaffold() {
   return Scaffold(
     backgroundColor: Colors.lightGreen[600],
     appBar: AppBar(
-      backgroundColor: Colors.lightGreen[900],
+      backgroundColor: Colors.lightGreen[800],
       leading: IconButton(
         icon: Icon(Icons.menu),
         onPressed: () {},
       ),
-      title: Text("Loading..."),
+      title: Text("Loading...", style: calistogaFont(),),
     ),
 
     body: Center(child: CircularProgressIndicator()),
