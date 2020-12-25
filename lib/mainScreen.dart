@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.208,
+              height: MediaQuery.of(context).size.height * 0.223,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
@@ -216,10 +216,9 @@ class _MainScreenState extends State<MainScreen> {
                     builder: (BuildContext context) {
                       return CustomDialogBox(
                         total: globals.userCart
-                            .map<double>((e) => double.parse(e.price))
+                            .map<double>((e) => e.price)
                             .toList()
-                            .fold<double>(0.0, (previousValue, element) => previousValue + element)
-                            .toString(),
+                            .fold<double>(0.0, (previousValue, element) => previousValue + element),
                         productList: globals.userCart.map((e) => e.name).toList(),
                       );
                     }
@@ -438,7 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisSpacing: 5,
                       mainAxisSpacing: 5,
                       children: List.generate(
-                        min(16, totalProducts.data - 1),
+                        min(16, totalProducts.data),
                         (index) {
                           var productData = snapshot.data.docs[index].data();
                           String prodName = productData['Product']['name'];
