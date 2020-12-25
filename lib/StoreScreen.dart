@@ -46,16 +46,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   void _initStoreArgs(DocumentSnapshot doc, CollectionReference ref) async {
     var storeArgs  = doc.data()['Store'];
-    _storeName = storeArgs[0];
-    _storeImageURL = storeArgs[1];
-    _storeDesc = storeArgs[2];
-    _storeAddr = storeArgs[3];
-    _storePhone = storeArgs[4];
-    _storeRating = double.parse(storeArgs[5]);
+    _storeName = storeArgs['name'];
+    _storeDesc = storeArgs['description'];
+    _storeAddr = storeArgs['address'];
+    _storePhone = storeArgs['phone'];
     _products = <globals.Product>[];
     for(var p in doc.data()['Products']){
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
-      _products.add(globals.Product(p, prodArgs['user'], prodArgs['name'], prodArgs['price'], prodArgs['date'], prodArgs['reviews'], prodArgs['category'], prodArgs['description']));
+      _products.add(globals.Product(p, prodArgs['user'], prodArgs['name'], double.parse(prodArgs['price']), prodArgs['date'], prodArgs['reviews'], prodArgs['category'], prodArgs['description']));
 
     }
     _reviews = doc.data()['Reviews'].map<globals.Review>((v) =>
@@ -81,6 +79,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 var prodDoc = userRep.firestore.collection('Products');
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
+                _storeRating = _getStoreRating();
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
@@ -299,9 +298,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
                                         var storeArgs = snapshot['Store'];
-                                        storeArgs[0] = controllers[0].text;
-                                        storeArgs[2] = controllers[1].text;
-                                        storeArgs[3] = controllers[2].text;
+                                        storeArgs['name'] = controllers[0].text;
+                                        storeArgs['description'] = controllers[1].text;
+                                        storeArgs['address'] = controllers[2].text;
                                         await userRep.firestore.collection('Stores').doc(_storeId).update({'Store': storeArgs});
                                       });
                                       setState(() {
