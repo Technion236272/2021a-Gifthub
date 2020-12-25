@@ -36,7 +36,7 @@ class UserRepository with ChangeNotifier {
     _apt = list['Info'][3];
     _city = list['Info'][4];
     try {
-      _avatarURL = await FirebaseStorage.instance.ref()
+      _avatarURL = await FirebaseStorage.instance.ref("userImages")
           .child(_user.uid)
           .getDownloadURL() ?? defaultAvatar;
     } catch (_){
