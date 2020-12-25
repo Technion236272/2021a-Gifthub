@@ -1,5 +1,5 @@
 import 'dart:ui';
-
+import 'globals.dart' as globals;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +14,8 @@ class Constants {
 }
 
 class CustomDialogBox extends StatefulWidget {
-  final String title = "Shopping Cart", text = "Checkout", total;
+  final String title = "Shopping Cart", text = "Checkout";
+  final double total;
   final productList;
 
   const CustomDialogBox({Key key, this.total, this.productList})
@@ -71,7 +72,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         fontWeight: FontWeight.w600),
                     textAlign: TextAlign.center),
                 Spacer(flex: 3),
-                Text('\$' + widget.total,
+                Text('\$' + widget.total.toString(),
                     style: GoogleFonts.openSans(
                         fontSize: MediaQuery.of(context).size.width * 0.045,
                         fontWeight: FontWeight.w600)),
@@ -81,7 +82,12 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                 height: MediaQuery.of(context).size.height * 0.03,
               ),
               Text(
-                "TODO: PRODUCTS LIST HERE, REMOVE THIS TEXT AND REPLACE WITH A LIST!",
+                // "TODO: PRODUCTS LIST HERE, REMOVE THIS TEXT AND REPLACE WITH A LIST!",
+                globals.userCart
+                    .map<String>((e) => e.name + '\n')
+                    .toList()
+                    .fold("", (previousValue, element) => previousValue + element)
+                    .toString(),
                 style: GoogleFonts.openSans(fontSize: 14),
                 textAlign: TextAlign.center,
               ),

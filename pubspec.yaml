@@ -45,7 +45,7 @@ dependencies:
   confetti: ^0.5.4+1
 
 flutter_icons:
-  image_path: "Assets/Untitled.png"
+  image_path: "Assets/Gifthub logo.png"
   android: true
 
   # The following adds the Cupertino Icons font to your application.
