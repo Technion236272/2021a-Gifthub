@@ -393,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
         "$i").get().then((value) async {
       var productData = value.data();
       imageURL = await FirebaseStorage.instance.ref().child(
-          productData['Product']['user'] + '_' + i.toString()).getDownloadURL();
+          'productImages/' + i.toString()).getDownloadURL();
     });
     return imageURL;
   }

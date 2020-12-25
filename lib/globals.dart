@@ -28,6 +28,18 @@ class Product {
   Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description)
       : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews, _category = category, _description = description;
 
+  Product.fromDoc(DocumentSnapshot doc) {
+    _productId = doc.id;
+    var prodArgs = doc.data();
+    _userId = prodArgs['user'];
+    _name = prodArgs['name'];
+    _price = double.parse(prodArgs['price']);
+    _date = prodArgs['date'];
+    _reviews = prodArgs['reviews'].map<Review>((r) => Review(r['user'], double.parse(r['rating']), r['content'])).toList();
+    _category = prodArgs['user'];
+    _description = prodArgs['user'];
+  }
+
 }
 
 class Review {
@@ -77,6 +89,12 @@ TextStyle niceFont({double size= 16.0, Color color=Colors.white}) {
   );
 }
 
+TextStyle calistogaFont({double size = 24.0, Color color=Colors.white}) {
+  return GoogleFonts.calistoga(
+    fontSize: size,
+    color: color,
+  );
+}
 RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0}) {
   return RatingBar(
     initialRating: rate,
@@ -141,12 +159,12 @@ Scaffold emptyLoadingScaffold() {
   return Scaffold(
     backgroundColor: Colors.lightGreen[600],
     appBar: AppBar(
-      backgroundColor: Colors.lightGreen[900],
+      backgroundColor: Colors.lightGreen[800],
       leading: IconButton(
         icon: Icon(Icons.menu),
         onPressed: () {},
       ),
-      title: Text("Loading..."),
+      title: Text("Loading...", style: calistogaFont(),),
     ),
 
     body: Center(child: CircularProgressIndicator()),
