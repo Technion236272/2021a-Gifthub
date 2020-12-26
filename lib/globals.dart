@@ -26,7 +26,11 @@ class Product {
   String get description => _description;
 
   Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description)
-      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews, _category = category, _description = description;
+      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _category = category, _description = description {
+    _reviews = reviews.map<Review>((v) =>
+        Review(v['user'], double.parse(v['rating']), v['content'])
+    ).toList();
+  }
 
   Product.fromDoc(DocumentSnapshot doc) {
     _productId = doc.id;
