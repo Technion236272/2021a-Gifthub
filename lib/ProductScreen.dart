@@ -8,54 +8,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:gifthub_2021a/AllReviewsScreen.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
-
-class ProductMock {
-  String _userId;
-  String _name;
-  double _price;
-  String _date;
-  List _reviews = <ReviewMock>[];
-  String _category;
-  String _description;
-
-  String get user => _userId;
-  String get name => _name;
-  double get price => _price;
-  String get date => _date;
-  List get reviews => _reviews;
-  String get category => _category;
-  String get description => _description;
-
-  ProductMock(String userId, String name, double price, String date, List reviews, String category, String description)
-      : _userId = userId, _name = name, _price = price, _date = date, _reviews = reviews, _category = category, _description = description;
-
-}
-
-class ReviewMock {
-  String _userName;
-  double _rating;
-  String _content;
-
-  ReviewMock(String userName, double rating, String content) : _userName = userName, _rating = rating, _content = content ;
-
-  ReviewMock.fromDoc(DocumentSnapshot doc) {
-    var reviewArgs = doc.data();
-    _userName = reviewArgs['user'];
-    _rating = double.parse(reviewArgs['rating']);
-    _content = reviewArgs['content'];
-  }
-
-  String get userName => _userName;
-  double get rating => _rating;
-  String get content => _content;
-
-}
 
 class ProductScreen extends StatefulWidget {
   final _productId;
@@ -71,12 +30,20 @@ class _ProductScreenState extends State<ProductScreen> {
   String _productImageURL;
   NetworkImage _productImage;
   Size _productImageSize;
+  double _productRating;
   bool editingMode = false;
-  final GlobalKey<ScaffoldState> _scaffoldKeyProductScreenSet = new GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKeyProductScreenSet;
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
+  final TextEditingController reviewCtrl = TextEditingController();
 
 
   _ProductScreenState(String productId) : _productId = productId;
+
+  @override
+  void initState(){
+    super.initState();
+    _scaffoldKeyProductScreenSet = new GlobalKey<ScaffoldState>();
+  }
 
   @override
   void dispose() {
@@ -123,6 +90,14 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
+  double _getProductRating() {
+    double sum = 0.0;
+    for (globals.Review r in _prod.reviews) {
+      sum += r.rating;
+    }
+    return _prod.reviews.length != 0 ? sum / _prod.reviews.length : 0.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserRepository>(
@@ -131,12 +106,15 @@ class _ProductScreenState extends State<ProductScreen> {
               future: (() async {
                 var prodDoc = userRep.firestore.collection('Products').doc(_productId);
                 await _initProductArgs(await prodDoc.get());
+                _getProductRating();
+                _productRating = _getProductRating();
               })(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.done) {
                   return Material(
                       color: Colors.lightGreen,
                       child: Scaffold(
+                        key: _scaffoldKeyProductScreenSet,
                         resizeToAvoidBottomInset: false,
                         resizeToAvoidBottomPadding: false,
                         backgroundColor: Colors.lightGreen[600],
@@ -219,15 +197,6 @@ class _ProductScreenState extends State<ProductScreen> {
                                 ),
                               ),
                               SizedBox(height: 20.0),
-                              editingMode?
-                              TextField(
-                                controller: controllers[2],
-                                style: globals.niceFont(),
-                              )
-                                  : Text(
-                                '\$' + _prod.price.toString(),
-                                style: globals.niceFont(size: 20.0),
-                              ),
                               SizedBox(height: 10.0),
                               editingMode?
                               TextField(
@@ -244,17 +213,71 @@ class _ProductScreenState extends State<ProductScreen> {
                                 onTap: () => {Navigator.of(context).push(MaterialPageRoute(builder: (context) => StoreScreen(_prod.user)))},
                               ),
                               SizedBox(height: 20.0),
-                              globals.fixedStarBar(4.0),
+                              globals.fixedStarBar(_productRating),
+                              SizedBox(height: 20.0),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    globals.regTextButton("All reviews (${_prod.reviews.length})", icon: Icon(Icons.list_alt_outlined), buttonColor: Colors.white, textColor: Colors.red, press: () {
+                                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => AllReviewsScreen(_prod.reviews)));
+                                    }),
+                                    globals.regTextButton("Add review", icon: Icon(Icons.add_outlined), buttonColor: Colors.white, textColor: Colors.red, press: () {
+                                      if(userRep.status != Status.Authenticated){
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
+                                        return;
+                                      }
+                                      _getReviewBottomSheet();
+                                    }),
+
+                                  ]
+                              ),
+                              SizedBox(height: 20.0),
+                              editingMode?
+                              TextField(
+                                controller: controllers[2],
+                                style: globals.niceFont(),
+                              )
+                                  : Text(
+                                'price: \$' + _prod.price.toString(),
+                                style: globals.niceFont(size: 30.0),
+                              ),
                               SizedBox(height: 20.0),
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () {}), // TODO add "contact seller" function
+                                  ]
+                              ),
+                              SizedBox(height: 20.0),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
                                     globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () {
-                                      globals.userCart.add(_prod);
+                                      try{
+                                        globals.userCart.add(_prod);
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Item added to cart")));
+                                      } catch(e) {
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("There was a problem")));
+                                      }
+
+                                    }),
+                                    globals.regTextButton("Add to Wishlist", icon: Icon(Icons.favorite_outlined), press: () async {
+                                      if(userRep.status != Status.Authenticated){
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
+                                        return;
+                                      }
+                                      var wishlist = (await FirebaseFirestore.instance.collection('Wishlists').doc(_prod.user).get()).data()['Wishlist'];
+                                      if(wishlist.contains(_productId)){
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("The product is already in your wishlist!")));
+                                        return;
+                                      }
+                                      await FirebaseFirestore.instance.collection('Wishlists').doc(_prod.user).update({
+                                        'Wishlist': FieldValue.arrayUnion([_productId]),
+                                      });
+                                      _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Product added to your wishlist")));
                                     }),
                                   ]
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -263,6 +286,115 @@ class _ProductScreenState extends State<ProductScreen> {
                 }
                 return globals.emptyLoadingScaffold();
               });
+        }
+    );
+  }
+
+  void _getReviewBottomSheet() {
+    double _currReviewRating;
+    showModalBottomSheet<dynamic>(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context1) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery
+                    .of(_scaffoldKeyProductScreenSet.currentContext)
+                    .viewInsets
+                    .bottom
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox(height: 10,),
+                globals.changingStarBar(0, onUpdate: (rating) {
+                  _currReviewRating = rating;
+                }, color: Colors.lightGreen[800]),
+                SizedBox(height: 15.0,),
+                Container(
+                  width: MediaQuery
+                      .of(context1)
+                      .size
+                      .width - 45,
+                  height: 150,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(4.0))
+                  ),
+                  child: TextField(
+                    controller: reviewCtrl,
+                    decoration: InputDecoration(
+                      hintText: "Write a review...",
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightGreen[800],
+                          width: 1.5,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.lightGreen[800],
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    maxLines: null,
+                    minLines: 5,
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+                SizedBox(height: 5.0,),
+                Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: Container(
+                    width: 200,
+                    child: RaisedButton(
+                      color: Colors.white,
+                      textColor: Colors.lightGreen[800],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(
+                            color: Colors.lightGreen[800],
+                            width: 2.0,
+                          )
+                      ),
+                      visualDensity: VisualDensity.adaptivePlatformDensity,
+                      onPressed: () async {
+                        var db = FirebaseFirestore.instance;
+                        var prodArgs = (await db.collection('Products').doc(_productId).get()).data()['Product'];
+                        prodArgs['reviews'].add({
+                          'user': '',
+                          'rating': _currReviewRating.toString(),
+                          'content': reviewCtrl.text,
+                        });
+                        await db.collection('Products').doc(_productId).update({
+                          'Product': prodArgs,
+                        }).catchError((e) {
+                          _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("There was a problem")));
+                          return;
+                        });
+                        Navigator.of(context).pop();
+                        setState(() {
+                          reviewCtrl.text = '';
+                        });
+                      },
+                      child: Text(
+                        "Submit",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.openSans(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          // color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10.0,)
+              ],
+            ),
+          );
         }
     );
   }
