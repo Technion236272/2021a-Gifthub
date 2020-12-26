@@ -32,12 +32,16 @@ class _AllReviewsScreenState extends State<AllReviewsScreen> {
       ),
 
       body: ListView(
-        children: _reviews.map<ListTile>((r) =>
-            ListTile(
-              title: Text(r.content, style: globals.niceFont()),
-              subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
-              leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
-            ),
+        children: ListTile.divideTiles(
+          context: context,
+          tiles: _reviews.map<ListTile>((r) =>
+              ListTile(
+                title: Text(r.content, style: globals.niceFont()),
+                subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
+                leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
+              ),
+          ),
+          color: Colors.red[900],
         ).toList(),
       ),
     );

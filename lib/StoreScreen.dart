@@ -118,6 +118,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
+                  if(snapshot.hasError){
+                    return globals.emptyErrorScaffold(snapshot.error.toString());
+                  }
                   final aboutTab = SingleChildScrollView(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
