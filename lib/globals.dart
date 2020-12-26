@@ -170,3 +170,19 @@ Scaffold emptyLoadingScaffold() {
     body: Center(child: CircularProgressIndicator()),
   );
 }
+
+Scaffold emptyErrorScaffold(String error) {
+  return Scaffold(
+    backgroundColor: Colors.lightGreen[600],
+    appBar: AppBar(
+      backgroundColor: Colors.lightGreen[800],
+      leading: IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {},
+      ),
+      title: Text("Error", style: calistogaFont(),),
+    ),
+
+    body: Center(child: Text("The app ran into an error:\n" + error, style: niceFont(), textAlign: TextAlign.center,)),
+  );
+}
