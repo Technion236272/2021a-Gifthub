@@ -78,6 +78,14 @@ class _ProductScreenState extends State<ProductScreen> {
 
   _ProductScreenState(String productId) : _productId = productId;
 
+  @override
+  void dispose() {
+    for(TextEditingController tec in controllers){
+      tec.dispose();
+    }
+    super.dispose();
+  }
+
   Future<void> _initProductArgs(DocumentSnapshot doc) async {
     var _prodArgs = doc.data()['Product'];
     _prod = globals.Product(

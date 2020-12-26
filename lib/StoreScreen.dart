@@ -47,6 +47,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   _StoreScreenState(String storeId) : _storeId = storeId;
 
+  @override
+  void dispose() {
+    for(TextEditingController tec in controllers){
+      tec.dispose();
+    }
+    reviewCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _initStoreArgs(DocumentSnapshot doc, CollectionReference ref) async {
     var storeArgs = doc.data()['Store'];
@@ -526,16 +534,26 @@ class AddProductDialogBox extends StatefulWidget {
    */
   @override
   _AddProductDialogBoxState createState() => _AddProductDialogBoxState();
+
+  void dispose() {
+    for(TextEditingController tec in controllersList){
+      tec.dispose();
+    }
+  }
 }
 
 class _AddProductDialogBoxState extends State<AddProductDialogBox> {
-  bool clickedButNoName = false, clickedButNoPrice = false, isImagePicked = false;
+  bool clickedButNoName, clickedButNoPrice, isCategorySelected, isImagePicked;
+  Color colorForCategory, colorForImage;
   PickedFile pickedImage;
+  String category;
 
   @override
   void initState() {
-    clickedButNoName = clickedButNoPrice = false;
+    clickedButNoName = clickedButNoPrice = isCategorySelected = isImagePicked = false;
     pickedImage = null;
+    colorForCategory = colorForImage = Colors.black;
+    String category = globals.categories[0];
     super.initState();
   }
 
@@ -581,16 +599,18 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
               Container(
                 padding: EdgeInsets.only(left: 2.0, right: 2.0),
                 child: TextField(
-                  controller: widget.controllersList[0],
-                  style: globals.niceFont(color: Colors.black),
-                  decoration: InputDecoration(
-                    hintText: "name*",
-                    errorText: clickedButNoName ? "Enter product name" : null,
-                  ),
+                    controller: widget.controllersList[0],
+                    style: globals.niceFont(color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: "name*",
+                      errorText: clickedButNoName ? "Enter product name" : null,
+                    ),
                     textAlign: TextAlign.center,
-                    onChanged: (s) {setState(() {
-                    clickedButNoName = s == '';
-                  });}
+                    onChanged: (s) {
+                      setState(() {
+                        clickedButNoName = s == '';
+                      });
+                    }
                 ),
               ),
               Container(
@@ -614,25 +634,92 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                     errorText: clickedButNoPrice ? "Enter product price" : null,
                   ),
                   textAlign: TextAlign.center,
-                  onChanged: (s) {setState(() {
-                    clickedButNoPrice = s == '';
-                  });},
+                  onChanged: (s) {
+                    try {
+                      double checkPrice = double.parse(widget.controllersList[2].text);
+                    } catch (e) {
+                      setState(() {
+                        clickedButNoPrice = true;
+                      });
+                      return;
+                    }
+                    setState(() {
+                      clickedButNoPrice = s == '';
+                    });
+                  },
                 ),
               ),
-              Center(child: Text(!isImagePicked ? "No image picked!" : "Image picked!", style: globals.niceFont(color: Colors.black),)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text("Category:", style: globals.niceFont(color: colorForCategory),),
+                  Container(
+                      color: Colors.transparent,
+                      child: DropdownButton<String>(
+                          elevation: 0,
+                          value: category,
+                          onChanged: (String newValue) {
+                            setState(() {
+                              category = newValue;
+                              isCategorySelected = newValue.compareTo(globals.categories[0]) != 0;
+                              colorForCategory = isCategorySelected ? Colors.black : Colors.red;
+                            });
+                          },
+                          items: globals.categories
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList())
+                  ),
+                ],
+              ),
+              Center(child: Text(!isImagePicked ? "No image picked!" : "Image picked!", style: globals.niceFont(color: colorForImage),)),
               RaisedButton(
-                  color: Colors.green,
-                  textColor: Colors.white,
-                  onPressed: () async {
-                    var image = await ImagePicker().getImage(source: ImageSource.gallery);
+                color: Colors.green,
+                textColor: Colors.white,
+                onPressed: () async {
+                  var image = await ImagePicker().getImage(source: ImageSource.gallery);
+                  setState(() {
+                    pickedImage = image;
                     isImagePicked = true;
-                    setState(() {pickedImage = image;});
-                  },
-                  child: Text("pick image", style: globals.niceFont()),
+                    colorForImage = isImagePicked ? Colors.black : Colors.red;
+                  });
+                },
+                child: Text("pick image", style: globals.niceFont()),
               ),
               InkWell(
                 onTap: () async {
-                  if(widget.controllersList[0].text == '' || widget.controllersList[2].text == ''){
+                  bool isAllGood = true;
+                  if (widget.controllersList[0].text == '' || widget.controllersList[2].text == '') {
+                    setState(() {
+                      clickedButNoName = widget.controllersList[0].text == '';
+                      clickedButNoPrice = widget.controllersList[2].text == '';
+                    });
+                    isAllGood = false;
+                  }
+                  try {
+                    double checkPrice = double.parse(widget.controllersList[2].text);
+                  } catch (e) {
+                    setState(() {
+                      clickedButNoPrice = true;
+                    });
+                    isAllGood = false;
+                  }
+                  if (!isCategorySelected) {
+                    setState(() {
+                      colorForCategory = Colors.red;
+                    });
+                    isAllGood = false;
+                  } else if (!isImagePicked) {
+                    setState(() {
+                      colorForCategory = Colors.black;
+                      colorForImage = Colors.red;
+                    });
+                    isAllGood = false;
+                  }
+                  if (!isAllGood) {
                     return;
                   }
                   var _db = FirebaseFirestore.instance;
@@ -646,7 +733,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                       'price': widget.controllersList[2].text,
                       'reviews': [],
                       'date': today,
-                      'category': '',
+                      'category': category,
                     }
                   }).catchError((e) {
                     return;
