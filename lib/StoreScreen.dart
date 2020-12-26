@@ -47,6 +47,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   _StoreScreenState(String storeId) : _storeId = storeId;
 
+  @override
+  void dispose() {
+    for(TextEditingController tec in controllers){
+      tec.dispose();
+    }
+    reviewCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _initStoreArgs(DocumentSnapshot doc, CollectionReference ref) async {
     var storeArgs = doc.data()['Store'];
@@ -526,6 +534,12 @@ class AddProductDialogBox extends StatefulWidget {
    */
   @override
   _AddProductDialogBoxState createState() => _AddProductDialogBoxState();
+
+  void dispose() {
+    for(TextEditingController tec in controllersList){
+      tec.dispose();
+    }
+  }
 }
 
 class _AddProductDialogBoxState extends State<AddProductDialogBox> {
