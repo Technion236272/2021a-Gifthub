@@ -41,7 +41,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   List _products = <globals.Product>[];
   List _reviews = <globals.Review>[];
   bool editingMode = false;
-  final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKeyStoreScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
   final reviewCtrl = TextEditingController();
 
@@ -109,7 +109,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     for (globals.Review r in _reviews) {
       sum += r.rating;
     }
-    return sum / _reviews.length;
+    return _reviews.length != 0 ? sum / _reviews.length : 0.0;
   }
 
   @override
@@ -139,9 +139,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           InkWell(
                             onLongPress: () async {
                               PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
-                              // Navigator.pop(_scaffoldKeyUserScreenSet.currentContext);
                               if (null == photo) {
-                                _scaffoldKeyUserScreenSet.currentState.showSnackBar(
+                                _scaffoldKeyStoreScreenSet.currentState.showSnackBar(
                                     SnackBar(
                                       content: Text("No image selected",
                                         style: GoogleFonts.notoSans(fontSize: 14.0),
@@ -270,6 +269,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     color: Colors.red[900],
                                     textColor: Colors.white,
                                     onPressed: () {
+                                      if(userRep.status != Status.Authenticated){
+                                        _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
+                                        return;
+                                      }
                                       _getReviewBottomSheet();
                                     },
                                     child: Row(
@@ -335,7 +338,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   resizeToAvoidBottomInset: false,
                                   resizeToAvoidBottomPadding: false,
                                   backgroundColor: Colors.lightGreen[600],
-                                  key: _scaffoldKeyUserScreenSet,
+                                  key: _scaffoldKeyStoreScreenSet,
                                   appBar: AppBar(
                                     backgroundColor: Colors.lightGreen[800],
                                     title: editingMode ?
@@ -418,7 +421,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           return Padding(
             padding: EdgeInsets.only(
                 bottom: MediaQuery
-                    .of(_scaffoldKeyUserScreenSet.currentContext)
+                    .of(_scaffoldKeyStoreScreenSet.currentContext)
                     .viewInsets
                     .bottom
             ),
