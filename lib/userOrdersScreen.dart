@@ -172,6 +172,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.lime,
                                         icon: Icons.star_half_outlined,
                                         onTap: () {
+                                          _reviewController.clear();
                                           showModalBottomSheet<dynamic>(
                                             context: context,
                                             isScrollControlled: true,
@@ -274,7 +275,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                               SnackBar(
                                                                 content: Text('Review Uploaded Successfully',
                                                                   style: GoogleFonts.lato(
-                                                                    fontSize: 13.0
+                                                                    fontSize: 14.0
                                                                   ),
                                                                 ),
                                                                 behavior: SnackBarBehavior.floating,
