@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -44,7 +46,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     ),
   );
 
-  // TODO: remove these as soon as user repository is initialized with firebase:
   @override
   void initState() {
     super.initState();
@@ -299,20 +300,47 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.blueAccent,
                                         icon: Icons.share_outlined,
                                         onTap: () async {
-                                          final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
-                                          if (Platform.isAndroid) {
-                                            var response = await get(imageURL.data);
-                                            final documentDirectory = (await getExternalStorageDirectory()).path;
-                                            File imgFile = new File('$documentDirectory/flutter.png');
-                                            imgFile.writeAsBytesSync(response.bodyBytes);
-                                            List<String> sharingList = new List();
-                                            sharingList.add('$documentDirectory/flutter.png');
-                                            //TODO: add store's name next to product's name or add a direct url share option
-                                            await Share.shareFiles(sharingList,
+                                          if(imageURL.hasData && imageURL.data != "") {
+                                            final RenderBox box = _scaffoldKeyOrders
+                                                .currentContext
+                                                .findRenderObject();
+                                            if (Platform.isAndroid) {
+                                              var response = await get(
+                                                  imageURL.data);
+                                              final documentDirectory = (await getExternalStorageDirectory())
+                                                  .path;
+                                              File imgFile = new File(
+                                                  '$documentDirectory/flutter.png');
+                                              imgFile.writeAsBytesSync(
+                                                  response.bodyBytes);
+                                              List<String> sharingList = new List();
+                                              sharingList.add(
+                                                  '$documentDirectory/flutter.png');
+                                              //TODO: add store's name next to product's name or add a direct url share option
+                                              await Share.shareFiles(
+                                                  sharingList,
+                                                  text: "check this cool product now!\n" +
+                                                      prodName,
+                                                  sharePositionOrigin: box
+                                                      .localToGlobal(
+                                                      Offset.zero) & box.size,
+                                                  subject: 'I found a lovely product on Gifthub!'
+                                              );
+                                            }
+                                          } else {
+                                            try {
+                                              final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
+                                              String image = 'no image product.png';
+                                              final List <String> list = [];
+                                              final tempDir = await getTemporaryDirectory();
+                                              list.add('${tempDir.path}/' + image);
+                                              await Share.shareFiles(
+                                                list,
                                                 text: "check this cool product now!\n" + prodName,
                                                 sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                                 subject: 'I found a lovely product on Gifthub!'
-                                            );
+                                              );
+                                            } catch (_) {}
                                           }
                                         },
                                       )
