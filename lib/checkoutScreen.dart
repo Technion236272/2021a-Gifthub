@@ -23,13 +23,14 @@ class CustomDialogBox extends StatefulWidget {
   const CustomDialogBox({Key key,})
       : super(key: key);
 
-  //YOU CALL THIS DIALOG BOX LIKE THIS:
-  /*
-  showDialog(context: context,
-                    builder: (BuildContext context){
-                      return CustomDialogBox(total: "45",productList: null,);//TODO: insert the correct total and product list
-                    }
-   */
+  ///YOU CALL THIS DIALOG BOX LIKE THIS:
+  ///
+  /// showDialog(context: context,
+  ///   builder: (BuildContext context){
+  ///     return CustomDialogBox();
+  ///   }
+  /// )
+
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
 }

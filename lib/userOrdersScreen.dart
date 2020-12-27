@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -250,7 +248,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                           ),
                                                           visualDensity: VisualDensity.adaptivePlatformDensity,
                                                           onPressed: () async {
-                                                            //TODO: upload review to DB
                                                             var listToAdd = [];
                                                             listToAdd.add(
                                                               {
