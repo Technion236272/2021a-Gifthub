@@ -45,3 +45,7 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# mock files
+userMock.dart
+productMock.dart

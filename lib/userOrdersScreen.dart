@@ -10,7 +10,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
-import 'package:gifthub_2021a/productMock.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share/share.dart';
@@ -21,7 +20,8 @@ import 'dart:io';
 import 'user_repository.dart';
 import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
-import 'package:collection/collection.dart';
+
+enum OrderStatus { Ordered, Pending, Confirmed, Arrived }
 
 class UserOrdersScreen extends StatefulWidget {
   UserOrdersScreen({Key key}) : super(key: key);
@@ -149,12 +149,12 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 onPressed: () => showDialog(
                                                   context: context,
                                                   builder: (BuildContext context) {
-                                                    var productList = [];
-                                                    groupBy(globals.userCart.
-                                                      map((e) => e.name)
-                                                      .toList(), (p) => p)
-                                                      .forEach((key, value) =>
-                                                        productList.add(key.toString() + '  x' + value.length.toString()));
+                                                    // var productList = [];
+                                                    // groupBy(globals.userCart.
+                                                    //   map((e) => e.name)
+                                                    //   .toList(), (p) => p)
+                                                    //   .forEach((key, value) =>
+                                                    //     productList.add(key.toString() + '  x' + value.length.toString()));
                                                     return CustomDialogBox();
                                                   },
                                                 ),
@@ -306,30 +306,20 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         icon: Icons.share_outlined,
                                         onTap: () async {
                                           if(imageURL.hasData && imageURL.data != "") {
-                                            final RenderBox box = _scaffoldKeyOrders
-                                                .currentContext
-                                                .findRenderObject();
+                                            final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
                                             if (Platform.isAndroid) {
-                                              var response = await get(
-                                                  imageURL.data);
-                                              final documentDirectory = (await getExternalStorageDirectory())
-                                                  .path;
-                                              File imgFile = new File(
-                                                  '$documentDirectory/flutter.png');
-                                              imgFile.writeAsBytesSync(
-                                                  response.bodyBytes);
+                                              var response = await get(imageURL.data);
+                                              final documentDirectory = (await getExternalStorageDirectory()).path;
+                                              File imgFile = new File('$documentDirectory/flutter.png');
+                                              imgFile.writeAsBytesSync(response.bodyBytes);
                                               List<String> sharingList = new List();
-                                              sharingList.add(
-                                                  '$documentDirectory/flutter.png');
+                                              sharingList.add('$documentDirectory/flutter.png');
                                               //TODO: add store's name next to product's name or add a direct url share option
                                               await Share.shareFiles(
                                                   sharingList,
-                                                  text: "check this cool product now!\n" +
-                                                      prodName,
-                                                  sharePositionOrigin: box
-                                                      .localToGlobal(
-                                                      Offset.zero) & box.size,
-                                                  subject: 'I found a lovely product on Gifthub!'
+                                                  text: "check this cool product now!\n" + prodName,
+                                                  sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                                  subject: 'I found a lovely product on GiftHub!'
                                               );
                                             }
                                           } else {
@@ -343,9 +333,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 list,
                                                 text: "check this cool product now!\n" + prodName,
                                                 sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-                                                subject: 'I found a lovely product on Gifthub!'
+                                                subject: 'I found a lovely product on GiftHub!'
                                               );
-                                            } catch (_) {}
+                                            } catch (_) {} //TODO: show error snackbar?
                                           }
                                         },
                                       )
@@ -394,7 +384,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                           .collection('Orders')
                                                           .doc(userRep.user.uid)
                                                           .update({
-                                                        'Products':FieldValue.arrayRemove(toRemoveList)
+                                                        'Orders':FieldValue.arrayRemove(toRemoveList)
                                                       });
                                                       setState(() {
                                                         ///so that orders list will be updated
@@ -437,12 +427,12 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 direction: DismissDirection.horizontal,
                                                 onDismissed: (_) => Navigator.pop(context),
                                                 child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      image: DecorationImage(
-                                                        image: NetworkImage(imageURL.data),
-                                                        fit: BoxFit.fitWidth,
-                                                      )
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(imageURL.data),
+                                                      fit: BoxFit.fitWidth,
                                                     )
+                                                  )
                                                 ),
                                               ),
                                             ),
