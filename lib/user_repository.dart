@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'productMock.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
@@ -19,7 +18,6 @@ class UserRepository with ChangeNotifier {
   FirebaseFirestore _db = FirebaseFirestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
   String _avatarURL = defaultAvatar;
-  List<Product> _orders = new List();
   String _firstName = "";
   String _lastName = "";
   String _address = "";
@@ -104,8 +102,6 @@ class UserRepository with ChangeNotifier {
   FirebaseStorage get storage => _storage;
 
   String get avatarURL => _avatarURL;
-
-  List<Product> get orders => _orders;
 
   Future<String> signIn(String email, String password) async {
     try {
