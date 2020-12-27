@@ -263,7 +263,7 @@ class UserRepository with ChangeNotifier {
     } catch (_) {
       //nothing
     } finally {
-      notifyListeners();
+      notifyListeners() ;
     }
   }
 }

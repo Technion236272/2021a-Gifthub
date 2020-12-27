@@ -95,7 +95,7 @@ class _ProductScreenState extends State<ProductScreen> {
     for (globals.Review r in _prod.reviews) {
       sum += r.rating;
     }
-    return _prod.reviews.length != 0 ? sum / _prod.reviews.length : 0.0;
+    return _prod.reviews.length != 0 ? sum / _prod.reviews.length : 0.0 ;
   }
 
   @override

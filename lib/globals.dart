@@ -115,7 +115,7 @@ RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 
     ),
     onRatingUpdate: (rating) {},
     itemPadding: EdgeInsets.zero,
-  );
+  ) ;
 }
 
 RatingBar changingStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0, Function onUpdate = null}) {

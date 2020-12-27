@@ -45,3 +45,8 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# Files still in development
+
+chat.dart
+ChatScreen.dart

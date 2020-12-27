@@ -44,6 +44,6 @@ class _AllReviewsScreenState extends State<AllReviewsScreen> {
           color: Colors.red[900],
         ).toList(),
       ),
-    );
+    ) ;
   }
 }
