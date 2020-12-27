@@ -44,6 +44,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   confetti: ^0.5.4+1
   tuple: ^1.0.3
+  collection: ^1.14.13
 
 flutter_icons:
   image_path: "Assets/Gifthub logo.png"
