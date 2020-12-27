@@ -266,12 +266,12 @@ class _ProductScreenState extends State<ProductScreen> {
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
                                         return;
                                       }
-                                      var wishlist = (await FirebaseFirestore.instance.collection('Wishlists').doc(_prod.user).get()).data()['Wishlist'];
+                                      var wishlist = (await FirebaseFirestore.instance.collection('Wishlists').doc(userRep.user.uid).get()).data()['Wishlist'];
                                       if(wishlist.contains(_productId)){
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("The product is already in your wishlist!")));
                                         return;
                                       }
-                                      await FirebaseFirestore.instance.collection('Wishlists').doc(_prod.user).update({
+                                      await FirebaseFirestore.instance.collection('Wishlists').doc(userRep.user.uid).update({
                                         'Wishlist': FieldValue.arrayUnion([_productId]),
                                       });
                                       _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Product added to your wishlist")));
@@ -289,7 +289,6 @@ class _ProductScreenState extends State<ProductScreen> {
         }
     );
   }
-}
 
   void _getReviewBottomSheet() {
     double _currReviewRating;
