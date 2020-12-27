@@ -20,8 +20,6 @@ import 'my_flutter_app_icons.dart';
 // import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
-import 'globals.dart' as globals;
-import 'package:collection/collection.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -210,23 +208,19 @@ class _MainScreenState extends State<MainScreen> {
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
+              ///Checkout - cart
               IconButton(
                 icon: Icon(Icons.shopping_cart_outlined),
                 onPressed: () {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      // var productList = [];
-                      // groupBy(globals.userCart.
-                      // map((e) => e.name)
-                      //     .toList(), (p) => p)
-                      //     .forEach((key, value) =>
-                      //     productList.add(key.toString() + '  x' + value.length.toString()));
                       return CustomDialogBox();
                     }
                   );
                 }
               ),
+              /// WishList
               IconButton(
                 icon: Icon(Icons.favorite),
                 onPressed: () =>
