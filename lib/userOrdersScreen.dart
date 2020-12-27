@@ -149,12 +149,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 onPressed: () => showDialog(
                                                   context: context,
                                                   builder: (BuildContext context) {
-                                                    // var productList = [];
-                                                    // groupBy(globals.userCart.
-                                                    //   map((e) => e.name)
-                                                    //   .toList(), (p) => p)
-                                                    //   .forEach((key, value) =>
-                                                    //     productList.add(key.toString() + '  x' + value.length.toString()));
                                                     return CustomDialogBox();
                                                   },
                                                 ),
