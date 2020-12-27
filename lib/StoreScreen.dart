@@ -286,7 +286,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           )
                         ]
                     ),
-                  );
+                  ) ;
                   final itemsTab = GridView.count(
                     childAspectRatio: 3 / 2,
                     crossAxisCount: 2,

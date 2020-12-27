@@ -49,3 +49,7 @@ app.*.map.json
 # mock files
 userMock.dart
 productMock.dart
+
+# Files still in development
+chat.dart
+ChatScreen.dart

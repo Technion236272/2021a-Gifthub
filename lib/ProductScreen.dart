@@ -95,7 +95,7 @@ class _ProductScreenState extends State<ProductScreen> {
     for (globals.Review r in _prod.reviews) {
       sum += r.rating;
     }
-    return _prod.reviews.length != 0 ? sum / _prod.reviews.length : 0.0;
+    return _prod.reviews.length != 0 ? sum / _prod.reviews.length : 0.0 ;
   }
 
   @override
@@ -121,10 +121,10 @@ class _ProductScreenState extends State<ProductScreen> {
                         appBar: AppBar(
                           backgroundColor: Colors.lightGreen[800],
                           title: editingMode?
-                              TextField(
-                                controller: controllers[0],
-                                style: globals.calistogaFont(),
-                              )
+                          TextField(
+                            controller: controllers[0],
+                            style: globals.calistogaFont(),
+                          )
                               : Text(_prod.name, style: globals.calistogaFont(),),
                           actions: userRep.status == Status.Authenticated && _prod.user == userRep.user.uid ?
                           editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
@@ -289,6 +289,7 @@ class _ProductScreenState extends State<ProductScreen> {
         }
     );
   }
+}
 
   void _getReviewBottomSheet() {
     double _currReviewRating;
