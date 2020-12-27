@@ -40,7 +40,7 @@ class UserRepository with ChangeNotifier {
     } catch (_){
       _avatarURL = defaultAvatar;
     }
-      //TODO: update _orders too
+    //TODO: update _orders too
   }
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_address,_apt,_city];
@@ -83,8 +83,8 @@ class UserRepository with ChangeNotifier {
   }
 
   UserRepository.instance() : _db = FirebaseFirestore.instance,
-                              _storage = FirebaseStorage.instance,
-                              _auth = FirebaseAuth.instance {_auth.authStateChanges().listen(_authStateChanges);
+        _storage = FirebaseStorage.instance,
+        _auth = FirebaseAuth.instance {_auth.authStateChanges().listen(_authStateChanges);
   }
 
   Status get status => _status;
@@ -133,8 +133,6 @@ class UserRepository with ChangeNotifier {
       notifyListeners();
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-      _db = FirebaseFirestore.instance;
-      _storage = FirebaseStorage.instance;
       _firstName=firstName;
       _lastName=lastName;
       _address=address;
@@ -167,7 +165,6 @@ class UserRepository with ChangeNotifier {
   Future signOut() async {
     _status = Status.Unauthenticated;
     _auth.signOut();
-    _db = null;
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
