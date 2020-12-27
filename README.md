@@ -25,7 +25,6 @@
 ## Table of Contents
 1. [Application stracture](docs/applicationstracture.md)
 2. [Firebase stracture](docs/firebasestracture.md)
-3. [Objects stracture](docs/databasestracture.md)
 #### Screens
 1. [Start Screen](docs/startscreen.md)
 2. [Main Screen](docs/mainscreen.md)
