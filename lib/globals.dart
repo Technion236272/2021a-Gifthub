@@ -238,7 +238,8 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
                     "Oops!\n\n It looks like your " + list + " list is empty!\n"
                         "\nGo gifting now to fill your " + list + "!",
                     style: niceFont(
-                      color: Colors.black
+                      color: Colors.black,
+                      size: 18.0
                     ),
                     textAlign: TextAlign.center,
                   ),

@@ -23,13 +23,14 @@ class CustomDialogBox extends StatefulWidget {
   const CustomDialogBox({Key key,})
       : super(key: key);
 
-  //YOU CALL THIS DIALOG BOX LIKE THIS:
-  /*
-  showDialog(context: context,
-                    builder: (BuildContext context){
-                      return CustomDialogBox(total: "45",productList: null,);//TODO: insert the correct total and product list
-                    }
-   */
+  ///YOU CALL THIS DIALOG BOX LIKE THIS:
+  ///
+  /// showDialog(context: context,
+  ///   builder: (BuildContext context){
+  ///     return CustomDialogBox();
+  ///   }
+  /// )
+
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
 }
@@ -140,7 +141,6 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               Flexible(
                 child: InkWell(
                   onTap: () async {
-                    //TODO: What happens after checkout?
                     Navigator.of(context).pop();
                     var ordersToAdd = [];
                     globals.userCart.forEach((element) {
@@ -154,10 +154,10 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                     });
                     await FirebaseFirestore.instance.collection('Orders')
                         .doc(Provider.of<UserRepository>(context, listen: false).user.uid)
-                        .update({'Products': FieldValue.arrayUnion(ordersToAdd)}); //TODO: change from 'Products' to 'Orders'
+                        .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
                     globals.userCart.clear();
                     Navigator.of(context).pop();
-                    //TODO: make cool animation
+                    //TODO: make cool animation - prob. Sprint 2
                   },
                   child: Container(
                     padding: EdgeInsets.only(

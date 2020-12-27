@@ -44,7 +44,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     ),
   );
 
-  // TODO: remove these as soon as user repository is initialized with firebase:
   @override
   void initState() {
     super.initState();
@@ -60,10 +59,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
             builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _circularProgressIndicator;
-              } else if (!snapshot.hasData || 0 == snapshot.data.data()['Products'].length) {
+              } else if (!snapshot.hasData || 0 == snapshot.data.data()['Orders'].length) {
                 return globals.emptyListErrorScreen(context, 'Orders');
               }
-              int totalProducts = snapshot.data.data()['Products'].length;
+              int totalProducts = snapshot.data.data()['Orders'].length;
               return Scaffold(
                 key: _scaffoldKeyOrders,
                 resizeToAvoidBottomInset: false,
@@ -99,7 +98,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   thickness: 1.0,
                                 );
                               }
-                              var ordersProduct = snapshot.data.data()['Products'];
+                              var ordersProduct = snapshot.data.data()['Orders'];
                               String prodName = ordersProduct[i ~/ 2]['name'];
                               String prodPrice = ordersProduct[i ~/ 2]['price'];
                               String prodDate = ordersProduct[i ~/ 2]['Date'];
@@ -171,6 +170,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.lime,
                                         icon: Icons.star_half_outlined,
                                         onTap: () {
+                                          _reviewController.clear();
                                           showModalBottomSheet<dynamic>(
                                             context: context,
                                             isScrollControlled: true,
@@ -248,7 +248,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                           ),
                                                           visualDensity: VisualDensity.adaptivePlatformDensity,
                                                           onPressed: () async {
-                                                            //TODO: upload review to DB
                                                             var listToAdd = [];
                                                             listToAdd.add(
                                                               {
@@ -258,15 +257,22 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                               });
                                                             await userRep.firestore
                                                                 .collection('Products')
-                                                                .doc(prodID).update(
-                                                              {'reviews': FieldValue.arrayUnion(listToAdd)}
-                                                            );
+                                                                .doc(prodID)
+                                                                .get()
+                                                                .then((value) async {
+                                                              Map<dynamic, dynamic> map = Map.from(value.data()['Product']);
+                                                              map['reviews']..addAll(listToAdd);
+                                                              await userRep.firestore
+                                                                  .collection('Products')
+                                                                  .doc(prodID)
+                                                                  .update({'Product': map});
+                                                            });
                                                             Navigator.of(context).pop();
                                                             _scaffoldKeyOrders.currentState.showSnackBar(
                                                               SnackBar(
                                                                 content: Text('Review Uploaded Successfully',
                                                                   style: GoogleFonts.lato(
-                                                                    fontSize: 13.0
+                                                                    fontSize: 14.0
                                                                   ),
                                                                 ),
                                                                 behavior: SnackBarBehavior.floating,
@@ -299,20 +305,47 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.blueAccent,
                                         icon: Icons.share_outlined,
                                         onTap: () async {
-                                          final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
-                                          if (Platform.isAndroid) {
-                                            var response = await get(imageURL.data);
-                                            final documentDirectory = (await getExternalStorageDirectory()).path;
-                                            File imgFile = new File('$documentDirectory/flutter.png');
-                                            imgFile.writeAsBytesSync(response.bodyBytes);
-                                            List<String> sharingList = new List();
-                                            sharingList.add('$documentDirectory/flutter.png');
-                                            //TODO: add store's name next to product's name or add a direct url share option
-                                            await Share.shareFiles(sharingList,
+                                          if(imageURL.hasData && imageURL.data != "") {
+                                            final RenderBox box = _scaffoldKeyOrders
+                                                .currentContext
+                                                .findRenderObject();
+                                            if (Platform.isAndroid) {
+                                              var response = await get(
+                                                  imageURL.data);
+                                              final documentDirectory = (await getExternalStorageDirectory())
+                                                  .path;
+                                              File imgFile = new File(
+                                                  '$documentDirectory/flutter.png');
+                                              imgFile.writeAsBytesSync(
+                                                  response.bodyBytes);
+                                              List<String> sharingList = new List();
+                                              sharingList.add(
+                                                  '$documentDirectory/flutter.png');
+                                              //TODO: add store's name next to product's name or add a direct url share option
+                                              await Share.shareFiles(
+                                                  sharingList,
+                                                  text: "check this cool product now!\n" +
+                                                      prodName,
+                                                  sharePositionOrigin: box
+                                                      .localToGlobal(
+                                                      Offset.zero) & box.size,
+                                                  subject: 'I found a lovely product on Gifthub!'
+                                              );
+                                            }
+                                          } else {
+                                            try {
+                                              final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
+                                              String image = 'no image product.png';
+                                              final List <String> list = [];
+                                              final tempDir = await getTemporaryDirectory();
+                                              list.add('${tempDir.path}/' + image);
+                                              await Share.shareFiles(
+                                                list,
                                                 text: "check this cool product now!\n" + prodName,
                                                 sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                                 subject: 'I found a lovely product on Gifthub!'
-                                            );
+                                              );
+                                            } catch (_) {}
                                           }
                                         },
                                       )
@@ -325,43 +358,76 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.red,
                                         icon: Icons.delete_outline_outlined,
                                         onTap: () async {
-                                          var toRemoveList = [];
-                                          var toRemoveItem = ordersProduct[i ~/ 2];
-                                          toRemoveList.add(toRemoveItem);
-                                          await userRep.firestore
-                                              .collection('Orders')
-                                              .doc(userRep.user.uid)
-                                              .update({
-                                                'Products':FieldValue.arrayRemove(toRemoveList)
-                                              });
-                                          setState(() {
-
-                                          });
-                                        _scaffoldKeyOrders.currentState.showSnackBar(
-                                          SnackBar(
-                                            content: Text('Product deleted'),
-                                            behavior: SnackBarBehavior.floating,
-                                            action: SnackBarAction(
-                                              textColor: Colors.deepPurpleAccent,
-                                              label:'Undo',
-                                              onPressed: () {
-                                                setState(() {
-                                                  // userRep.orders.add(product);
-                                                });
-                                              },
-                                            ),
-                                          )
-                                        );
-                                      }
-                                    ),
-                                  ],
+                                          showDialog(
+                                            barrierDismissible: true,
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                elevation: 24.0,
+                                                title: Text('Delete?',
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 18.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                content: Text('Are you sure you want to delete ' +
+                                                  prodName + '?',
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 16.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  FlatButton(
+                                                    child: Text("Yes",
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 14.0,
+                                                        color: Colors.green,
+                                                      ),
+                                                    ),
+                                                    onPressed: () async {
+                                                      var toRemoveList = [];
+                                                      var toRemoveItem = ordersProduct[i ~/ 2];
+                                                      toRemoveList.add(toRemoveItem);
+                                                      await userRep.firestore
+                                                          .collection('Orders')
+                                                          .doc(userRep.user.uid)
+                                                          .update({
+                                                        'Products':FieldValue.arrayRemove(toRemoveList)
+                                                      });
+                                                      setState(() {
+                                                        ///so that orders list will be updated
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  FlatButton(
+                                                    child: Text("No",
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 14.0,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            }
+                                          );
+                                        }
+                                      ),
+                                    ],
                                     child: ListTile(
                                       leading: imageURL.hasData && imageURL.data != ""
                                       ? CircularProfileAvatar(
                                         imageURL.data,
                                         radius: 26.0,
                                         onTap: () {
-                                          Navigator.of(context).push(new MaterialPageRoute<void>(
+                                          Navigator.of(context).push(
+                                            new MaterialPageRoute<void>(
                                             builder: (BuildContext context) => Dismissible(
                                               key: const Key('keyV'),
                                               direction: DismissDirection.vertical,
@@ -432,7 +498,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     String imageURL = "";
     try {
       imageURL = await FirebaseStorage.instance
-          .ref('ProductImages')
+          .ref('productImages')
           .child(productId)
           .getDownloadURL();
     } catch (_) {
