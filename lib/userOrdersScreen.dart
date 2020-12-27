@@ -61,10 +61,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
             builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _circularProgressIndicator;
-              } else if (!snapshot.hasData || 0 == snapshot.data.data()['Products'].length) {
+              } else if (!snapshot.hasData || 0 == snapshot.data.data()['Orders'].length) {
                 return globals.emptyListErrorScreen(context, 'Orders');
               }
-              int totalProducts = snapshot.data.data()['Products'].length;
+              int totalProducts = snapshot.data.data()['Orders'].length;
               return Scaffold(
                 key: _scaffoldKeyOrders,
                 resizeToAvoidBottomInset: false,
@@ -100,7 +100,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   thickness: 1.0,
                                 );
                               }
-                              var ordersProduct = snapshot.data.data()['Products'];
+                              var ordersProduct = snapshot.data.data()['Orders'];
                               String prodName = ordersProduct[i ~/ 2]['name'];
                               String prodPrice = ordersProduct[i ~/ 2]['price'];
                               String prodDate = ordersProduct[i ~/ 2]['Date'];
@@ -259,9 +259,16 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                               });
                                                             await userRep.firestore
                                                                 .collection('Products')
-                                                                .doc(prodID).update(
-                                                              {'reviews': FieldValue.arrayUnion(listToAdd)}
-                                                            );
+                                                                .doc(prodID)
+                                                                .get()
+                                                                .then((value) async {
+                                                              Map<dynamic, dynamic> map = Map.from(value.data()['Product']);
+                                                              map['reviews']..addAll(listToAdd);
+                                                              await userRep.firestore
+                                                                  .collection('Products')
+                                                                  .doc(prodID)
+                                                                  .update({'Product': map});
+                                                            });
                                                             Navigator.of(context).pop();
                                                             _scaffoldKeyOrders.currentState.showSnackBar(
                                                               SnackBar(
@@ -421,7 +428,8 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         imageURL.data,
                                         radius: 26.0,
                                         onTap: () {
-                                          Navigator.of(context).push(new MaterialPageRoute<void>(
+                                          Navigator.of(context).push(
+                                            new MaterialPageRoute<void>(
                                             builder: (BuildContext context) => Dismissible(
                                               key: const Key('keyV'),
                                               direction: DismissDirection.vertical,
