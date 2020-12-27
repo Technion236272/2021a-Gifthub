@@ -144,7 +144,16 @@ class UserRepository with ChangeNotifier {
       var list=[];
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
-      await _db.collection('Stores').doc(_user.uid).set({'Store':list});
+      await _db.collection('Stores').doc(_user.uid).set({
+        'Products':[],
+        'Reviews':[],
+        'Store':{
+          'address':address,
+          'description': 'This is default store description!',
+          'name':firstName+'\'s store',
+          'phone':'00000000'
+        }
+      });
       notifyListeners();
       return 'Success';
     } catch (e) {
@@ -188,7 +197,16 @@ class UserRepository with ChangeNotifier {
     var list=[];
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
-    await _db.collection('Stores').doc(_user.uid).set({'Store':list});
+    await _db.collection('Stores').doc(_user.uid).set({
+      'Products':[],
+      'Reviews':[],
+      'Store':{
+        'address':address,
+        'description': 'This is default store description!',
+        'name':firstName+'\'s store',
+        'phone':'00000000'
+      }
+    });
   }
 
   Future<bool> signInWithGoogleCheckIfFirstTime() async {
