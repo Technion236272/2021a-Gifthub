@@ -40,7 +40,6 @@ class UserRepository with ChangeNotifier {
     } catch (_){
       _avatarURL = defaultAvatar;
     }
-      //TODO: update _orders too
   }
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_address,_apt,_city];
