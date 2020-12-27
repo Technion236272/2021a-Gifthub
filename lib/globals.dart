@@ -166,10 +166,6 @@ Scaffold emptyLoadingScaffold() {
     backgroundColor: Colors.lightGreen[600],
     appBar: AppBar(
       backgroundColor: Colors.lightGreen[800],
-      leading: IconButton(
-        icon: Icon(Icons.menu),
-        onPressed: () {},
-      ),
       title: Text("Loading...", style: calistogaFont(),),
     ),
 
