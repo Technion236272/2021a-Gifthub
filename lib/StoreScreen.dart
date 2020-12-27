@@ -261,7 +261,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     child: Row(
                                         children: [
                                           Icon(Icons.list_alt),
-                                          Text("All ${_reviews.length} Reviews"),
+                                          Text("All Reviews (${_reviews.length})"),
                                         ]
                                     )
                                 ),
