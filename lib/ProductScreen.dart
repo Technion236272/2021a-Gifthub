@@ -238,15 +238,8 @@ class _ProductScreenState extends State<ProductScreen> {
                                 style: globals.niceFont(),
                               )
                                   : Text(
-                                'price: \$' + _prod.price.toString(),
+                                '\$' + _prod.price.toString(),
                                 style: globals.niceFont(size: 30.0),
-                              ),
-                              SizedBox(height: 20.0),
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () {}), // TODO add "contact seller" function
-                                  ]
                               ),
                               SizedBox(height: 20.0),
                               Row(
@@ -261,7 +254,14 @@ class _ProductScreenState extends State<ProductScreen> {
                                       }
 
                                     }),
-                                    globals.regTextButton("Add to Wishlist", icon: Icon(Icons.favorite_outlined), press: () async {
+                                  ]
+                              ),
+                              SizedBox(height: 20.0),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                  globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () {}), // TODO add "contact seller" function
+                                  globals.regTextButton("Add to Wishlist", icon: Icon(Icons.favorite_outline_outlined), buttonColor: Colors.white, textColor: Colors.red, press: () async {
                                       if(userRep.status != Status.Authenticated){
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
                                         return;
