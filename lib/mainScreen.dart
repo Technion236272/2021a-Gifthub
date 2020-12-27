@@ -21,6 +21,7 @@ import 'my_flutter_app_icons.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
 import 'globals.dart' as globals;
+import 'package:collection/collection.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -55,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
       behavior: SnackBarBehavior.floating,
       content: Text('only verified users can access this screen',
         style: GoogleFonts.lato(
-            fontSize: 13.0
+          fontSize: 13.0
         ),
       ),
       action: SnackBarAction(
@@ -212,15 +213,16 @@ class _MainScreenState extends State<MainScreen> {
               IconButton(
                 icon: Icon(Icons.shopping_cart_outlined),
                 onPressed: () {
-                  showDialog(context: context,
+                  showDialog(
+                    context: context,
                     builder: (BuildContext context) {
-                      return CustomDialogBox(
-                        total: globals.userCart
-                            .map<double>((e) => e.price)
-                            .toList()
-                            .fold<double>(0.0, (previousValue, element) => previousValue + element),
-                        productList: globals.userCart.map((e) => e.name).toList(),
-                      );
+                      var productList = [];
+                      groupBy(globals.userCart.
+                      map((e) => e.name)
+                          .toList(), (p) => p)
+                          .forEach((key, value) =>
+                          productList.add(key.toString() + '  x' + value.length.toString()));
+                      return CustomDialogBox();
                     }
                   );
                 }
@@ -368,11 +370,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
-        width: 60,
-        height: 60,
-        child: CircularProgressIndicator(
-          valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
-        )
+      width: 60,
+      height: 60,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
     ),
   );
 
@@ -388,13 +390,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _getImage(int i) async {
-    String imageURL;
-    await FirebaseFirestore.instance.collection("Products").doc(
-        "$i").get().then((value) async {
-      var productData = value.data();
-      imageURL = await FirebaseStorage.instance.ref().child(
-          'productImages/' + i.toString()).getDownloadURL();
-    });
+    String imageURL = "";
+    try {
+      imageURL = await FirebaseStorage.instance
+          .ref()
+          .child('productImages/' + i.toString())
+          .getDownloadURL();
+    } catch (_) {
+      imageURL = "";
+    }
     return imageURL;
   }
 
@@ -478,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           width: MediaQuery.of(context).size.width,
                                           height: MediaQuery.of(context).size.height * 1/6,
                                           color: Colors.transparent,
-                                          child: imageURL.hasData
+                                          child: imageURL.hasData && "" != imageURL.data
                                           ? Image.network(imageURL.data,
                                             fit: BoxFit.fitWidth,
                                           )
