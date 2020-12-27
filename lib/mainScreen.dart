@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,8 +21,6 @@ import 'my_flutter_app_icons.dart';
 // import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
-import 'globals.dart' as globals;
-import 'package:collection/collection.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -210,23 +209,19 @@ class _MainScreenState extends State<MainScreen> {
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
+              ///Checkout - cart
               IconButton(
                 icon: Icon(Icons.shopping_cart_outlined),
                 onPressed: () {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      // var productList = [];
-                      // groupBy(globals.userCart.
-                      // map((e) => e.name)
-                      //     .toList(), (p) => p)
-                      //     .forEach((key, value) =>
-                      //     productList.add(key.toString() + '  x' + value.length.toString()));
                       return CustomDialogBox();
                     }
                   );
                 }
               ),
+              /// WishList
               IconButton(
                 icon: Icon(Icons.favorite),
                 onPressed: () =>
@@ -405,6 +400,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ///TODO: this does some sorts of problems but it works tho and guests can view product images
+      if(Provider.of<UserRepository>(context,).status != Status.Authenticated) {
+        await FirebaseAuth.instance.signInAnonymously();
+      }
+      setState(() {
+
+      });
+    });
     return Material(
       child: Stack(
         alignment: Alignment.center,

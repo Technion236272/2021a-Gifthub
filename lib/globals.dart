@@ -187,6 +187,24 @@ Scaffold emptyErrorScaffold(String error) {
 
 Widget emptyListErrorScreen(BuildContext context, String list) {
   return Scaffold(
+    appBar: 'Orders' == list ? null
+    : AppBar(
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      elevation: 0.0,
+      backgroundColor: Colors.lightGreen[800],
+      leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop()
+      ),
+      title: Text("Wish List",
+        style: GoogleFonts.calistoga(
+            fontSize: 33,
+            color: Colors.white
+        ),
+        textAlign: TextAlign.center,
+      ),
+    ),
     body: Stack(
       children: <Widget>[
         Align(
