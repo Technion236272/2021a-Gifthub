@@ -1,7 +1,6 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:gifthub_2021a/productMock.dart';
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'user_repository.dart';
 import 'package:flutter/cupertino.dart';
@@ -209,7 +208,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                               onTap: () async {
                                                 if(imageURL.hasData && "" != imageURL.data) {
                                                   final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
-                                                  Product product = userRep.orders[i ~/ 2];
                                                   if (Platform.isAndroid) {
                                                     var response = await get(imageURL.data);
                                                     final documentDirectory = (await getExternalStorageDirectory()).path;
@@ -220,7 +218,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                     //TODO: add store's name next to product's name or add a direct url share option
                                                     await Share.shareFiles(
                                                         sharingList,
-                                                        text: "check this cool product now!\n" + product.name,
+                                                        text: "check this cool product now!\n" + prodName,
                                                         sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                                         subject: 'I found a lovely product on GiftHub!'
                                                     );
