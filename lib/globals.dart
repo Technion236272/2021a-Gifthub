@@ -66,7 +66,7 @@ class Review {
 
 }
 
-List userCart;
+List<Product> userCart;
 
 final List<String> categories = ['', 'Cakes', 'Chocolate', 'Balloons', 'Flowers', 'Greeting Cards','Gift Cards', 'Other'];
 
@@ -186,5 +186,68 @@ Scaffold emptyErrorScaffold(String error) {
     ),
 
     body: Center(child: Text("The app ran into an error:\n" + error, style: niceFont(), textAlign: TextAlign.center,)),
+  );
+}
+
+Widget emptyListErrorScreen(BuildContext context, String list) {
+  return Scaffold(
+    body: Stack(
+      children: <Widget>[
+        Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width * 0.35,
+            color: Colors.lightGreen[800],
+          ),
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            color: Colors.white,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                FittedBox(
+                  child: Center(
+                    child: Icon(
+                      Icons.star,
+                      color: Colors.lightGreenAccent,
+                      size: MediaQuery.of(context).size.height *
+                          0.065 *
+                          3.3 *
+                          2.1 * 3,
+                    )
+                  ),
+                ),
+                Center(
+                  child: Icon(
+                    GiftHubIcons.gift,
+                    color: Colors.white,
+                    size: MediaQuery.of(context).size.height * 0.065 * 2,
+                  ),
+                ),
+                Align(
+                  alignment: FractionalOffset.center,
+                  child: Text(
+                    "Oops!\n\n It looks like your " + list + " list is empty!\n"
+                        "\nGo gifting now to fill your " + list + "!",
+                    style: niceFont(
+                      color: Colors.black
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ),
+      ]
+    ),
   );
 }
