@@ -226,12 +226,18 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             child: Expanded(
                               child: ListView(
                                 physics: const NeverScrollableScrollPhysics(),
-                                children: _reviews.map<ListTile>((r) =>
-                                    ListTile(
-                                      title: Text(r.content, style: globals.niceFont()),
-                                      subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
-                                      leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
-                                    ),
+                                children: ListTile.divideTiles(
+                                  context: context,
+                                  tiles: _reviews
+                                      .sublist(0, min(2, _reviews.length))
+                                      .map<ListTile>((r) =>
+                                      ListTile(
+                                        title: Text(r.content, style: globals.niceFont()),
+                                        subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
+                                        leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
+                                      )
+                                  ).toList(),
+                                  color: Colors.red,
                                 ).toList(),
                               ),
                             ),
