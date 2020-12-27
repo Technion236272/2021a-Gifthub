@@ -1,3 +1,10 @@
+![Firebase Stracture Diagram](image.png "Firebase Stracture Diagram")
+
+
+
+
+
+
 # Firebase
 
 ## Storage
