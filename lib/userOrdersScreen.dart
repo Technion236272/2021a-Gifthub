@@ -325,36 +325,68 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.red,
                                         icon: Icons.delete_outline_outlined,
                                         onTap: () async {
-                                          var toRemoveList = [];
-                                          var toRemoveItem = ordersProduct[i ~/ 2];
-                                          toRemoveList.add(toRemoveItem);
-                                          await userRep.firestore
-                                              .collection('Orders')
-                                              .doc(userRep.user.uid)
-                                              .update({
-                                                'Products':FieldValue.arrayRemove(toRemoveList)
-                                              });
-                                          setState(() {
-
-                                          });
-                                        _scaffoldKeyOrders.currentState.showSnackBar(
-                                          SnackBar(
-                                            content: Text('Product deleted'),
-                                            behavior: SnackBarBehavior.floating,
-                                            action: SnackBarAction(
-                                              textColor: Colors.deepPurpleAccent,
-                                              label:'Undo',
-                                              onPressed: () {
-                                                setState(() {
-                                                  // userRep.orders.add(product);
-                                                });
-                                              },
-                                            ),
-                                          )
-                                        );
-                                      }
-                                    ),
-                                  ],
+                                          showDialog(
+                                            barrierDismissible: true,
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                elevation: 24.0,
+                                                title: Text('Delete?',
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 18.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                content: Text('Are you sure you want to delete ' +
+                                                  prodName + '?',
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 16.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  FlatButton(
+                                                    child: Text("Yes",
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 14.0,
+                                                        color: Colors.green,
+                                                      ),
+                                                    ),
+                                                    onPressed: () async {
+                                                      var toRemoveList = [];
+                                                      var toRemoveItem = ordersProduct[i ~/ 2];
+                                                      toRemoveList.add(toRemoveItem);
+                                                      await userRep.firestore
+                                                          .collection('Orders')
+                                                          .doc(userRep.user.uid)
+                                                          .update({
+                                                        'Products':FieldValue.arrayRemove(toRemoveList)
+                                                      });
+                                                      setState(() {
+                                                        ///so that orders list will be updated
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  FlatButton(
+                                                    child: Text("No",
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 14.0,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            }
+                                          );
+                                        }
+                                      ),
+                                    ],
                                     child: ListTile(
                                       leading: imageURL.hasData && imageURL.data != ""
                                       ? CircularProfileAvatar(
@@ -432,7 +464,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     String imageURL = "";
     try {
       imageURL = await FirebaseStorage.instance
-          .ref('ProductImages')
+          .ref('productImages')
           .child(productId)
           .getDownloadURL();
     } catch (_) {

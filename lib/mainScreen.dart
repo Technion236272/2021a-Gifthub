@@ -312,6 +312,7 @@ class _MainScreenState extends State<MainScreen> {
               if(2 == i && userRep.status == Status.Authenticated){
                 ///set store id to current user id:
                 _MainScreenState._userID = userRep.user.uid;
+                this._children[2] = StoreScreen(_userID);
                 setState(() {
                   _currentIndex = i;
                 });
