@@ -253,7 +253,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                               {
                                                                 'content': _reviewController.text,
                                                                 'rating': _rating.toString(),
-                                                                'user': userRep?.user?.uid ?? ""
+                                                                'user': ""
                                                               });
                                                             await userRep.firestore
                                                                 .collection('Products')
