@@ -14,11 +14,27 @@
       },
       "oauth_client": [
         {
-          "client_id": "28894696255-54nl47dtnfabr4lqb81hr8p5tpe3eb93.apps.googleusercontent.com",
+          "client_id": "28894696255-bucej7sa6nrqnopjkpudls720ajuqhuv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.gifthub_2021a",
+            "certificate_hash": "d497ea2c16a997692ff03a1c7a94183fd8fc1849"
+          }
+        },
+        {
+          "client_id": "28894696255-kuv3rdmtr20u5lck9l2ngj59s5p490go.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.technion.gifthub_2021a",
             "certificate_hash": "f3277274a21dc3c7754b3375239937780919f337"
+          }
+        },
+        {
+          "client_id": "28894696255-tpcoaqk8bu63l5hi3oesbvl6b3vm67p5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.gifthub_2021a",
+            "certificate_hash": "3bbee097cb37f2a35fe887ca96465f06ab976009"
           }
         },
         {
