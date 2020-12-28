@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,7 +17,6 @@ import 'userOrdersScreen.dart';
 import 'wishListScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
-// import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
 import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
