@@ -187,7 +187,7 @@ Scaffold emptyErrorScaffold(String error) {
 
 Widget emptyListErrorScreen(BuildContext context, String list) {
   return Scaffold(
-    appBar: 'Orders' == list ? null
+    appBar: 'Orders ' == list ? null
     : AppBar(
       centerTitle: true,
       automaticallyImplyLeading: false,
@@ -249,7 +249,7 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
                 Align(
                   alignment: FractionalOffset.center,
                   child: Text(
-                    "Oops!\n\n It looks like your " + list + " list is empty!\n"
+                    "Oops!\n\n It looks like your " + list + (list == 'Orders ' ? "list is empty!\n" : " is empty!\n") +
                         "\nGo gifting now to fill your " + list + "!",
                     style: niceFont(
                       color: Colors.black,
@@ -264,5 +264,45 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
         ),
       ]
     ),
+  );
+}
+
+Stack emptyListOfCategories (BuildContext context, String category) {
+  return Stack(
+    alignment: Alignment.center,
+    children: [
+      FittedBox(
+        child: Center(
+            child: Icon(
+              Icons.star,
+              color: Colors.lightGreenAccent,
+              size: MediaQuery.of(context).size.height *
+                  0.065 *
+                  3.3 *
+                  2.1 * 5,
+            )
+        ),
+      ),
+      Center(
+        child: Icon(
+          GiftHubIcons.gift,
+          color: Colors.white,
+          size: MediaQuery.of(context).size.height * 0.065 * 2,
+        ),
+      ),
+      Align(
+        alignment: FractionalOffset.center,
+        child: Text(
+          "Oops!\n\n "
+          "It looks like there are no products\n"
+              "under " + category + " category!\n",
+          style: niceFont(
+              color: Colors.black,
+              size: 18.0
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ]
   );
 }

@@ -60,7 +60,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _circularProgressIndicator;
               } else if (!snapshot.hasData || 0 == snapshot.data.data()['Orders'].length) {
-                return globals.emptyListErrorScreen(context, 'Orders');
+                return globals.emptyListErrorScreen(context, 'Orders ');
               }
               int totalProducts = snapshot.data.data()['Orders'].length;
               return Scaffold(
@@ -107,7 +107,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               return FutureBuilder(
                                 future: _getImage(prodID),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
-                                  if (snapshot.connectionState != ConnectionState.done) {
+                                  if (snapshot.connectionState != ConnectionState.done || !imageURL.hasData) {
                                     return _circularProgressIndicator;
                                   }
                                   ///if image url contains no data (meaning there is no product image)
@@ -405,7 +405,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                       ),
                                     ],
                                     child: ListTile(
-                                      leading: imageURL.hasData && imageURL.data != ""
+                                      leading: imageURL.data != ""
                                       ? CircularProfileAvatar(
                                         imageURL.data,
                                         radius: 26.0,

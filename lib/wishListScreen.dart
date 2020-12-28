@@ -185,12 +185,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                         onPressed: () => showDialog(
                                                           context: context,
                                                           builder: (BuildContext context) {
-                                                            // var productList = [];
-                                                            // groupBy(globals.userCart.
-                                                            // map((e) => e.name)
-                                                            //     .toList(), (p) => p)
-                                                            //     .forEach((key, value) =>
-                                                            //     productList.add(key.toString() + '  x' + value.length.toString()));
                                                             return CustomDialogBox();
                                                           },
                                                         ),

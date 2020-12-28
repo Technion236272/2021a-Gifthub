@@ -21,6 +21,7 @@ import 'my_flutter_app_icons.dart';
 // import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
+import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -364,6 +365,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final List<String> _categories = ['All', 'Cakes', 'Chocolate', 'Balloons', 'Flowers', 'Greeting Cards','Gift Cards', 'Other'];
+  String _currCategory = 'All';
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
       width: 60,
@@ -379,18 +382,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  Future<int> _getTotalProducts() async {
-    var x = await FirebaseFirestore.instance.collection("Products").doc("Counter").get();
-    var y = x.data();
-    return y['Counter'];
-  }
-
-  Future<String> _getImage(int i) async {
+  Future<String> _getImage(String i) async {
     String imageURL = "";
     try {
       imageURL = await FirebaseStorage.instance
           .ref()
-          .child('productImages/' + i.toString())
+          .child('productImages/' + i)
           .getDownloadURL();
     } catch (_) {
       imageURL = "";
@@ -400,15 +397,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   ///TODO: this does some sorts of problems but it works tho and guests can view product images
-    //   if(Provider.of<UserRepository>(context,).status != Status.Authenticated) {
-    //     await FirebaseAuth.instance.signInAnonymously();
-    //   }
-    //   setState(() {
-    //
-    //   });
-    // });
     return Material(
       child: Stack(
         alignment: Alignment.center,
@@ -428,136 +416,210 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Container(
               color: Colors.white,
-              child: FutureBuilder(
-                future: _getTotalProducts(),
-                builder:(BuildContext context, AsyncSnapshot<int> totalProducts) =>
-                (!totalProducts.hasData || totalProducts.connectionState != ConnectionState.done)
-                ? _circularProgressIndicator
-                : FutureBuilder(
-                  future: FirebaseFirestore.instance.collection("Products").get(),
-                  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
-                      return _circularProgressIndicator;
-                    }
-                    return GridView.count(
-                      primary: false,
-                      crossAxisCount: 2,
-                      padding: const EdgeInsets.all(20),
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 5,
-                      children: List.generate(
-                        min(16, totalProducts.data),
-                        (index) {
-                          var productData = snapshot.data.docs[index].data();
-                          String prodName = productData['Product']['name'];
-                          String prodDescription = productData['Product']['description'];
-                          String prodPrice = productData['Product']['price'];
-                          return FutureBuilder(
-                            future: _getImage(index),
-                            builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
-                            ///if imageURL has no data then defaulted asset image is displayed
-                            ///under 'Assets/no image product.png'
-                            (imageURL.connectionState != ConnectionState.done)
-                            ? _circularProgressIndicator
-                            : Card(
-                              elevation: 10.0,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                                child: InkWell(
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      new MaterialPageRoute<void>(
-                                        builder: (context) => ProductScreen(index.toString())
-                                      )
-                                    );
-                                  },
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: MediaQuery.of(context).size.height,
-                                    color: Colors.transparent,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Container(
-                                          width: MediaQuery.of(context).size.width,
-                                          height: MediaQuery.of(context).size.height * 1/6,
-                                          color: Colors.transparent,
-                                          child: imageURL.hasData && "" != imageURL.data
-                                          ? Image.network(imageURL.data,
-                                            fit: BoxFit.fitWidth,
-                                          )
-                                          : Image.asset('Assets/no image product.png',
-                                            fit: BoxFit.fitWidth,
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Flexible( ///product title goes here
-                                                  child: Text('  ' +
-                                                    ((prodName.length <= 20 - prodPrice.length + 1)
-                                                    ? prodName
-                                                    : (prodName.substring(0, 20 - prodPrice.length).trimRight() + '...')),
-                                                    textAlign: TextAlign.left,
-                                                    style: GoogleFonts.lato(
-                                                      fontSize: 14.0,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Flexible( ///product description goes here
-                                                  child: Text('  ' +
-                                                    ((prodDescription.length <= 24 - prodPrice.length + 1)
-                                                    ? prodDescription
-                                                    : (prodDescription.substring(0, 24 - prodPrice.length).trimRight() + '...')),
-                                                    textAlign: TextAlign.left,
-                                                    style: GoogleFonts.lato(
-                                                      fontSize: 11.0,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Flexible( ///product price goes here
-                                              child: Align(
-                                                alignment: Alignment.centerRight,
-                                                child: Text(
-                                                  prodPrice + '\$',
-                                                  textAlign: TextAlign.right,
-                                                  style: GoogleFonts.lato(
-                                                    fontSize: 11.0,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(11.0),
+                              child: Center(
+                                child: Text('  Category: ',
+                                  style: niceFont(
+                                    color: Colors.black,
+                                    size: 18.0,
                                   ),
                                 ),
                               ),
                             ),
-                          );
-                        }
+                            Container(
+                              color: Colors.transparent,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  canvasColor: Colors.transparent,
+                                  buttonTheme: ButtonTheme.of(context).copyWith(
+                                    alignedDropdown: true,
+                                  )
+                                ),
+                                child: DropdownButton<String>(
+                                  dropdownColor: Colors.white,
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.lightGreen[300],
+                                  ),
+                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
+                                    color: Colors.lightGreen[200],
+                                  ),
+                                  elevation: 8,
+                                  value: _currCategory,
+                                  items: _categories
+                                      .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
+                                        child: Text(e, style: niceFont(color: Colors.lightGreen[300]),),
+                                        value: e,
+                                    )
+                                  ).toList(),
+                                  onChanged: (String value) {
+                                    setState(() {
+                                      _currCategory = value;
+                                    });
+                                  },
+                                )
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  }
-                ),
+                    ),
+                  ),
+                  Flexible(
+                    flex: 11,
+                    child: FutureBuilder(
+                      future: FirebaseFirestore.instance.collection("Products").get(),
+                      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                          return _circularProgressIndicator;
+                        }
+                        List<QueryDocumentSnapshot> productsList = List.from(snapshot.data.docs);
+                        productsList.removeWhere((element) => element.id == 'Counter');
+                        if(_categories[0] != _currCategory) {
+                          productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
+                        }
+                        if(productsList.isEmpty) {
+                          return emptyListOfCategories(context, _currCategory);
+                        }
+                        return GridView.count(
+                          primary: false,
+                          crossAxisCount: 2,
+                          padding: const EdgeInsets.all(20),
+                          crossAxisSpacing: 5,
+                          mainAxisSpacing: 5,
+                          children: List.generate(
+                            min(16, productsList.length),
+                            (index) {
+                              var productData = productsList[index].data();
+                              String prodName = productData['Product']['name'];
+                              String prodDescription = productData['Product']['description'];
+                              String prodPrice = productData['Product']['price'];
+                              return FutureBuilder(
+                                future: _getImage(productsList[index].id),
+                                builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
+                                ///if imageURL has no data then defaulted asset image is displayed
+                                ///under 'Assets/no image product.png'
+                                (imageURL.connectionState != ConnectionState.done)
+                                ? _circularProgressIndicator
+                                : Card(
+                                  elevation: 10.0,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                                    child: InkWell(
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          new MaterialPageRoute<void>(
+                                            builder: (context) => ProductScreen(productsList[index].id)
+                                          )
+                                        );
+                                      },
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height,
+                                        color: Colors.transparent,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Container(
+                                              width: MediaQuery.of(context).size.width,
+                                              height: MediaQuery.of(context).size.height * 1/6,
+                                              color: Colors.transparent,
+                                              child: imageURL.hasData && "" != imageURL.data
+                                              ? Image.network(imageURL.data,
+                                                fit: BoxFit.fitWidth,
+                                              )
+                                              : Image.asset('Assets/no image product.png',
+                                                fit: BoxFit.fitWidth,
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Flexible( ///product title goes here
+                                                      child: Text('  ' +
+                                                        ((prodName.length <= 20 - prodPrice.length + 1)
+                                                        ? prodName
+                                                        : (prodName.substring(0, 20 - prodPrice.length).trimRight() + '...')),
+                                                        textAlign: TextAlign.left,
+                                                        style: GoogleFonts.lato(
+                                                          fontSize: 14.0,
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Flexible( ///product description goes here
+                                                      child: Text('  ' +
+                                                        ((prodDescription.length <= 24 - prodPrice.length + 1)
+                                                        ? prodDescription
+                                                        : (prodDescription.substring(0, 24 - prodPrice.length).trimRight() + '...')),
+                                                        textAlign: TextAlign.left,
+                                                        style: GoogleFonts.lato(
+                                                          fontSize: 11.0,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Flexible( ///product price goes here
+                                                  child: Align(
+                                                    alignment: Alignment.centerRight,
+                                                    child: Text(
+                                                      prodPrice + '\$',
+                                                      textAlign: TextAlign.right,
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 11.0,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          ),
+                        );
+                      }
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
