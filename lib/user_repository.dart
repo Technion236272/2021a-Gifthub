@@ -171,6 +171,7 @@ class UserRepository with ChangeNotifier {
     _status = Status.Unauthenticated;
     _auth.signOut();
     notifyListeners();
+    await FirebaseAuth.instance.signInAnonymously();
     return Future.delayed(Duration.zero);
   }
   ///This function signs in user with Google account.
