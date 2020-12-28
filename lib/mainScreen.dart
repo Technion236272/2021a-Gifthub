@@ -505,11 +505,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               mainAxisAlignment: MainAxisAlignment.start,
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Flexible(
+                                                Flexible( ///product title goes here
                                                   child: Text('  ' +
-                                                    ((prodName.length <= 17)
+                                                    ((prodName.length <= 20 - prodPrice.length + 1)
                                                     ? prodName
-                                                    : (prodName.substring(0,16) + '...')), //product title goes here
+                                                    : (prodName.substring(0, 20 - prodPrice.length).trimRight() + '...')),
                                                     textAlign: TextAlign.left,
                                                     style: GoogleFonts.lato(
                                                       fontSize: 14.0,
@@ -517,11 +517,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                   ),
                                                 ),
-                                                Flexible(
+                                                Flexible( ///product description goes here
                                                   child: Text('  ' +
-                                                    ((prodDescription.length > 19)
-                                                    ? (prodDescription.substring(0,20) + '...')
-                                                    : prodDescription), //product description goes here
+                                                    ((prodDescription.length <= 24 - prodPrice.length + 1)
+                                                    ? prodDescription
+                                                    : (prodDescription.substring(0, 24 - prodPrice.length).trimRight() + '...')),
                                                     textAlign: TextAlign.left,
                                                     style: GoogleFonts.lato(
                                                       fontSize: 11.0,
@@ -531,11 +531,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ],
                                             ),
-                                            Flexible(
+                                            Flexible( ///product price goes here
                                               child: Align(
                                                 alignment: Alignment.centerRight,
                                                 child: Text(
-                                                  prodPrice + '\$', //product price goes here
+                                                  prodPrice + '\$',
                                                   textAlign: TextAlign.right,
                                                   style: GoogleFonts.lato(
                                                     fontSize: 11.0,
