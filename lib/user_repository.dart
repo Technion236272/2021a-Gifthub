@@ -85,7 +85,7 @@ class UserRepository with ChangeNotifier {
 
   UserRepository.instance() : _db = FirebaseFirestore.instance,
         _storage = FirebaseStorage.instance,
-        _auth = FirebaseAuth.instance {_auth.authStateChanges().listen(_authStateChanges);
+        _auth = FirebaseAuth.instance {//_auth.authStateChanges().listen(_authStateChanges);
   }
 
   Status get status => _status;
@@ -112,11 +112,11 @@ class UserRepository with ChangeNotifier {
       notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       _status = Status.Authenticated;
-
+      _user = FirebaseAuth.instance.currentUser;
       try {
         _avatarURL = await _storage.ref('userImages').child(_user.uid).getDownloadURL();
       }
-      on FirebaseException catch (_) { // in case the user hasn't yet uploaded an avatar
+      on FirebaseException catch (_) { /// in case the user hasn't yet uploaded an avatar
         _avatarURL = null;
       }
       updateLocalUserFields();
@@ -136,6 +136,7 @@ class UserRepository with ChangeNotifier {
       _status = Status.Authenticating;
       notifyListeners();
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      _user = FirebaseAuth.instance.currentUser;
       _status = Status.Authenticated;
       _firstName=firstName;
       _lastName=lastName;
@@ -186,6 +187,7 @@ class UserRepository with ChangeNotifier {
       idToken: googleAuth.idToken,
     );
     await FirebaseAuth.instance.signInWithCredential(credential);
+    _user = FirebaseAuth.instance.currentUser;
   }
   ///After signing up with Google, we initialize class's parameters and initialize the needed lists on Firebase.
   void signInWithGoogleAddAccountInfo(String firstName,String lastName,String address,String apt,String city) async {
@@ -230,7 +232,7 @@ class UserRepository with ChangeNotifier {
   }
 
   Future<void> _authStateChanges(User firebaseUser) async {
-    if (firebaseUser == null) {
+    if (null == firebaseUser || firebaseUser.isAnonymous) {
       _status = Status.Unauthenticated;
       _user = null;
     } else {

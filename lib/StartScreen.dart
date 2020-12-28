@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -1039,8 +1040,9 @@ Widget startScreenScaffold(context) => Material(
                           color: Colors.black),
                       textAlign: TextAlign.center,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       userRep.status = Status.Unauthenticated;
+                      await FirebaseAuth.instance.signInAnonymously();
                       Navigator.pushAndRemoveUntil(
                           context,
                           new MaterialPageRoute<void>(

@@ -142,6 +142,10 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                 child: InkWell(
                   onTap: () async {
                     Navigator.of(context).pop();
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    if(null == userRep.user || userRep.status != Status.Authenticated){
+                      return Future.delayed(Duration.zero);
+                    }
                     var ordersToAdd = [];
                     globals.userCart.forEach((element) {
                       ordersToAdd.add({
