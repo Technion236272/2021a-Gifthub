@@ -60,7 +60,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _circularProgressIndicator;
               } else if (!snapshot.hasData || 0 == snapshot.data.data()['Orders'].length) {
-                return globals.emptyListErrorScreen(context, 'Orders');
+                return globals.emptyListErrorScreen(context, 'Orders ');
               }
               int totalProducts = snapshot.data.data()['Orders'].length;
               return Scaffold(

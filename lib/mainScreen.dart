@@ -482,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                  )
+                  ),
                   Flexible(
                     flex: 11,
                     child: FutureBuilder(

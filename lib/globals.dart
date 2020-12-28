@@ -187,7 +187,7 @@ Scaffold emptyErrorScaffold(String error) {
 
 Widget emptyListErrorScreen(BuildContext context, String list) {
   return Scaffold(
-    appBar: 'Orders' == list ? null
+    appBar: 'Orders ' == list ? null
     : AppBar(
       centerTitle: true,
       automaticallyImplyLeading: false,
@@ -249,7 +249,7 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
                 Align(
                   alignment: FractionalOffset.center,
                   child: Text(
-                    "Oops!\n\n It looks like your " + list + " list is empty!\n"
+                    "Oops!\n\n It looks like your " + list + (list == 'Orders ' ? "list is empty!\n" : " is empty!\n") +
                         "\nGo gifting now to fill your " + list + "!",
                     style: niceFont(
                       color: Colors.black,
