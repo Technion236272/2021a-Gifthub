@@ -1,4 +1,4 @@
-![App Stracture Diagram](AppStracture.png "App Stracture Diagram")
+![App Stracture Diagram](AppStracture.PNG "App Stracture Diagram")
 
 
 # Application Stracture
