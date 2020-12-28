@@ -11,6 +11,7 @@ enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
 const String defaultAvatar = 'https://cdn.onlinewebfonts.com/svg/img_258083.png';
 
+///This class is used to sign in and out and keep user's information
 class UserRepository with ChangeNotifier {
   FirebaseAuth _auth;
   User _user;
@@ -24,7 +25,7 @@ class UserRepository with ChangeNotifier {
   String _apt = "";
   String _city = "";
 
-
+  ///This function gets user's information from firebase and initializes the local class variables with it.
   void updateLocalUserFields() async {
     var snapshot = await FirebaseFirestore.instance.collection('Users').doc(_user.uid).get();
     var list = snapshot.data();
@@ -41,6 +42,7 @@ class UserRepository with ChangeNotifier {
       _avatarURL = defaultAvatar;
     }
   }
+  ///This function takes the current information stored in this class's variables and uploads it to the user's information list on firebase.
   Future<void> updateFirebaseUserList() async {
     var list=[_firstName,_lastName,_address,_apt,_city];
     await _db.collection('Users').doc(_user.uid).set({'Info':list});
@@ -102,6 +104,8 @@ class UserRepository with ChangeNotifier {
 
   String get avatarURL => _avatarURL;
 
+  ///This function is used for Email sign in
+  ///Returns "Success" string if succeeded
   Future<String> signIn(String email, String password) async {
     try {
       _status = Status.Authenticating;
@@ -125,7 +129,8 @@ class UserRepository with ChangeNotifier {
       //throw e;
     }
   }
-
+  ///This function is used for Email sign up
+  ///Returns "Success" string if succeeded
   Future<String> signUp(String email, String password,String firstName,String lastName,String address,String apt,String city) async {
     try {
       _status = Status.Authenticating;
@@ -167,7 +172,8 @@ class UserRepository with ChangeNotifier {
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
-
+  ///This function signs in user with Google account.
+  ///This is called after pressing "Continue with Google" on start screen.
   Future<void> signInWithGoogle() async {
     // Trigger the authentication flow
     final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
@@ -181,7 +187,7 @@ class UserRepository with ChangeNotifier {
     );
     await FirebaseAuth.instance.signInWithCredential(credential);
   }
-
+  ///After signing up with Google, we initialize class's parameters and initialize the needed lists on Firebase.
   void signInWithGoogleAddAccountInfo(String firstName,String lastName,String address,String apt,String city) async {
     _db = FirebaseFirestore.instance;
     _firstName=firstName;
@@ -204,7 +210,9 @@ class UserRepository with ChangeNotifier {
       }
     });
   }
-
+  ///This function checks if a user signs in with a google account for the first time.
+  ///if yes, returns true.
+  ///if no, returns false and update local variables with his updated information on firebase.
   Future<bool> signInWithGoogleCheckIfFirstTime() async {
     _db = FirebaseFirestore.instance;
     try {

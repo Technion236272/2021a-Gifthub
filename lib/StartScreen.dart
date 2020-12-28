@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,8 @@ import 'mainScreen.dart';
 import 'my_flutter_app_icons.dart';
 import 'user_repository.dart';
 
+
+//Text Controllers for sign up/in fields
 final firstNameController = TextEditingController();
 final lastNameController = TextEditingController();
 final emailController = TextEditingController();
@@ -15,7 +18,12 @@ final cityController = TextEditingController();
 final addressController = TextEditingController();
 final passwordController = TextEditingController();
 
+
 bool checkEmailSignupFields() {
+  /*
+  This function checks that the fields for sign up, it checks that they are not empty and have the right kind of text (for example, email should have '@' after the first section).
+  Returns a bool, if everything has passed or not.
+   */
   return (emailController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
           firstNameController.text.isNotEmpty &&
@@ -29,6 +37,10 @@ bool checkEmailSignupFields() {
 }
 
 bool checkEmailSigninFields() {
+  /*
+  This function checks that the fields for sign up, it checks that they are not empty
+  Returns a bool, if everything has passed or not.
+   */
   return (emailController.text.isNotEmpty &&
       passwordController.text.isNotEmpty);
 }
@@ -36,6 +48,14 @@ bool checkEmailSigninFields() {
 bool emailInUse = false;
 
 void firstSignUpSheet(var context, int screen) {
+  /**This function shows the bottom sheet when pressing on one of the "Continue with ...".
+    Receives the ID of the screen it should show.
+    IDs:
+    2- Email sign up (shows after trying to sign in with an email that doesnt exist)
+    3- Google sign up (shows after trying to sign in with an Google account that doesnt exist in GiftHub's system)
+    5- Email sign in screen
+    Returns nothing.
+   **/
   showModalBottomSheet<void>(
       isScrollControlled: true,
       context: context,
@@ -49,6 +69,7 @@ void firstSignUpSheet(var context, int screen) {
         return Consumer<UserRepository>(
           builder: (context, userRep, _) => StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
+                ///Email sign up bottom sheet state.
             if (screen == 2) {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
@@ -429,6 +450,7 @@ void firstSignUpSheet(var context, int screen) {
                     )),
               );
             }
+            ///After signing in with Google for the first time, this bottom sheet state shows.
             if (screen == 3) {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
@@ -704,7 +726,7 @@ void firstSignUpSheet(var context, int screen) {
                     )),
               );
             }
-
+            ///Email sign in bottom sheet state
             if (screen == 5) {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
@@ -834,11 +856,11 @@ void firstSignUpSheet(var context, int screen) {
                                   }
                                   if (message ==
                                       'The password is invalid or the user does not have a password.') {
-                                    //TODO: show snackbar wrong password
+                                    //TODO: show snackbar wrong password. For sprint 2
                                   }
                                   if (message ==
                                       'A network error (such as timeout, interrupted connection or unreachable host) has occurred.') {
-                                    //TODO: show snackbar netwrok error
+                                    //TODO: show snackbar netwrok error. For sprint 2
                                   }
                                   if (message ==
                                       'There is no user record corresponding to this identifier. The user may have been deleted.') {
@@ -864,7 +886,7 @@ void firstSignUpSheet(var context, int screen) {
         );
       });
 }
-
+///Start screen.
 Widget startScreenScaffold(context) => Material(
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) => Scaffold(
@@ -943,7 +965,7 @@ Widget startScreenScaffold(context) => Material(
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize:
-                                    MediaQuery.of(context).size.height * 0.032,
+                                    MediaQuery.of(context).size.width * 0.06,
                                 fontFamily: 'TimesNewRoman'),
                           )
                         ],
@@ -956,7 +978,7 @@ Widget startScreenScaffold(context) => Material(
                         if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                           firstSignUpSheet(context, 3);
                         } else {
-                          //TODO: User is now logged in. Move to Ariel's start screen
+
                           Navigator.pushAndRemoveUntil(
                               context,
                               new MaterialPageRoute<void>(
@@ -988,7 +1010,7 @@ Widget startScreenScaffold(context) => Material(
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize:
-                                    MediaQuery.of(context).size.height * 0.032,
+                                MediaQuery.of(context).size.width * 0.06,
                                 fontFamily: 'TimesNewRoman'),
                           )
                         ],
