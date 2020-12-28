@@ -966,7 +966,7 @@ Widget startScreenScaffold(context) => Material(
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize:
-                                    MediaQuery.of(context).size.width * 0.06,
+                                    MediaQuery.of(context).size.width * 0.05,
                                 fontFamily: 'TimesNewRoman'),
                           )
                         ],
@@ -1011,7 +1011,7 @@ Widget startScreenScaffold(context) => Material(
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize:
-                                MediaQuery.of(context).size.width * 0.06,
+                                MediaQuery.of(context).size.width * 0.05,
                                 fontFamily: 'TimesNewRoman'),
                           )
                         ],

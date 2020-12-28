@@ -187,6 +187,7 @@ class UserRepository with ChangeNotifier {
       idToken: googleAuth.idToken,
     );
     await FirebaseAuth.instance.signInWithCredential(credential);
+    _status = Status.Authenticated;
     _user = FirebaseAuth.instance.currentUser;
   }
   ///After signing up with Google, we initialize class's parameters and initialize the needed lists on Firebase.
