@@ -400,15 +400,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      ///TODO: this does some sorts of problems but it works tho and guests can view product images
-      if(Provider.of<UserRepository>(context,).status != Status.Authenticated) {
-        await FirebaseAuth.instance.signInAnonymously();
-      }
-      setState(() {
-
-      });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   ///TODO: this does some sorts of problems but it works tho and guests can view product images
+    //   if(Provider.of<UserRepository>(context,).status != Status.Authenticated) {
+    //     await FirebaseAuth.instance.signInAnonymously();
+    //   }
+    //   setState(() {
+    //
+    //   });
+    // });
     return Material(
       child: Stack(
         alignment: Alignment.center,
