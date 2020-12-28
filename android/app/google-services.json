@@ -1,34 +1,49 @@
 {
   "project_info": {
-    "project_number": "367880170865",
-    "firebase_url": "https://gifthub-ab89a.firebaseio.com",
-    "project_id": "gifthub-ab89a",
-    "storage_bucket": "gifthub-ab89a.appspot.com"
+    "project_number": "28894696255",
+    "project_id": "gifthub-1c81c",
+    "storage_bucket": "gifthub-1c81c.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:367880170865:android:47d6f10bdcf71bcd0c1ad0",
+        "mobilesdk_app_id": "1:28894696255:android:caa8eb51adc54450cd798a",
         "android_client_info": {
-          "package_name": "com.technion.gifthub"
+          "package_name": "com.technion.gifthub_2021a"
         }
       },
       "oauth_client": [
         {
-          "client_id": "367880170865-240leerluactr0h343f9hpms8un4qnnd.apps.googleusercontent.com",
+          "client_id": "28894696255-54nl47dtnfabr4lqb81hr8p5tpe3eb93.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.gifthub_2021a",
+            "certificate_hash": "f3277274a21dc3c7754b3375239937780919f337"
+          }
+        },
+        {
+          "client_id": "28894696255-bucej7sa6nrqnopjkpudls720ajuqhuv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.gifthub_2021a",
+            "certificate_hash": "d497ea2c16a997692ff03a1c7a94183fd8fc1849"
+          }
+        },
+        {
+          "client_id": "28894696255-dkg1s48r3n8ttt1tfupkudcog3874frj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCooQspmXXZPVgI5cHr4mYtnHZTPURzDrk"
+          "current_key": "AIzaSyAUJ9njBkPk6dOR9YNKtyTFpc9zsQS0ny0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "367880170865-240leerluactr0h343f9hpms8un4qnnd.apps.googleusercontent.com",
+              "client_id": "28894696255-dkg1s48r3n8ttt1tfupkudcog3874frj.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
