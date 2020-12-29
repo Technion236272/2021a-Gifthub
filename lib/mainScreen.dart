@@ -77,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.223,
+              height: MediaQuery.of(context).size.width * 0.44,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,

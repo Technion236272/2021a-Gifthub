@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,7 +19,11 @@ import 'package:flutter_launcher_icons/xml_templates.dart';
 void main() {
   globals.userCart = <globals.Product>[];
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
