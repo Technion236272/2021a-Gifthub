@@ -112,8 +112,8 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ),
                     onTap: () async {
-                      var userRep = Provider.of<UserRepository>(context);
-                      userRep.signInWithGoogle();
+                      var userRep = Provider.of<UserRepository>(context, listen: false);
+                      await userRep.signInWithGoogle();
                       if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                         firstSignUpSheet(context, 3);
                       } else {
