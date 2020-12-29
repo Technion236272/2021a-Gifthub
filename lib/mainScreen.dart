@@ -50,19 +50,21 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _snackBarUserUnauthenticated = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      content: Text('only verified users can access this screen',
-        style: GoogleFonts.lato(
-          fontSize: 13.0
+    Future.delayed(Duration.zero, () {
+      _snackBarUserUnauthenticated = SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text('only verified users can access this screen',
+          style: GoogleFonts.lato(
+              fontSize: MediaQuery.of(context).size.height * 0.0256 * (14.1/18)
+          ),
         ),
-      ),
-      action: SnackBarAction(
-        textColor: Colors.deepPurpleAccent,
-        label: 'Log in',
-        onPressed: this._signInDialog,
-      ),
-    );
+        action: SnackBarAction(
+          textColor: Colors.deepPurpleAccent,
+          label: 'Log in',
+          onPressed: this._signInDialog,
+        ),
+      );
+    });
   }
 
   void _signInDialog() {
@@ -432,12 +434,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Padding(
-                              padding: const EdgeInsets.all(11.0),
+                              padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
                               child: Center(
                                 child: Text('  Category: ',
                                   style: niceFont(
                                     color: Colors.black,
-                                    size: 18.0,
+                                    size: MediaQuery.of(context).size.height * 0.0256,
                                   ),
                                 ),
                               ),
@@ -513,9 +515,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               return FutureBuilder(
                                 future: _getImage(productsList[index].id),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
-                                ///if imageURL has no data then defaulted asset image is displayed
+                                ///if imageURL has error then defaulted asset image is displayed
                                 ///under 'Assets/no image product.png'
-                                (imageURL.connectionState != ConnectionState.done)
+                                (imageURL.connectionState != ConnectionState.done || !imageURL.hasData)
                                 ? _circularProgressIndicator
                                 : Card(
                                   elevation: 10.0,
@@ -545,7 +547,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               width: MediaQuery.of(context).size.width,
                                               height: MediaQuery.of(context).size.height * 1/6,
                                               color: Colors.transparent,
-                                              child: imageURL.hasData && "" != imageURL.data
+                                              child: !imageURL.hasError && "" != imageURL.data
                                               ? Image.network(imageURL.data,
                                                 fit: BoxFit.fitWidth,
                                               )
@@ -565,9 +567,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   children: [
                                                     Flexible( ///product title goes here
                                                       child: Text('  ' +
-                                                        ((prodName.length <= 20 - prodPrice.length + 1)
+                                                        ((prodName.length < 20 - (prodPrice.length + 1))
                                                         ? prodName
-                                                        : (prodName.substring(0, 20 - prodPrice.length).trimRight() + '...')),
+                                                        : (prodName.substring(0, 17 - (prodPrice.length + 1)).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 14.0,
@@ -577,9 +579,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                     Flexible( ///product description goes here
                                                       child: Text('  ' +
-                                                        ((prodDescription.length <= 24 - prodPrice.length + 1)
+                                                        ((prodDescription.length <= 23 - (prodPrice.length + 1))
                                                         ? prodDescription
-                                                        : (prodDescription.substring(0, 24 - prodPrice.length).trimRight() + '...')),
+                                                        : (prodDescription.substring(0, 20 - (prodPrice.length + 1)).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 11.0,

@@ -177,7 +177,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           "Press to change",
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.lato(
-                                            fontSize: 15.0,
+                                            fontSize: MediaQuery.of(context).size.height * 0.0256 * (15/18),
                                             color: Colors.black
                                           ),
                                         ),
@@ -197,15 +197,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   padding: EdgeInsets.only(left: 10, right: 5),
                                   child: Container(
                                     width: MediaQuery.of(context).size.width * 0.5 - 15,
-                                    height: MediaQuery.of(context).size.height * 0.1,
+                                    height: MediaQuery.of(context).size.height * 0.11,
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: <Widget>[
-                                        SizedBox(
-                                          height: MediaQuery.of(context).size.height * 0.025 - 2,
-                                          width: 100.0,
+                                        Flexible(
                                           child: Text('First name',
                                             style: GoogleFonts.montserrat(
                                               fontSize: 16.0,
@@ -215,36 +213,39 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                             textAlign: TextAlign.center,
                                           ),
                                         ),
-                                        SizedBox(height: 4,),
-                                        Container(
-                                          height: MediaQuery.of(context).size.height * 0.075 - 2,
-                                          width: MediaQuery.of(context).size.width * 0.5 - 10,
-                                          child: TextField(
-                                            readOnly: !_editingMode,
-                                            enableInteractiveSelection: true,
-                                            autofocus: false,
-                                            decoration: InputDecoration(
-                                              isDense: true,
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(color: Colors.grey),
-                                                borderRadius: BorderRadius.all(Radius.circular(30))
+                                        Flexible(
+                                          flex: 2,
+                                          child: Container(
+                                            height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                            width: MediaQuery.of(context).size.width * 0.5 - 10,
+                                            child: TextField(
+                                              readOnly: !_editingMode,
+                                              enableInteractiveSelection: true,
+                                              autofocus: false,
+                                              decoration: InputDecoration(
+                                                isDense: true,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderRadius: BorderRadius.all(Radius.circular(30))
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderRadius: BorderRadius.all(Radius.circular(30))
+                                                ),
                                               ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(color: Colors.grey),
-                                                borderRadius: BorderRadius.all(Radius.circular(30))
-                                              ),
+                                              onChanged: (text) => {},
+                                              textAlignVertical: TextAlignVertical.top,
+                                              textAlign: TextAlign.center,
+                                              controller: _firstNameController,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
+                                              ],
+                                              focusNode: _firstNameInputFocusNode,
+                                              style: GoogleFonts.lato(
+                                                fontSize: 16.0,
+                                                color: Colors.black,
+                                              )
                                             ),
-                                            onChanged: (text) => {},
-                                            textAlign: TextAlign.center,
-                                            controller: _firstNameController,
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
-                                            ],
-                                            focusNode: _firstNameInputFocusNode,
-                                            style: GoogleFonts.lato(
-                                              fontSize: 16.0,
-                                              color: Colors.black,
-                                            )
                                           ),
                                         ),
                                       ],
@@ -255,15 +256,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   padding: EdgeInsets.only(right: 10, left: 5),
                                   child: Container(
                                     width: MediaQuery.of(context).size.width * 0.5 - 15,
-                                    height: MediaQuery.of(context).size.height * 0.1,
+                                    height: MediaQuery.of(context).size.height * 0.11,
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: <Widget>[
-                                        SizedBox(
-                                          height: MediaQuery.of(context).size.height * 0.025 - 2,
-                                          width: 100.0,
+                                        Flexible(
                                           child: Text('Last name',
                                               textAlign: TextAlign.center,
                                               style: GoogleFonts.montserrat(
@@ -273,36 +272,39 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               )
                                           ),
                                         ),
-                                        SizedBox(height: 4,),
-                                        Container(
-                                          height: MediaQuery.of(context).size.height * 0.075 - 2,
-                                          width: MediaQuery.of(context).size.width * 0.5 - 10,
-                                          child: TextField(
-                                            readOnly: !_editingMode,
-                                            autofocus: false,
-                                            focusNode: _lastNameInputFocusNode,
-                                            keyboardType: TextInputType.name,
-                                            decoration: InputDecoration(
-                                              isDense: true,
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(color: Colors.grey),
-                                                borderRadius: BorderRadius.all(Radius.circular(30))
+                                        Flexible(
+                                          flex: 2,
+                                          child: Container(
+                                            height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                            width: MediaQuery.of(context).size.width * 0.5 - 10,
+                                            child: TextField(
+                                              readOnly: !_editingMode,
+                                              autofocus: false,
+                                              focusNode: _lastNameInputFocusNode,
+                                              keyboardType: TextInputType.name,
+                                              decoration: InputDecoration(
+                                                isDense: true,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderRadius: BorderRadius.all(Radius.circular(30))
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderRadius: BorderRadius.all(Radius.circular(30))
+                                                ),
                                               ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(color: Colors.grey),
-                                                borderRadius: BorderRadius.all(Radius.circular(30))
-                                              ),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
+                                              ],
+                                              textAlignVertical: TextAlignVertical.top,
+                                              textAlign: TextAlign.center,
+                                              controller: _lastNameController,
+                                              onChanged: (text) => {},
+                                              style: GoogleFonts.lato(
+                                                fontSize: 16.0,
+                                                color: Colors.black,
+                                              )
                                             ),
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter.allow(RegExp('[a-z A-Z -]'))
-                                            ],
-                                            textAlign: TextAlign.center,
-                                            controller: _lastNameController,
-                                            onChanged: (text) => {},
-                                            style: GoogleFonts.lato(
-                                              fontSize: 16.0,
-                                              color: Colors.black,
-                                            )
                                           ),
                                         ),
                                       ],
@@ -327,32 +329,36 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 ),
                                 Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 10.0),
-                                  child: TextField(
-                                    readOnly: !_editingMode,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
-                                          borderRadius: BorderRadius.all(Radius.circular(30))
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                    child: TextField(
+                                      readOnly: !_editingMode,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.grey),
+                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.grey),
+                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                        ),
                                       ),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
-                                          borderRadius: BorderRadius.all(Radius.circular(30))
-                                      ),
+                                      focusNode: _addressInputFocusNode,
+                                      controller: _addressController,
+                                      autofocus: false,
+                                      keyboardType: TextInputType.streetAddress,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
+                                      ],
+                                      onChanged: (text) => {},
+                                      textAlignVertical: TextAlignVertical.top,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.lato(
+                                        fontSize: 16.0,
+                                        color: Colors.black
+                                      )
                                     ),
-                                    focusNode: _addressInputFocusNode,
-                                    controller: _addressController,
-                                    autofocus: false,
-                                    keyboardType: TextInputType.streetAddress,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
-                                    ],
-                                    onChanged: (text) => {},
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.lato(
-                                      fontSize: 16.0,
-                                      color: Colors.black
-                                    )
                                   ),
                                 ),
                                 SizedBox(height: 15,),
@@ -365,14 +371,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       padding: const EdgeInsets.only(left: 10.0, right: 5.0),
                                       child: Container(
                                         width: MediaQuery.of(context).size.width * 0.3 - 15,
-                                        height: MediaQuery.of(context).size.height * 0.1,
+                                        height: MediaQuery.of(context).size.height * 0.11,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: <Widget>[
-                                            SizedBox(
-                                              height: MediaQuery.of(context).size.height * 0.03,
+                                            Flexible(
                                               child: Text('Apt.',
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 16.0,
@@ -382,37 +387,41 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 textAlign: TextAlign.center,
                                               ),
                                             ),
-                                            Container(
-                                              height: MediaQuery.of(context).size.height * 0.07,
-                                              width: MediaQuery.of(context).size.width * 0.3,
-                                              child: TextField(
-                                                autofocus: false,
-                                                readOnly: !_editingMode,
-                                                keyboardType: TextInputType.number,
-                                                decoration: InputDecoration(
-                                                  counterText: "",
-                                                  isDense: true,
-                                                  enabledBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(color: Colors.grey),
-                                                      borderRadius: BorderRadius.all(Radius.circular(30))
+                                            Flexible(
+                                              flex: 2,
+                                              child: Container(
+                                                height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                                width: MediaQuery.of(context).size.width * 0.3,
+                                                child: TextField(
+                                                  autofocus: false,
+                                                  readOnly: !_editingMode,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                    counterText: "",
+                                                    isDense: true,
+                                                    enabledBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.grey),
+                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                    ),
+                                                    focusedBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.grey),
+                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                    ),
                                                   ),
-                                                  focusedBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(color: Colors.grey),
-                                                      borderRadius: BorderRadius.all(Radius.circular(30))
-                                                  ),
+                                                  onChanged: (text) => {},
+                                                  textAlignVertical: TextAlignVertical.top,
+                                                  textAlign: TextAlign.center,
+                                                  controller: _aptController,
+                                                  maxLength: 6,
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(RegExp('[0-9]'))
+                                                  ],
+                                                  focusNode: _aptInputFocusNode,
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 16.0,
+                                                    color: Colors.black,
+                                                  )
                                                 ),
-                                                onChanged: (text) => {},
-                                                textAlign: TextAlign.center,
-                                                controller: _aptController,
-                                                maxLength: 6,
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.allow(RegExp('[0-9]'))
-                                                ],
-                                                focusNode: _aptInputFocusNode,
-                                                style: GoogleFonts.lato(
-                                                  fontSize: 16.0,
-                                                  color: Colors.black,
-                                                )
                                               ),
                                             ),
                                           ],
@@ -423,14 +432,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       padding: const EdgeInsets.only(right: 10.0, left: 5.0),
                                       child: Container(
                                         width: MediaQuery.of(context).size.width * 0.7 - 15,
-                                        height: MediaQuery.of(context).size.height * 0.1,
+                                        height: MediaQuery.of(context).size.height * 0.11,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: <Widget>[
-                                            SizedBox(
-                                              height: MediaQuery.of(context).size.height * 0.03,
+                                            Flexible(
                                               child: Text('City',
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 16.0,
@@ -440,34 +448,38 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 textAlign: TextAlign.center,
                                               ),
                                             ),
-                                            Container(
-                                              height: MediaQuery.of(context).size.height * 0.07,
-                                              width: MediaQuery.of(context).size.width * 0.7 - 10,
-                                              child: TextField(
-                                                autofocus: false,
-                                                readOnly: !_editingMode,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  enabledBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(color: Colors.grey),
-                                                      borderRadius: BorderRadius.all(Radius.circular(30))
+                                            Flexible(
+                                              flex: 2,
+                                              child: Container(
+                                                height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                                width: MediaQuery.of(context).size.width * 0.7 - 10,
+                                                child: TextField(
+                                                  autofocus: false,
+                                                  readOnly: !_editingMode,
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    enabledBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.grey),
+                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                    ),
+                                                    focusedBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.grey),
+                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                    ),
                                                   ),
-                                                  focusedBorder: OutlineInputBorder(
-                                                      borderSide: BorderSide(color: Colors.grey),
-                                                      borderRadius: BorderRadius.all(Radius.circular(30))
-                                                  ),
+                                                  onChanged: (text) => {},
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical: TextAlignVertical.top,
+                                                  controller: _cityController,
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
+                                                  ],
+                                                  focusNode: _cityInputFocusNode,
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 16.0,
+                                                    color: Colors.black,
+                                                  )
                                                 ),
-                                                onChanged: (text) => {},
-                                                textAlign: TextAlign.center,
-                                                controller: _cityController,
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
-                                                ],
-                                                focusNode: _cityInputFocusNode,
-                                                style: GoogleFonts.lato(
-                                                  fontSize: 16.0,
-                                                  color: Colors.black,
-                                                )
                                               ),
                                             ),
                                           ],
@@ -475,10 +487,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       ),
                                     ),
                                   ],
-                                )
+                                ),
                               ],
                             ),
-                            SizedBox(height: 70,),
+                            SizedBox(height: 60,),
                             Align(
                               alignment: FractionalOffset.bottomCenter,
                               child: Container(
@@ -534,11 +546,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         }
                                         _editingMode = false;
                                       });
-                                      userRep.updateFirebaseUserList();
+                                      await userRep.updateFirebaseUserList();
                                       setState(() {
                                         _uploadingAvatar = false;
                                       });
-                                      // return Future.delayed(Duration(seconds: 3));
                                     }
                                     : () {
                                       _unfocusAll();
