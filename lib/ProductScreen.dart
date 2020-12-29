@@ -226,6 +226,10 @@ class _ProductScreenState extends State<ProductScreen> {
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
                                         return;
                                       }
+                                      if(userRep.user.uid == _prod.user) {
+                                        _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("You can't add a review to your own product")));
+                                        return;
+                                      }
                                       _getReviewBottomSheet();
                                     }),
 

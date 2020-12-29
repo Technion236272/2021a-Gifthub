@@ -126,7 +126,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if(snapshot.hasError){
+                  if (snapshot.hasError) {
                     return globals.emptyErrorScaffold(snapshot.error.toString());
                   }
                   final aboutTab = SingleChildScrollView(
@@ -164,7 +164,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               child: Image(
                                 image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
                                 width: min(min(MediaQuery
-                                    .of(context).size.width, _storeImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                                    .of(context)
+                                    .size
+                                    .width, _storeImageSize.width), MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.25),
                               ),
                             ),)
                               : Container(
@@ -172,7 +177,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               border: Border.all(width: 5),
                             ),
                             child: Image(
-                              width: min(min(MediaQuery.of(context).size.width, _storeImageSize.width), MediaQuery.of(context).size.height * 0.25),
+                              width: min(min(MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width, _storeImageSize.width), MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.25),
                               image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
                             ),
                           ),
@@ -238,33 +249,37 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     )
                                 ),
                                 RaisedButton(
-                                    elevation: 15.0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.0),
-                                      side: BorderSide(color: Colors.transparent),
-                                    ),
-                                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                                    color: Colors.red[900],
-                                    textColor: Colors.white,
-                                    onPressed: () {
-                                      if(userRep.status != Status.Authenticated){
-                                        _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
-                                        return;
-                                      }
-                                      _getReviewBottomSheet();
-                                    },
-                                    child: Row(
-                                        children: [
-                                          Icon(Icons.add),
-                                          Text("Add Review"),
-                                        ]
-                                    )
+                                  child: Row(
+                                      children: [
+                                        Icon(Icons.add),
+                                        Text("Add Review"),
+                                      ]
+                                  ),
+                                  elevation: 15.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                    side: BorderSide(color: Colors.transparent),
+                                  ),
+                                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                                  color: Colors.red[900],
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    if (userRep.status != Status.Authenticated) {
+                                      _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
+                                      return;
+                                    }
+                                    if(userRep.user.uid == _storeId){
+                                      _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("You can't add a review to your own store")));
+                                      return;
+                                    }
+                                    _getReviewBottomSheet();
+                                  },
                                 ),
                               ]
                           )
                         ]
                     ),
-                  ) ;
+                  );
                   final itemsTab = GridView.count(
                     childAspectRatio: 3 / 2,
                     crossAxisCount: 2,
@@ -279,7 +294,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             prodImage = null;
                           }
                           return Tuple2<globals.Product, Image>(p, prodImage);
-                        } (),
+                        }(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.done) {
                             return Card(
@@ -289,7 +304,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Expanded(child: snapshot.data.item2 != null? snapshot.data.item2 : Image.asset('Assets/Untitled.png')),
+                                    Expanded(child: snapshot.data.item2 != null ? snapshot.data.item2 : Image.asset('Assets/Untitled.png')),
                                     Text(p.name, style: globals.niceFont()),
                                     Text('\$' + p.price.toString(), style: globals.niceFont())
                                   ],
