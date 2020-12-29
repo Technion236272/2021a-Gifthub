@@ -187,6 +187,8 @@ Scaffold emptyErrorScaffold(String error) {
   );
 }
 
+/// decorated screen upon empty WishList or Orders list
+/// displays GiftHub's logo with a star and an informative text to the user
 Widget emptyListErrorScreen(BuildContext context, String list) {
   return Scaffold(
     appBar: 'Orders ' == list ? null
@@ -268,7 +270,8 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
     ),
   );
 }
-
+/// decorated screen upon empty search result of categories
+/// displays GiftHub's logo with a star and an informative text to the user
 Stack emptyListOfCategories (BuildContext context, String category) {
   return Stack(
     alignment: Alignment.center,
