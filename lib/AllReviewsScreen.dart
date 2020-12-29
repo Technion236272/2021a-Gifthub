@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'globals.dart' as globals;
 
+/// ------------------------------------------------
+/// All Reviews Screen:
+/// This widget shows a screen with a list of all the reviews
+/// for a store/product. The widget gets the list when it is called,
+/// which makes it generic.
+/// ------------------------------------------------
+
 class AllReviewsScreen extends StatefulWidget {
   final _reviews;
 

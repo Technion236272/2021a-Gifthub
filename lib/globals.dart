@@ -6,6 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'my_flutter_app_icons.dart';
 
+/// ------------------------------------------------
+/// globals
+/// This file contains implementations to some classes,
+/// variables and functions that are used widely throughout
+/// the app, and it allows us to create app-wide conventions
+/// easily.
+/// ------------------------------------------------
+
 class Product {
   String _productId;
   String _userId;

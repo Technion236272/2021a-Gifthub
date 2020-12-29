@@ -19,6 +19,15 @@ import 'package:intl/intl.dart';
 import 'AllReviewsScreen.dart';
 import 'package:tuple/tuple.dart';
 
+/// ----------------------------------------------------
+/// The Store Screen:
+/// This is a generic widget that will show a store based
+/// on the store Id it gets upon creation.
+/// Contains a tab with info about the store ('abot tab')
+/// and a tab with a grid of the store's product ('items tab').
+/// Also allows a store owner to edit their store information
+/// and add new products.
+/// ----------------------------------------------------
 class StoreScreen extends StatefulWidget {
   final _storeId;
 
@@ -63,6 +72,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     _storeAddr = storeArgs['address'];
     _storePhone = storeArgs['phone'];
     Completer<Size> completer = Completer<Size>();
+    /// Get the store's image from the storage if it exists or show a default image.
     try {
       _storeImageURL = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
       _storeImage = NetworkImage(_storeImageURL);
@@ -86,6 +96,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     } finally {
       _storeImageSize = await completer.future;
     }
+    ///Get all the store's products.
     _products = <globals.Product>[];
     for (var p in doc.data()['Products']) {
       var prodArgs = (await ref.doc(p).get()).data()['Product'];
@@ -129,6 +140,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                   if (snapshot.hasError) {
                     return globals.emptyErrorScaffold(snapshot.error.toString());
                   }
+                  /// Shows the store's information.
+                  /// Supports editing mode that allows the owner to change
+                  /// some of the store's info.
                   final aboutTab = SingleChildScrollView(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +151,21 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         children: <Widget>[
                           editingMode ?
                           InkWell(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(width: 5),
+                              ),
+                              child: Image(
+                                image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
+                                width: min(min(MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width, _storeImageSize.width), MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.25),
+                              ),
+                            ),
                             onLongPress: () async {
                               PickedFile photo = await ImagePicker().getImage(source: ImageSource.gallery);
                               if (null == photo) {
@@ -157,21 +186,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 });
                               }
                             },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 5),
-                              ),
-                              child: Image(
-                                image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
-                                width: min(min(MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width, _storeImageSize.width), MediaQuery
-                                    .of(context)
-                                    .size
-                                    .height * 0.25),
-                              ),
-                            ),)
+                            )
                               : Container(
                             decoration: BoxDecoration(
                               border: Border.all(width: 5),
@@ -280,6 +295,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         ]
                     ),
                   );
+                  /// Shows the store's product in a pretty grid.
+                  /// Users can access any product by clicking it.
                   final itemsTab = GridView.count(
                     childAspectRatio: 3 / 2,
                     crossAxisCount: 2,
@@ -349,6 +366,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
+                                    ///Let the user edit and save store changes only if it's the owner
                                     actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                                       await userRep.firestore.collection('Stores').doc(_storeId).get().then((snapshot) async {
@@ -521,13 +539,7 @@ class AddProductDialogBox extends StatefulWidget {
       controllersList.add(TextEditingController());
     }
   }
-  //YOU CALL THIS DIALOG BOX LIKE THIS:
-  /*
-  showDialog(context: context,
-                    builder: (BuildContext context){
-                      return AddProductDialogBox(total: "45",productList: null,);//TODO: insert the correct total and product list
-                    }
-   */
+
   @override
   _AddProductDialogBoxState createState() => _AddProductDialogBoxState();
 
