@@ -21,6 +21,14 @@ import 'user_repository.dart';
 import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
 
+///-----------------------------------------------------------------------------
+/// User Orders Screen:
+/// displays all products that the current user ordered
+/// user's orders are fetched remotely from FireBase FireStore & Storage,
+/// generated and displayed in a ListView
+/// all list items are slidable and multiple options offered as will be described below
+///-----------------------------------------------------------------------------
+
 enum OrderStatus { Ordered, Pending, Confirmed, Arrived }
 
 class UserOrdersScreen extends StatefulWidget {
@@ -33,6 +41,8 @@ class UserOrdersScreen extends StatefulWidget {
 class _UserOrdersScreenState extends State<UserOrdersScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyOrders = new GlobalKey<ScaffoldState>();
   final TextEditingController _reviewController = TextEditingController();
+
+  ///current review rating of user
   double _rating = 0.0;
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
@@ -54,12 +64,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     return Material(
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) {
+          /// fetching user's orders from FB storage
           return FutureBuilder(
             future: FirebaseFirestore.instance.collection("Orders").doc(userRep.user.uid).get(),
             builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
+              if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
                 return _circularProgressIndicator;
-              } else if (!snapshot.hasData || 0 == snapshot.data.data()['Orders'].length) {
+              } else if (0 == snapshot.data.data()['Orders'].length) {
+                /// if user's order history is empty then a blank, informative and interactive
+                /// screen is displayed. defined under globals.dart
                 return globals.emptyListErrorScreen(context, 'Orders ');
               }
               int totalProducts = snapshot.data.data()['Orders'].length;
@@ -89,6 +102,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.all(16),
                             itemBuilder: (BuildContext context, int i) {
+                              /// generating the orders
                               if (i >= 2 * totalProducts) {
                                 return null;
                               }
@@ -98,6 +112,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   thickness: 1.0,
                                 );
                               }
+                              /// parsing product details from FB firestore
                               var ordersProduct = snapshot.data.data()['Orders'];
                               String prodName = ordersProduct[i ~/ 2]['name'];
                               String prodPrice = ordersProduct[i ~/ 2]['price'];
@@ -105,28 +120,31 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               String prodID = ordersProduct[i ~/ 2]['productID'];
                               String prodQuantity = ordersProduct[i ~/ 2]['quantity'];
                               return FutureBuilder(
+                                /// fetching order's images
                                 future: _getImage(prodID),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
                                   if (snapshot.connectionState != ConnectionState.done || !imageURL.hasData) {
                                     return _circularProgressIndicator;
                                   }
-                                  ///if image url contains no data (meaning there is no product image)
+                                  ///if image url has error (meaning there is no product image)
                                   ///then defaulted asset image is displayed
                                   ///under 'Assets/no image product.png'
-                                  return Slidable(
+                                  return Slidable( ///creating slidable list tile
                                     showAllActionsThreshold: 0.5,
                                     actionPane: SlidableDrawerActionPane(),
                                     fastThreshold: 2.0,
                                     actionExtentRatio: 0.22,
                                     direction: Axis.horizontal,
                                     actions: <Widget>[
-                                      //Reorder
+                                      ///Reorder
                                       IconSlideAction(
                                         caption: 'Reorder',
                                         color: Colors.transparent,
                                         foregroundColor: Colors.amberAccent,
                                         icon: Icons.attach_money_outlined,
                                         onTap: () {
+                                          ///adding order to cart and displaying
+                                          ///success snackbar with checkout option
                                           globals.userCart.add(globals.Product(
                                             prodID,
                                             userRep.user.uid,
@@ -157,7 +175,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                           );
                                         },
                                       ),
-                                      //Write review
+                                      ///Write review
                                       IconSlideAction(
                                         caption: 'Write review',
                                         color: Colors.transparent,
@@ -171,7 +189,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                             builder: (BuildContext context) {
                                               return Padding(
                                                 padding: EdgeInsets.only(
-                                                    bottom: MediaQuery.of(context).viewInsets.bottom
+                                                  bottom: MediaQuery.of(context).viewInsets.bottom
                                                 ),
                                                 child: Column(
                                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +244,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                       ),
                                                     ),
                                                     SizedBox(height: 5.0,),
-                                                    Align(
+                                                    Align( ///submission button:
                                                       alignment: FractionalOffset.bottomCenter,
                                                       child: Container(
                                                         width: 200,
@@ -242,6 +260,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                           ),
                                                           visualDensity: VisualDensity.adaptivePlatformDensity,
                                                           onPressed: () async {
+                                                            if(0.0 == _rating) {
+                                                              _rating = 1.0;
+                                                            }
                                                             var listToAdd = [];
                                                             listToAdd.add(
                                                               {
@@ -292,30 +313,33 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                           );
                                         },
                                       ),
-                                      //share
+                                      ///share
                                       IconSlideAction(
                                         caption: 'Share to...',
                                         color: Colors.transparent,
                                         foregroundColor: Colors.blueAccent,
                                         icon: Icons.share_outlined,
                                         onTap: () async {
-                                          if(imageURL.hasData && imageURL.data != "") {
-                                            final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
-                                            if (Platform.isAndroid) {
-                                              var response = await get(imageURL.data);
-                                              final documentDirectory = (await getExternalStorageDirectory()).path;
-                                              File imgFile = new File('$documentDirectory/flutter.png');
-                                              imgFile.writeAsBytesSync(response.bodyBytes);
-                                              List<String> sharingList = new List();
-                                              sharingList.add('$documentDirectory/flutter.png');
-                                              //TODO: add store's name next to product's name or add a direct url share option
-                                              await Share.shareFiles(
-                                                  sharingList,
-                                                  text: "check this cool product now!\n" + prodName,
-                                                  sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-                                                  subject: 'I found a lovely product on GiftHub!'
-                                              );
-                                            }
+                                          /// split between 2 cases:
+                                          /// item has an image or not
+                                          if(!imageURL.hasError && imageURL.hasData && imageURL.data != "") {
+                                            try {
+                                              final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
+                                              if (Platform.isAndroid) {
+                                                var response = await get(imageURL.data);
+                                                final documentDirectory = (await getExternalStorageDirectory()).path;
+                                                File imgFile = new File('$documentDirectory/flutter.png');
+                                                imgFile.writeAsBytesSync(response.bodyBytes);
+                                                List<String> sharingList = new List();
+                                                sharingList.add('$documentDirectory/flutter.png');
+                                                await Share.shareFiles(
+                                                    sharingList,
+                                                    text: "check this cool product now!\n" + prodName,
+                                                    sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                                    subject: 'I found a lovely product on GiftHub!'
+                                                );
+                                              }
+                                            } catch (_) {}
                                           } else {
                                             try {
                                               final RenderBox box = _scaffoldKeyOrders.currentContext.findRenderObject();
@@ -329,13 +353,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                                 subject: 'I found a lovely product on GiftHub!'
                                               );
-                                            } catch (_) {} //TODO: show error snackbar?
+                                            } catch (_) {}
                                           }
                                         },
                                       )
                                     ],
                                     secondaryActions: <Widget>[
-                                    //delete
+                                    ///delete option
                                       IconSlideAction(
                                         caption: 'Delete',
                                         color: Colors.transparent,
@@ -346,6 +370,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                             barrierDismissible: true,
                                             context: context,
                                             builder: (BuildContext context) {
+                                              /// upon deletion
+                                              /// showing alert dialog to reassure
+                                              /// user's intention
                                               return AlertDialog(
                                                 backgroundColor: Colors.white,
                                                 elevation: 24.0,
@@ -405,8 +432,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                       ),
                                     ],
                                     child: ListTile(
-                                      leading: imageURL.data != ""
-                                      ? CircularProfileAvatar(
+                                      leading: !imageURL.hasError && imageURL.hasData && imageURL.data != ""
+                                      /// split to 2 cases where product has a
+                                      /// picture or not
+                                      ? CircularProfileAvatar( ///product's image
                                         imageURL.data,
                                         radius: 26.0,
                                         onTap: () {
@@ -438,12 +467,14 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         borderRadius: BorderRadius.circular(26.0),
                                         child: Image.asset('Assets/no image product.png'),
                                       ),
+                                      ///orders's name
                                       title: Text(prodName + '  x' + prodQuantity,
                                         style: GoogleFonts.lato(
                                           fontSize: 18.0,
                                           color: Colors.black,
                                         ),
                                       ),
+                                      ///order's price, date of order and order status
                                       subtitle: Text(prodPrice + "\$  |  " +
                                           prodDate + "  |  " +
                                           OrderStatus.values[i % 4].toString().substring(12),
@@ -452,6 +483,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                           color: Colors.grey,
                                         ),
                                       ),
+                                      /// navigate to product's screen:
                                       onTap: () => Navigator.of(context).push(
                                         new MaterialPageRoute(
                                           builder: (BuildContext context) {
@@ -478,6 +510,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     );
   }
 
+  /// gets product image from firebase storage with respect to the storage's
+  /// structure under docs/ folder at our GitHub project
+  /// if there is no image, then an empty string is returned
   Future<String> _getImage(String productId) async {
     String imageURL = "";
     try {

@@ -245,7 +245,6 @@ class UserRepository with ChangeNotifier {
 
   /// sets avatar for a user
   /// in use at: userSettingsScreen.dart
-  /// written by Ariel
   Future<void> setAvatar(String avatar) async {
     try {
       await _storage.ref('userImages').child(_auth.currentUser.uid).putFile(File(avatar));
@@ -259,7 +258,6 @@ class UserRepository with ChangeNotifier {
 
   /// deletes avatar for a user
   /// in use at: userSettingsScreen.dart
-  /// written by Ariel
   Future<void> deleteAvatar() async {
     try {
       await _storage.ref("userImages").child(_user.uid).delete();

@@ -23,14 +23,6 @@ class CustomDialogBox extends StatefulWidget {
   const CustomDialogBox({Key key,})
       : super(key: key);
 
-  ///YOU CALL THIS DIALOG BOX LIKE THIS:
-  ///
-  /// showDialog(context: context,
-  ///   builder: (BuildContext context){
-  ///     return CustomDialogBox();
-  ///   }
-  /// )
-
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
 }
@@ -53,11 +45,14 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
   }
 
   contentBox(context) {
+    ///generating user's shopping cart to be displayed as follows:
+    ///Product some_product -> (some_product's name)  x(some_product's quantity in cart)
     List<String> productList = [];
     groupBy(globals.userCart.
     map((e) => e.name)
         .toList(), (p) => p)
         .forEach((key, value) => productList.add(key.toString() + '  x' + value.length.toString()));
+    ///calculating total price of order:
     double price = globals.userCart
         .map<double>((e) => e.price)
         .toList()
@@ -87,6 +82,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         fontWeight: FontWeight.w600),
                     textAlign: TextAlign.center),
                 Spacer(flex: 3),
+                ///total price of order:
                 Text('\$' + price.toStringAsFixed(1),
                     style: GoogleFonts.openSans(
                         fontSize: MediaQuery.of(context).size.width * 0.045,
@@ -114,7 +110,9 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                     }
                     index ~/= 2;
                     return ListTile(
+                      ///product's name
                       title: Text(productList[index]),
+                      ///product deletion option:
                       trailing: IconButton(
                         onPressed: () {
                           for(globals.Product p in globals.userCart){
@@ -138,7 +136,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.04,
               ),
-              Flexible(
+              Flexible( ///checkout button:
                 child: InkWell(
                   onTap: () async {
                     Navigator.of(context).pop();
@@ -146,6 +144,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                     if(null == userRep.user || userRep.status != Status.Authenticated){
                       return Future.delayed(Duration.zero);
                     }
+                    ///updating user's order history:
                     var ordersToAdd = [];
                     globals.userCart.forEach((element) {
                       ordersToAdd.add({
@@ -160,7 +159,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         .doc(Provider.of<UserRepository>(context, listen: false).user.uid)
                         .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
                     globals.userCart.clear();
-                    Navigator.of(context).pop();
+                    Navigator.pop(context);
                     //TODO: make cool animation - prob. Sprint 2
                   },
                   child: Container(
@@ -188,6 +187,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
             ],
           ),
         ),
+        ///GiftHub logo decoration
         Positioned(
           left: Constants.padding,
           right: Constants.padding,
@@ -226,13 +226,14 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
       ],
     );
   }
-  
+
+  ///getting product's quantity on cart
   String _getQuantity(String name, List<String> list){
     for(String p in list) {
       if (name == p.split('  x')[0]) {
         return p.split('  x')[1];
       }
     }
-    return "1"; ///shouldn't get here
+    return "1"; ///shouldn't get here because product has to be on user's cart
   }
 }
