@@ -214,34 +214,6 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           SizedBox(width: 10),
                           globals.fixedStarBar(_storeRating),
                           SizedBox(height: 10),
-                          Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width,
-                            height: MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.2,
-                            child: Expanded(
-                              child: ListView(
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: ListTile.divideTiles(
-                                  context: context,
-                                  tiles: _reviews
-                                      .sublist(0, min(2, _reviews.length))
-                                      .map<ListTile>((r) =>
-                                      ListTile(
-                                        title: Text(r.content, style: globals.niceFont()),
-                                        subtitle: Text(r.userName, style: globals.niceFont(size: 12)),
-                                        leading: globals.fixedStarBar(r.rating, itemSize: 18.0,),
-                                      )
-                                  ).toList(),
-                                  color: Colors.red,
-                                ).toList(),
-                              ),
-                            ),
-                          ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
