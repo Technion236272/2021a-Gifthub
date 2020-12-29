@@ -543,6 +543,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
   Color colorForCategory, colorForImage;
   PickedFile pickedImage;
   String category;
+  bool _isAddedPressed = false;
 
   @override
   void initState() {
@@ -686,7 +687,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                 child: Text("pick image", style: globals.niceFont()),
               ),
               InkWell(
-                onTap: () async {
+                onTap: _isAddedPressed? null : () async {
                   bool isAllGood = true;
                   if (widget.controllersList[0].text == '' || widget.controllersList[2].text == '') {
                     setState(() {
@@ -718,6 +719,9 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                   if (!isAllGood) {
                     return;
                   }
+                  setState(() {
+                    _isAddedPressed = true;
+                  });
                   var _db = FirebaseFirestore.instance;
                   var prodId = (await _db.collection('Products').doc('Counter').get()).data()['Counter'];
                   var today = DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
@@ -745,6 +749,9 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                     return;
                   });
                   await FirebaseStorage.instance.ref().child('productImages/' + prodId.toString()).putFile(File(pickedImage.path));
+                  setState(() {
+                    _isAddedPressed = false;
+                  });
                   Navigator.of(context).pop();
                 },
                 child: Container(
@@ -756,12 +763,13 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                       .size
                       .height * 0.02),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: _isAddedPressed ? Colors.grey : Colors.red,
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(globals.Constants.padding),
                         bottomRight: Radius.circular(globals.Constants.padding)),
                   ),
-                  child: Text
+                  child: _isAddedPressed ? Center(child: CircularProgressIndicator())
+                      : Text
                     (widget.textConfirm,
                     style: GoogleFonts.openSans(color: Colors.white, fontSize: MediaQuery
                         .of(context)
