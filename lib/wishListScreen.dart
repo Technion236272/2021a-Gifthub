@@ -18,6 +18,14 @@ import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
 import 'ProductScreen.dart';
 
+///-----------------------------------------------------------------------------
+/// User Wish List Screen:
+/// displays all products that the current user set on his wish list
+/// user's products are fetched remotely from FireBase FireStore & Storage,
+/// generated and displayed in a ListView
+/// all list items are slidable and multiple options offered as will be described below
+///-----------------------------------------------------------------------------
+
 class WishListScreen extends StatefulWidget {
   WishListScreen({Key key}) : super(key: key);
 
@@ -49,11 +57,14 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) =>
           FutureBuilder(
+            /// fetching user's wish list from FB storage
             future: FirebaseFirestore.instance.collection("Wishlists").doc(userRep.user.uid).get(),
             builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> wishListSnapshot) {
-              if (wishListSnapshot.connectionState != ConnectionState.done) {
+              if (!wishListSnapshot.hasData || wishListSnapshot.connectionState != ConnectionState.done) {
                 return _circularProgressIndicator;
-              } else if (!wishListSnapshot.hasData || 0 == wishListSnapshot.data.data()['Wishlist'].length) {
+              } else if (0 == wishListSnapshot.data.data()['Wishlist'].length) {
+                /// if user's wish list is empty then a blank, informative and interactive
+                /// screen is displayed. defined under globals.dart
                 return globals.emptyListErrorScreen(context, 'Wishlist');
               }
               int totalProducts = wishListSnapshot.data.data()['Wishlist'].length;
@@ -96,8 +107,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
                             color: Colors.white,
-                            //padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight * 2 + 7),
                             child: ListView.builder(
+                              /// generating the wishlist
                               itemCount: totalProducts * 2,
                               shrinkWrap: true,
                               padding: const EdgeInsets.all(16),
@@ -122,6 +133,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                     if(!productSnapshot.hasData || _isCounter(productSnapshot)){
                                       return Container(width: 0.0, height: 0.0);
                                     }
+                                    /// parsing product details from FB firestore
                                     var productData = productSnapshot.data.data()['Product'];
                                     String prodName = productData['name'];
                                     String prodPrice = productData['price'];
@@ -132,7 +144,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                         if (imageURL.connectionState != ConnectionState.done) {
                                           return _circularProgressIndicator;
                                         }
-                                        ///if image url contains no data (meaning there is no product image)
+                                        ///if image url has error (meaning there is no product image)
                                         ///then defaulted asset image is displayed
                                         ///under 'Assets/no image product.png'
                                         return Slidable(
@@ -140,7 +152,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                           actionExtentRatio: 0.22,
                                           direction: Axis.horizontal,
                                           actions: <Widget>[
-                                            //add to cart
+                                            ///add to cart
                                             IconSlideAction(
                                               caption: 'Add to cart',
                                               color: Colors.transparent,
@@ -193,30 +205,33 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                 );
                                               },
                                             ),
-                                            // Share
+                                            /// Share
                                             IconSlideAction(
                                               caption: 'Share',
                                               color: Colors.transparent,
                                               foregroundColor: Colors.blueAccent,
                                               icon: Icons.share_outlined,
                                               onTap: () async {
-                                                if(imageURL.hasData && "" != imageURL.data) {
-                                                  final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
-                                                  if (Platform.isAndroid) {
-                                                    var response = await get(imageURL.data);
-                                                    final documentDirectory = (await getExternalStorageDirectory()).path;
-                                                    File imgFile = new File('$documentDirectory/flutter.png');
-                                                    imgFile.writeAsBytesSync(response.bodyBytes);
-                                                    List<String> sharingList = new List();
-                                                    sharingList.add('$documentDirectory/flutter.png');
-                                                    //TODO: add store's name next to product's name or add a direct url share option
-                                                    await Share.shareFiles(
-                                                        sharingList,
-                                                        text: "check this cool product now!\n" + prodName,
-                                                        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-                                                        subject: 'I found a lovely product on GiftHub!'
-                                                    );
-                                                  }
+                                                /// split between 2 cases:
+                                                /// item has an image or not
+                                                if(!imageURL.hasError && imageURL.hasData && "" != imageURL.data) {
+                                                  try {
+                                                    final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
+                                                    if (Platform.isAndroid) {
+                                                      var response = await get(imageURL.data);
+                                                      final documentDirectory = (await getExternalStorageDirectory()).path;
+                                                      File imgFile = new File('$documentDirectory/flutter.png');
+                                                      imgFile.writeAsBytesSync(response.bodyBytes);
+                                                      List<String> sharingList = new List();
+                                                      sharingList.add('$documentDirectory/flutter.png');
+                                                      await Share.shareFiles(
+                                                          sharingList,
+                                                          text: "check this cool product now!\n" + prodName,
+                                                          sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                                          subject: 'I found a lovely product on GiftHub!'
+                                                      );
+                                                    }
+                                                  } catch (_) {}
                                                 } else {
                                                   try {
                                                     final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
@@ -236,13 +251,16 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                             ),
                                           ],
                                           secondaryActions: <Widget>[
-                                            // Delete
+                                            /// Delete
                                             IconSlideAction(
                                               caption: 'Delete',
                                               color: Colors.transparent,
                                               foregroundColor: Colors.red,
                                               icon: Icons.delete_outline_outlined,
                                               onTap: () async {
+                                                /// upon deletion
+                                                /// showing alert dialog to reassure
+                                                /// user's intention
                                                 showDialog(
                                                   barrierDismissible: true,
                                                   context: context,
@@ -312,7 +330,9 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                 }
                                               )
                                             ),
-                                            leading: imageURL.hasData && imageURL.data != ""
+                                            leading: !imageURL.hasError && imageURL.hasData && imageURL.data != ""
+                                            /// split to 2 cases where product has a
+                                            /// picture or not
                                             ? CircularProfileAvatar(
                                               imageURL.data,
                                               radius: 26.0,
@@ -357,13 +377,13 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                 child: Image.asset('Assets/no image product.png'),
                                               ),
                                             ),
-                                            title: Text(prodName,
+                                            title: Text(prodName, ///product name
                                               style: GoogleFonts.lato(
                                                 fontSize: 18.0,
                                                 color: Colors.black,
                                               ),
                                             ),
-                                            subtitle: Text(prodPrice + "\$",
+                                            subtitle: Text(prodPrice + "\$", ///product's price
                                               style: GoogleFonts.lato(
                                                 fontSize: 13.5,
                                                 color: Colors.grey,
@@ -391,6 +411,9 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
     );
   }
 
+  /// gets product image from firebase storage with respect to the storage's
+  /// structure under docs/ folder at our GitHub project
+  /// if there is no image, then an empty string is returned
   Future<String> _getImage(String productId) async {
     String imageURL = "";
     try {
@@ -404,6 +427,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
     return imageURL;
   }
 
+  ///checks whether current snapshot is the 'Counter' snapshot or not
   bool _isCounter(AsyncSnapshot<DocumentSnapshot> snapshot){
     if(!snapshot.hasData){
       return false;

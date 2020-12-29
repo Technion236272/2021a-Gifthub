@@ -12,6 +12,16 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+///-----------------------------------------------------------------------------
+/// User Settings Screen
+/// displays user's personal information and enables modifying user's info.
+/// including:
+/// - Avatar
+/// - First and Last name
+/// - address
+/// - city
+/// - Apartment
+///-----------------------------------------------------------------------------
 
 class UserSettingsScreen extends StatefulWidget {
   UserSettingsScreen({Key key}) : super(key: key);
@@ -32,13 +42,28 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final FocusNode _addressInputFocusNode = FocusNode();
   final FocusNode _aptInputFocusNode = FocusNode();
   final FocusNode _cityInputFocusNode = FocusNode();
+
+  /// true if user modified their avatar on edit mode, else false
   bool _avatarChanged = false;
+
+  /// true if screen's current state in edit mode, else false
   bool _editingMode = false;
+
+  ///true if user was on edit mode and presses confirm changes, else false
   bool _confirmEditingPressed = false;
+
+  ///holds new avatar uploaded url if user changed avatar
   String _newAvatarURL = "";
+
+  ///holds new avatar uploaded path if user changed avatar
   String _picPath = "";
+
+  ///true if phone is currently uploading avatar, else false
   bool _uploadingAvatar = false;
+
+  ///true if user chose to delete their avatar, else false
   bool _deletedAvatar = false;
+
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -50,6 +75,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ///fetching current data of user
     var userRep = Provider.of<UserRepository>(context, listen: false);
     _newAvatarURL = userRep.avatarURL ?? defaultAvatar;
     _firstNameController.text = userRep.firstName;
@@ -102,12 +128,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             SizedBox(height: 15),
+                            ///user's Avatar
                             Stack(
                               alignment: Alignment.center,
                               children: <Widget> [
+                                ///circular progress indicator if user's picture yet to be set
                                 _uploadingAvatar ?
                                 Container(
-                                  // padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1),
                                   width: MediaQuery.of(context).size.height * 0.1 * 2,
                                   height: MediaQuery.of(context).size.height * 0.1 * 2,
                                   decoration: BoxDecoration(
@@ -121,6 +148,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   )
                                 )
                                 : CircularProfileAvatar(
+                                  ///showing currently uploaded avatar if we're on edit mode
                                   _editingMode ? _newAvatarURL : userRep.avatarURL ?? defaultAvatar,
                                   borderColor: Colors.black,
                                   borderWidth: 1.3,
@@ -160,6 +188,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 ),
                                 _editingMode && !_uploadingAvatar
                                 ? Column(
+                                  ///'Press to change' text if we're on edit mode and not uploading
+                                  ///new avatar
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
@@ -193,6 +223,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
+                                ///user's first name
                                 Padding(
                                   padding: EdgeInsets.only(left: 10, right: 5),
                                   child: Container(
@@ -252,6 +283,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     ),
                                   ),
                                 ),
+                                ///user's last name
                                 Padding(
                                   padding: EdgeInsets.only(right: 10, left: 5),
                                   child: Container(
@@ -327,6 +359,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       color: Colors.black,
                                     )
                                 ),
+                                ///user's address
                                 Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                                   child: Container(
@@ -367,6 +400,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
+                                    ///user's apartment
                                     Padding(
                                       padding: const EdgeInsets.only(left: 10.0, right: 5.0),
                                       child: Container(
@@ -428,6 +462,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         ),
                                       ),
                                     ),
+                                    ///user's city
                                     Padding(
                                       padding: const EdgeInsets.only(right: 10.0, left: 5.0),
                                       child: Container(
@@ -491,6 +526,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               ],
                             ),
                             SizedBox(height: 60,),
+                            /// edit/submit changes button
                             Align(
                               alignment: FractionalOffset.bottomCenter,
                               child: Container(
@@ -509,8 +545,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     visualDensity: VisualDensity.adaptivePlatformDensity,
                                     color: _editingMode && !_confirmEditingPressed ? Colors.green[900] : Colors.grey[900],
                                     textColor: Colors.white,
-                                    onPressed: _uploadingAvatar ? null
+                                    onPressed:
+                                    ///disabling button if we're uploading new avatar
+                                    _uploadingAvatar ? null
                                       : _editingMode
+                                    ///if we're in edit mode then we submit our changes
                                       ? () async {
                                       setState(() {
                                         _confirmEditingPressed = true;
@@ -551,6 +590,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         _uploadingAvatar = false;
                                       });
                                     }
+                                    ///setting edit mode:
                                     : () {
                                       _unfocusAll();
                                       setState(() {
@@ -611,6 +651,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     super.dispose();
   }
 
+  ///showing bottom sheet of avatar changing options, including
+  ///choose from gallery, camera and if user's avatar isn;t the defaulted one
+  ///then also deletion option
   void _showAvatarChangeOptions() {
     _unfocusAll();
     showModalBottomSheet(
@@ -781,6 +824,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     );
   }
 
+  ///removing focus from all text field's
   void _unfocusAll(){
     _addressInputFocusNode.unfocus();
     _firstNameInputFocusNode.unfocus();
@@ -789,6 +833,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _cityInputFocusNode.unfocus();
   }
 
+
+  ///hiding keyboard and un-focusing text field on user tap outside text field
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
