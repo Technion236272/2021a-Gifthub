@@ -16,6 +16,15 @@ import 'package:provider/provider.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
 
+/// ----------------------------------------------------
+/// The Product Screen:
+/// This is a generic widget that will show a product based
+/// on the product Id it gets upon creation.
+/// Contains single page with info about the product ('abot tab')
+/// and some buttons with functionality that relates to the product.
+/// Also allows a store owner to edit their product information.
+/// ----------------------------------------------------
+
 class ProductScreen extends StatefulWidget {
   final _productId;
 
@@ -64,6 +73,7 @@ class _ProductScreenState extends State<ProductScreen> {
         _prodArgs['reviews'],
         _prodArgs['category'],
         _prodArgs['description']);
+    /// Get the store's image from the storage if it exists or show a default image.
     Completer<Size> completer = Completer<Size>();
     try {
       _productImageURL = await FirebaseStorage.instance.ref().child('productImages/' + _productId).getDownloadURL();
@@ -126,6 +136,7 @@ class _ProductScreenState extends State<ProductScreen> {
                             style: globals.calistogaFont(),
                           )
                               : Text(_prod.name, style: globals.calistogaFont(),),
+                          ///Let the user edit and save product changes only if it's the owner
                           actions: userRep.status == Status.Authenticated && _prod.user == userRep.user.uid ?
                           editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
                             await userRep.firestore.collection('Products').doc(_productId).get().then((snapshot) async {
