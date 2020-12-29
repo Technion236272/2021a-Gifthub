@@ -25,7 +25,15 @@ import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont
 /// The Main Screen:
 /// The screen which controls the nav. bar and the navigation between the 3
 /// different screens - Home, Orders and Account.
-/// it also sets an appropriate AppBar for each screen accordingly.
+/// It also sets an appropriate AppBar for each screen accordingly.
+/// As of release-1.0 - there are only 4 different screens to navigate to:
+/// HomeScreen - marked as 'Home'
+/// UserOrdersScreen - marked as 'Orders'
+/// StoreScreen - marked as 'My Store'
+/// UserSettingsScreen - marked as 'Account'
+///   An authenticated user can access all screens
+///   A guest can only access HomeScreen, view products on HomeScreen and
+///     checkout from app bar's trailing cart icon
 /// ----------------------------------------------------------------------------
 
 class MainScreen extends StatefulWidget {
@@ -37,34 +45,53 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyMainScreen = new GlobalKey<ScaffoldState>();
+
+  ///current index of the current screen that is displayed
+  ///e.g. currentIndex = 2 -> we're on StoreScreen
   int _currentIndex = 0;
+
+  ///userID of the current authenticated user. empty if user on guest mode.
   static String _userID = "";
+
+  ///final list of all screen we can navigate to as described above
   final List<Widget> _children = [
     HomeScreen(),
     UserOrdersScreen(),
     StoreScreen(_userID),
     UserSettingsScreen()
   ];
+
+  ///displayed whenever the current user is unauthenticated tries to navigate to
+  ///Account, My Store, Orders or Wishlist
+  ///initialized in initState() below
   SnackBar _snackBarUserUnauthenticated;
 
   @override
   void initState() {
     super.initState();
-    _snackBarUserUnauthenticated = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      content: Text('only verified users can access this screen',
-        style: GoogleFonts.lato(
-          fontSize: 13.0
+    Future.delayed(Duration.zero, () {
+      _snackBarUserUnauthenticated = SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text('only verified users can access this screen',
+          style: GoogleFonts.lato(
+              fontSize: MediaQuery.of(context).size.height * 0.0256 * (14.1/18)
+          ),
         ),
-      ),
-      action: SnackBarAction(
-        textColor: Colors.deepPurpleAccent,
-        label: 'Log in',
-        onPressed: this._signInDialog,
-      ),
-    );
+        action: SnackBarAction(
+          textColor: Colors.deepPurpleAccent,
+          label: 'Log in',
+          onPressed: this._signInDialog,
+        ),
+      );
+    });
   }
 
+  /// Sign In dialog.
+  /// Decorated with our GiftHub logo.
+  /// Displayed whenever unauthenticated user presses
+  /// the leading icon 'Sign In' on app bar. Shows 2 sign in options:
+  /// - With Google
+  /// - With Email
   void _signInDialog() {
     showDialog(
       context: context,
@@ -77,13 +104,14 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.223,
+              height: MediaQuery.of(context).size.width * 0.44,
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
+                  /// setting shadow of the popped dialog
                   BoxShadow(
                     color: Colors.black,
                     offset: Offset(0,10),
@@ -109,9 +137,9 @@ class _MainScreenState extends State<MainScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    onTap: () async {
-                      var userRep = Provider.of<UserRepository>(context);
-                      userRep.signInWithGoogle();
+                    onTap: () async { ///sign in with Google:
+                      var userRep = Provider.of<UserRepository>(context, listen: false);
+                      await userRep.signInWithGoogle();
                       if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                         firstSignUpSheet(context, 3);
                       } else {
@@ -138,11 +166,13 @@ class _MainScreenState extends State<MainScreen> {
                     leading: Icon(Icons.email_outlined,
                       color: Colors.black87,
                     ),
+                    /// sign in with Email:
                     onTap: () => firstSignUpSheet(context,5),
                   ),
                 ],
               ),
             ),
+            ///displaying GiftHub logo as decoration:
             Positioned(
               left: 20,
               right: 20,
@@ -186,6 +216,9 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  /// Returns current app bar title in reliance of current Screen, which is
+  /// determined bu current index of screen on _children's list
+  /// in user under AppBar's title property
   String _currentAppBarTitle(int index) {
     return 0 == index ? '' : 1 == index ? "Orders" : 2 == index ? "My Store" : "Account";
   }
@@ -208,7 +241,8 @@ class _MainScreenState extends State<MainScreen> {
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
-              ///Checkout - cart
+              /// Checkout - cart
+              /// displays a checkout dialog box defined in checkoutScreen.dart
               IconButton(
                 icon: Icon(Icons.shopping_cart_outlined),
                 onPressed: () {
@@ -221,6 +255,7 @@ class _MainScreenState extends State<MainScreen> {
                 }
               ),
               /// WishList
+              /// on pressed - displays the user's wishlist
               IconButton(
                 icon: Icon(Icons.favorite),
                 onPressed: () =>
@@ -233,6 +268,10 @@ class _MainScreenState extends State<MainScreen> {
                 : _scaffoldKeyMainScreen.currentState.showSnackBar(_snackBarUserUnauthenticated)
               ),
             ],
+            /// IF current user is in guest mode then the icon is set to 'sign in' icon
+            /// and on pressed a sign in dialog pops as described above
+            /// IF current user is authenticated then the icon is set to 'sign out' icon
+            /// and an alert dialog pops up to ensure user's will to logout
             leading: IconButton(
               icon: userRep.status == Status.Authenticated ?
                 Icon(Icons.logout) : Icon(Icons.login_outlined),
@@ -297,27 +336,34 @@ class _MainScreenState extends State<MainScreen> {
               textAlign: TextAlign.center,
             ),
           ),
+          /// current displayed screen as of the current index's value
           body: _children[_currentIndex],
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.white,
             currentIndex: _currentIndex,
             onTap: (i) {
-              if(2 == i && userRep.status == Status.Authenticated){
+              if(2 == i && userRep.status == Status.Authenticated) {
                 ///set store id to current user id:
                 _MainScreenState._userID = userRep.user.uid;
+                ///set StoreScreen with respect to current authenticated user
                 this._children[2] = StoreScreen(_userID);
+                ///navigate to pressed screen
                 setState(() {
                   _currentIndex = i;
                 });
                 return;
               }
+              /// if user isn't authenticated and tries to navigate to a
+              /// restricted-to-guests screen then an error SnackBar is displayed
+              /// as described above
               if(i > 0 && userRep.status != Status.Authenticated) {
                 _scaffoldKeyMainScreen.currentState.showSnackBar(
                   _snackBarUserUnauthenticated
                 );
                 return;
               }
+              /// sets state to new screen
               setState(() {
                 _currentIndex = i;
               });
@@ -352,7 +398,7 @@ class _MainScreenState extends State<MainScreen> {
 /// The Home Screen:
 /// The screen which shows the home page of the app.
 /// It displays a limited GridView of the different products available in
-/// the app.
+/// the app. Also, there is an option of filter products by categories.
 /// ----------------------------------------------------------------------------
 
 class HomeScreen extends StatefulWidget {
@@ -363,8 +409,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// List of all available categories
   final List<String> _categories = ['All', 'Cakes', 'Chocolate', 'Balloons', 'Flowers', 'Greeting Cards','Gift Cards', 'Other'];
+
+  ///holds current user-pressed category
   String _currCategory = 'All';
+
+  ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
       width: 60,
@@ -380,6 +431,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  /// gets product image from firebase storage with respect to the storage's
+  /// structure under docs/ folder at our GitHub project
+  /// if there is no image, then an empty string is returned
   Future<String> _getImage(String i) async {
     String imageURL = "";
     try {
@@ -399,6 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
+          /// making sure that the top os the screen remains green
           Align(
             alignment: Alignment.topCenter,
             child: Container(
@@ -407,11 +462,13 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.lightGreen[800],
             ),
           ),
+          ///setting top rounded corners on screen
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
               topRight: Radius.circular(20.0),
             ),
+            /// bottom side of screen (below app bar) is set to be white
             child: Container(
               color: Colors.white,
               width: MediaQuery.of(context).size.width,
@@ -432,12 +489,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Padding(
-                              padding: const EdgeInsets.all(11.0),
+                              padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
                               child: Center(
                                 child: Text('  Category: ',
                                   style: niceFont(
                                     color: Colors.black,
-                                    size: 18.0,
+                                    size: MediaQuery.of(context).size.height * 0.0256,
                                   ),
                                 ),
                               ),
@@ -451,6 +508,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     alignedDropdown: true,
                                   )
                                 ),
+                                /// a drop down button to select wanted category
                                 child: DropdownButton<String>(
                                   dropdownColor: Colors.white,
                                   underline: Container(
@@ -468,6 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         value: e,
                                     )
                                   ).toList(),
+                                  ///setting state for new chosen category
                                   onChanged: (String value) {
                                     setState(() {
                                       _currCategory = value;
@@ -484,19 +543,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(
                     flex: 11,
                     child: FutureBuilder(
+                      /// fetching all product snapshots from firebase:
                       future: FirebaseFirestore.instance.collection("Products").get(),
                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
                           return _circularProgressIndicator;
                         }
                         List<QueryDocumentSnapshot> productsList = List.from(snapshot.data.docs);
+                        ///removing the 'Counter' document (see Firebase structure under docs/)
                         productsList.removeWhere((element) => element.id == 'Counter');
+                        /// if the current category is not 'All', then we remove all products
+                        /// that don't match current category
                         if(_categories[0] != _currCategory) {
                           productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
                         }
+                        /// if there are no products under current category then
+                        /// a decorated error screen is displayed
+                        /// the screen is defined under globals.dart
                         if(productsList.isEmpty) {
                           return emptyListOfCategories(context, _currCategory);
                         }
+                        /// setting displayed grid view:
                         return GridView.count(
                           primary: false,
                           crossAxisCount: 2,
@@ -506,6 +573,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: List.generate(
                             min(16, productsList.length),
                             (index) {
+                              /// fetching product's attributes:
                               var productData = productsList[index].data();
                               String prodName = productData['Product']['name'];
                               String prodDescription = productData['Product']['description'];
@@ -513,9 +581,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               return FutureBuilder(
                                 future: _getImage(productsList[index].id),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
-                                ///if imageURL has no data then defaulted asset image is displayed
+                                ///if imageURL has error then defaulted asset image is displayed
                                 ///under 'Assets/no image product.png'
-                                (imageURL.connectionState != ConnectionState.done)
+                                (imageURL.connectionState != ConnectionState.done || !imageURL.hasData)
                                 ? _circularProgressIndicator
                                 : Card(
                                   elevation: 10.0,
@@ -525,7 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       focusColor: Colors.transparent,
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
-                                      onTap: () {
+                                      onTap: () { ///navigating to the user tapped product:
                                         Navigator.of(context).push(
                                           new MaterialPageRoute<void>(
                                             builder: (context) => ProductScreen(productsList[index].id)
@@ -541,11 +609,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: <Widget>[
-                                            Container(
+                                            Container( ///setting product's image:
                                               width: MediaQuery.of(context).size.width,
                                               height: MediaQuery.of(context).size.height * 1/6,
                                               color: Colors.transparent,
-                                              child: imageURL.hasData && "" != imageURL.data
+                                              child: !imageURL.hasError && "" != imageURL.data
                                               ? Image.network(imageURL.data,
                                                 fit: BoxFit.fitWidth,
                                               )
@@ -563,11 +631,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Flexible( ///product title goes here
+                                                    Flexible(
+                                                      ///product title goes here
+                                                      ///if it's too long to fit then we take a substring of it
                                                       child: Text('  ' +
-                                                        ((prodName.length <= 20 - prodPrice.length + 1)
+                                                        ((prodName.length < 20 - (prodPrice.length + 1))
                                                         ? prodName
-                                                        : (prodName.substring(0, 20 - prodPrice.length).trimRight() + '...')),
+                                                        : (prodName.substring(0, 17 - (prodPrice.length + 1)).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 14.0,
@@ -575,11 +645,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         ),
                                                       ),
                                                     ),
-                                                    Flexible( ///product description goes here
+                                                    Flexible(
+                                                      ///product description goes here
+                                                      ///if it's too long to fit then we take a substring of it
                                                       child: Text('  ' +
-                                                        ((prodDescription.length <= 24 - prodPrice.length + 1)
+                                                        ((prodDescription.length <= 23 - (prodPrice.length + 1))
                                                         ? prodDescription
-                                                        : (prodDescription.substring(0, 24 - prodPrice.length).trimRight() + '...')),
+                                                        : (prodDescription.substring(0, 20 - (prodPrice.length + 1)).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 11.0,
@@ -589,7 +661,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                   ],
                                                 ),
-                                                Flexible( ///product price goes here
+                                                Flexible(
+                                                  ///product price goes here:
                                                   child: Align(
                                                     alignment: Alignment.centerRight,
                                                     child: Text(
