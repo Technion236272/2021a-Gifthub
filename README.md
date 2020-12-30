@@ -23,5 +23,5 @@
 * [ ] Pay with credit card or PayPal.
 
 ## Table of Contents
-1. [Application stracture](docs/applicationstracture.md)
-2. [Firebase stracture](docs/firebasestracture.md)
+1. [Application structure](docs/applicationstracture.md)
+2. [Firebase structure](docs/firebasestracture.md)
