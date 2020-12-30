@@ -8,6 +8,7 @@
 *.log
 *.pyc
 *.swp
+*.pdf
 .DS_Store
 .atom/
 .buildlog/
@@ -44,3 +45,11 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# mock files
+userMock.dart
+productMock.dart
+
+# Files still in development
+chat.dart
+ChatScreen.dart

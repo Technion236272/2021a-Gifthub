@@ -16,8 +16,12 @@
 
 ## Complementary features
 
-* [ ] Sign up and login with Google and Facebook.
+* [ ] Sign up and login with Google.
 * [ ] Save your favorite stores for later in a favorites list.
 * [ ] Save your favorite products for later in a wish list.
 * [ ] Share your favourite gifts with friends.
 * [ ] Pay with credit card or PayPal.
+
+## Table of Contents
+1. [Application stracture](docs/applicationstracture.md)
+2. [Firebase stracture](docs/firebasestracture.md)
