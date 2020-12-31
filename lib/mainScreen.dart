@@ -20,6 +20,7 @@ import 'my_flutter_app_icons.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
 import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -614,8 +615,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                               height: MediaQuery.of(context).size.height * 1/6,
                                               color: Colors.transparent,
                                               child: !imageURL.hasError && "" != imageURL.data
-                                              ? Image.network(imageURL.data,
-                                                fit: BoxFit.fitWidth,
+                                              ? CachedNetworkImage(
+                                                  imageUrl: imageURL.data,
+                                                  placeholder: (context, url) => _circularProgressIndicator,
+                                                  fit: BoxFit.fitWidth,
                                               )
                                               : Image.asset('Assets/no image product.png',
                                                 fit: BoxFit.fitWidth,
