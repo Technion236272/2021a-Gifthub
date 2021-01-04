@@ -19,25 +19,23 @@ import 'package:google_fonts/google_fonts.dart';
 import 'globals.dart';
 
 class ChatScreen extends StatefulWidget {
-  String sellerID;
   String userID;
-  ChatScreen({Key key, this.sellerID, this.userID}) : super(key: key);
+  ChatScreen({Key key, this.userID}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState(sellerID, userID);
+  _ChatScreenState createState() => _ChatScreenState( userID);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet =
       new GlobalKey<ScaffoldState>();
-  String sellerID;
   String userID;
   var document;
   var imageUrl;
   bool inChat = false;
   @override
-  _ChatScreenState(String sellerID, String userID)
-      : sellerID = sellerID,
+  _ChatScreenState( String userID)
+      :
         userID = userID,
         inChat = false {}
 
@@ -76,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }),
             title: Text(
               "Chat",
-              style: GoogleFonts.calistoga(
+              style: GoogleFonts.lato(
                 fontSize: 28,
                 color: Colors.white,
               ),
@@ -216,35 +214,40 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Flexible(
               child: Container(
+
                 child: Column(
                   children: <Widget>[
                     Container(
-                      child: Text(
-                        '${document.data()['Info'][0]} ${document.data()['Info'][1]}',
-                        maxLines: 1,
-                        style: TextStyle(
-                            fontSize: 22,
-                            fontFamily: 'TimesNewRoman',
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                  // bottomLeft
-                                  offset: Offset(-1.5, -1.5),
-                                  color: darkG),
-                              Shadow(
-                                  // bottomRight
-                                  offset: Offset(1.5, -1.5),
-                                  color: darkG),
-                              Shadow(
-                                  // topRight
-                                  offset: Offset(1.5, 1.5),
-                                  color: darkG),
-                              Shadow(
-                                  // topLeft
-                                  offset: Offset(-1.5, 1.5),
-                                  color: darkG),
-                            ],
-                            fontWeight: FontWeight.w900),
+
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
+                        child: Text(
+                          '${document.data()['Info'][0]} ${document.data()['Info'][1]}',
+                          maxLines: 1,
+                          style: GoogleFonts.lato(
+                              fontSize: 22,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                    // bottomLeft
+                                    offset: Offset(-1, -1),
+                                    color: darkG),
+                                Shadow(
+                                    // bottomRight
+                                    offset: Offset(1, -1),
+                                    color: darkG),
+                                Shadow(
+                                    // topRight
+                                    offset: Offset(1, 1),
+                                    color: darkG),
+                                Shadow(
+                                    // topLeft
+                                    offset: Offset(-1, 1),
+                                    color: darkG),
+                              ],
+                              fontWeight: FontWeight.w900),
+                        ),
                       ),
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.fromLTRB(

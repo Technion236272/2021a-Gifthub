@@ -32,7 +32,8 @@ class MyApp extends StatelessWidget {
             ),
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          home: ChatScreen(sellerID:"TEST SID",userID: "5KToU3PtcrXGYOk6a9tLYfIolHl2",)
+          home: ChatScreen(userID: "QYeeYxXVoDdgfH7TpipBtFvyw3H3"//"QYeeYxXVoDdgfH7TpipBtFvyw3H3"//
+            ,)
       ),
     );
   }
