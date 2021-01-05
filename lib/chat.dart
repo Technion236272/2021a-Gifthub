@@ -254,9 +254,24 @@ class ChatState extends State<Chat> {
           document.data()['type'] == 0
           // Text
               ? Container(
-            child: Text(
-              document.data()['content'],
-              style: GoogleFonts.lato(fontSize: 15, color: secondaryTextColor),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  document.data()['content'],
+                  style: GoogleFonts.lato(fontSize: 15, color: secondaryTextColor),
+                ),
+                Container(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    DateFormat('kk:mm').format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            int.parse(document.data()['timestamp']))),
+                    style: GoogleFonts.lato(fontSize: 11,color:Colors.grey[200]),
+                  ),
+                )
+              ],
             ),
             padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
             width: s50(context)*4,
@@ -348,7 +363,7 @@ class ChatState extends State<Chat> {
               ),
               clipBehavior: Clip.hardEdge,
             )
-                : Container(width: s10(context)*3.5),
+                : Container(),
 
             //Display text message
             document.data()['type'] == 0
