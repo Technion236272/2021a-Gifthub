@@ -21,6 +21,7 @@ import 'checkoutScreen.dart';
 import 'StartScreen.dart';
 import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'ChatScreen.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -58,6 +59,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _children = [
     HomeScreen(),
     UserOrdersScreen(),
+    ChatScreen(userID: _userID,),
     StoreScreen(_userID),
     UserSettingsScreen()
   ];
@@ -221,7 +223,11 @@ class _MainScreenState extends State<MainScreen> {
   /// determined bu current index of screen on _children's list
   /// in user under AppBar's title property
   String _currentAppBarTitle(int index) {
-    return 0 == index ? '' : 1 == index ? "Orders" : 2 == index ? "My Store" : "Account";
+    return 0 == index
+        ? ''
+        : 1 == index ? "Orders"
+        : 2 == index ? "Chat"
+        : 3 == index ? "My Store" : "Account"; /// index = 4
   }
 
   @override
@@ -237,7 +243,7 @@ class _MainScreenState extends State<MainScreen> {
           resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
-          appBar: 2 == _currentIndex ? null : AppBar(
+          appBar: 3 == _currentIndex ? null : AppBar(
             centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
@@ -344,11 +350,24 @@ class _MainScreenState extends State<MainScreen> {
             selectedItemColor: Colors.white,
             currentIndex: _currentIndex,
             onTap: (i) {
+              ///Chat:
               if(2 == i && userRep.status == Status.Authenticated) {
                 ///set store id to current user id:
                 _MainScreenState._userID = userRep.user.uid;
                 ///set StoreScreen with respect to current authenticated user
-                this._children[2] = StoreScreen(_userID);
+                this._children[2] = ChatScreen(userID: _userID);
+                ///navigate to pressed screen
+                setState(() {
+                  _currentIndex = i;
+                });
+                return;
+              }
+              ///Store:
+              if(3 == i && userRep.status == Status.Authenticated) {
+                ///set chat id to current user id:
+                _MainScreenState._userID = userRep.user.uid;
+                ///set ChatScreen with respect to current authenticated user
+                this._children[3] = StoreScreen(_userID);
                 ///navigate to pressed screen
                 setState(() {
                   _currentIndex = i;
@@ -378,6 +397,10 @@ class _MainScreenState extends State<MainScreen> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.attach_money_outlined),
                 label: 'Orders',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_outlined),
+                label: 'Chat',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.storefront_outlined),

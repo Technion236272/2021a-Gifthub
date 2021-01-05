@@ -103,10 +103,21 @@ class _ChatScreenState extends State<ChatScreen> {
                           userId: userID,
                           peerId: peerid,
                           peerAvatar: imageUrl)
-                      : StreamBuilder(
-                          stream: Firestore.instance
-                              .collection('messageAlert').doc(userID).snapshots(),
+                      : FutureBuilder(
+                          future: FirebaseFirestore.instance
+                              .collection('messageAlert').doc(userID).get(),
                           builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                              return Center(
+                                child: SizedBox(
+                                    width: 60,
+                                    height: 60,
+                                    child: CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+                                    )
+                                ),
+                              );
+                            }
                             if(snapshot.data['users'].length==0){
                               return Padding(
                                 padding: const EdgeInsets.all(14.0),
