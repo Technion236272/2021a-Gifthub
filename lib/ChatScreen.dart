@@ -41,6 +41,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Material(
         child: Consumer<UserRepository>(builder: (context, userRep, _) {
 
