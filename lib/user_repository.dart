@@ -145,6 +145,8 @@ class UserRepository with ChangeNotifier {
       _city=city;
       updateFirebaseUserList();
       var list=[];
+      await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
+
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
       await _db.collection('Stores').doc(_user.uid).set({
@@ -201,6 +203,8 @@ class UserRepository with ChangeNotifier {
     _city=city;
     updateFirebaseUserList();
     var list=[];
+    await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
+
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
     await _db.collection('Stores').doc(_user.uid).set({

@@ -14,6 +14,15 @@ import 'my_flutter_app_icons.dart';
 /// easily.
 /// ------------------------------------------------
 
+final appColor = Colors.red;
+final mainColor = Colors.green;
+final secondaryTextColor = Colors.white;
+final secondaryColor=Colors.blue[400];
+final darkG=Colors.grey[700];
+s50(context) => MediaQuery.of(context).size.width * 0.023 * 6;
+s25(context) => s50(context) / 2;
+s10(context) => s50(context) / 5;
+s5(context) => s10(context) / 2;
 ///NOTE: font size of 18.0 is usually approx. "MediaQuery.of(context).size.height * 0.0256"
 
 class Product {
