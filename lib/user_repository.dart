@@ -149,6 +149,7 @@ class UserRepository with ChangeNotifier {
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
       await _db.collection('Stores').doc(_user.uid).set({'Store':list});
+      await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
       notifyListeners();
       return 'Success';
     } catch (e) {
@@ -198,6 +199,7 @@ class UserRepository with ChangeNotifier {
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
     await _db.collection('Stores').doc(_user.uid).set({'Store':list});
+    await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
   }
   Future<bool> signInWithGoogleCheckIfFirstTime() async {
     _db = FirebaseFirestore.instance;

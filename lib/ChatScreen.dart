@@ -25,14 +25,14 @@ class ChatScreen extends StatefulWidget {
   @override
   _ChatScreenState createState() => _ChatScreenState( userID);
 }
-
 class _ChatScreenState extends State<ChatScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet =
       new GlobalKey<ScaffoldState>();
   String userID;
-  var document;
+  var peerid;
   var imageUrl;
   bool inChat = false;
+
   @override
   _ChatScreenState( String userID)
       :
@@ -43,6 +43,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Material(
         child: Consumer<UserRepository>(builder: (context, userRep, _) {
+
+
       return Stack(alignment: Alignment.center, children: <Widget>[
         Align(
           alignment: Alignment.topCenter,
@@ -94,16 +96,33 @@ class _ChatScreenState extends State<ChatScreen> {
                 height: MediaQuery.of(context).size.height,
                 color: Colors.white,
                 child: Container(
-                  child: inChat
+                  child:
+                      inChat
                       ? Chat(
                           userId: userID,
-                          peerId: document.id,
+                          peerId: peerid,
                           peerAvatar: imageUrl)
                       : StreamBuilder(
                           stream: Firestore.instance
-                              .collection('Users')
-                              .snapshots(),
+                              .collection('messageAlert').doc(userID).snapshots(),
                           builder: (context, snapshot) {
+                            if(snapshot.data['users'].length==0){
+                              return Padding(
+                                padding: const EdgeInsets.all(14.0),
+                                child: Center(
+                                  child: Column(children: [
+                                    gifthub_logo,
+                                    Spacer(),
+                                    Container(alignment:Alignment.bottomCenter,child: Center(
+                                      child: Text("You have no chats available!"
+                                          "\n\nTo start chatting, go to a seller store page and hit Contact Seller!",style: GoogleFonts.lato(fontSize: 20,),textAlign: TextAlign.center,),
+                                    )),
+                                    Spacer(),
+                                    Spacer()
+                                  ],),
+                                ),
+                              );
+                            }
                             if (snapshot.hasData) {
                               return ListView.builder(
                                 padding: EdgeInsets.all(
@@ -119,24 +138,25 @@ class _ChatScreenState extends State<ChatScreen> {
                                         child: FutureBuilder(
                                           future: FirebaseStorage.instance
                                               .ref("userImages/")
-                                              .child(snapshot
-                                                  .data.documents[index].id)
+                                              .child(snapshot.data['users'][index]['id'])
                                               .getDownloadURL(),
                                           builder: (BuildContext context,
                                                   AsyncSnapshot<String>
-                                                      imageLink) =>
-                                              buildListTile(
+                                                      imageLink) {
+
+                                              return buildListTile(
                                                   context,
-                                                  snapshot
-                                                      .data.documents[index],
-                                                  imageLink,index),
+                                                  snapshot.data['users'][index],
+                                                  imageLink,index);}
                                         ),
                                       ),
                                     ),
                                   );
                                 },
-                                itemCount: snapshot.data.documents.length,
+                                itemCount: snapshot.data['users'].length,
                               );
+
+
                             } else {
                               return Center(
                                 child: CircularProgressIndicator(
@@ -156,7 +176,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }));
   }
 
-  Widget buildListTile(BuildContext context, DocumentSnapshot document,
+  Widget buildListTile(BuildContext context, Map listitem,
       AsyncSnapshot<String> imageUrlAsync,int index) {
     //This is the dream fade function. This took me 2 hours, idk why... :(
     int i=index%14+1;
@@ -168,17 +188,14 @@ class _ChatScreenState extends State<ChatScreen> {
       currGreen=i*100;
     }
     //----------
+    String name=listitem['name'];
 
-    if (document.id == userID) {
-      return Container();
-    }
+
     String imageUrl = imageUrlAsync.data;
     if (imageUrl == null) {
       imageUrl =
           "https://ui-avatars.com/api/?bold=true&background=random&name=" +
-              document.data()['Info'][0] +
-              "+" +
-              document.data()['Info'][1];
+               name;
     }
 
     return Container(
@@ -223,7 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         padding: EdgeInsets.all(
                             MediaQuery.of(context).size.width * 0.01),
                         child: Text(
-                          '${document.data()['Info'][0]} ${document.data()['Info'][1]}',
+                          name,
                           maxLines: 1,
                           style: GoogleFonts.lato(
                               fontSize: 22,
@@ -263,7 +280,7 @@ class _ChatScreenState extends State<ChatScreen> {
         onPressed: () {
           setState(() {
             this.userID = userID;
-            this.document = document;
+            this.peerid=listitem['id'];
             this.imageUrl = imageUrl;
             this.inChat = true;
           });

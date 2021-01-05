@@ -217,12 +217,24 @@ class ChatState extends State<Chat> {
     );
   }
 
-  void onSendMessage(String content, int type) {
+  Future<void> onSendMessage(String content, int type) async {
 
     //Check if message is empty or not
     if (content.trim() != '') {
       textEditingController.clear();
 
+      //Add myself to peer's list of contacts in the first spot
+      var userDoc=(await Firestore.instance
+          .collection('Users').doc(userId).get());
+      String name=userDoc['Info'][0] + " "+ userDoc['Info'][1];
+      var map=await Firestore.instance
+          .collection('messageAlert').doc(peerId).get();
+      List oldMap=map['users'];
+      oldMap.removeWhere((element) => element['id']==userId);
+      List newMap=[{'id':userId,'name':name}];
+      newMap.addAll(oldMap);
+      Firestore.instance
+          .collection('messageAlert').doc(peerId).set({'users':newMap});
       //Make a message document in firebase
       FirebaseFirestore.instance
           .collection('messages')
