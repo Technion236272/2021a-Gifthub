@@ -72,6 +72,24 @@ class ChatState extends State<Chat> {
     isLoading = false;
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            buildListMessage(),
+            buildBottomArea()
+          ],
+        ),
+        isLoading ? Center(child:CircularProgressIndicator()) : Container()
+      ],
+    );
+
+
+
+  }
+
   Future getImage() async {
     //Get image from gallery
     imageFile = File((await ImagePicker().getImage(source: ImageSource.gallery)).path);
@@ -118,36 +136,107 @@ class ChatState extends State<Chat> {
     ));
   }
 
+  Widget buildBottomArea() {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          // Button send image
+          IconButton(
+            icon: Icon(Icons.image),
+            onPressed: getImage,
+            color: darkG,
+          ),
 
+          // Edit text
+          Flexible(
+            child: Container(
+              child: TextField(
+                onSubmitted: (value) {
+                  onSendMessage(textEditingController.text, 0);
+                },
+                style: TextStyle(color: darkG, fontSize: 15.0),
+                controller: textEditingController,
+                decoration: InputDecoration.collapsed(
+                  hintText: 'Enter your message...',
+                  hintStyle: TextStyle(color: darkG),
+                ),
+                focusNode: focusNode,
+              ),
+            ),
+          ),
 
+          // Button send message
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: (){
+              String text=textEditingController.text;
+              onSendMessage(text, 0);
+            },
+            color: darkG,
+          ),
+        ],
+      ),
+      width: MediaQuery.of(context).size.width,
+      height: s50(context),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(width: 0.6,color: darkG)),
+          color: Colors.transparent),
+    );
+  }
 
+  Widget buildListMessage() {
+    return Flexible(
+      child: groupChatId == ''
+          ? Center(
+          child: CircularProgressIndicator())
+          : StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('messages')
+            .doc(groupChatId)
+            .collection(groupChatId)
+            .orderBy('timestamp', descending: true)
+            .limit(_limit)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+                child: CircularProgressIndicator());
+          } else {
+            listMessage.addAll(snapshot.data.documents);
+            return ListView.builder(
+              padding: EdgeInsets.all(s10(context)),
+              itemBuilder: (context, index) =>
+                  buildItem(index, snapshot.data.documents[index]),
+              itemCount: snapshot.data.documents.length,
+              reverse: true,
+              controller: listScrollController,
+            );
+          }
+        },
+      ),
+    );
+  }
 
   void onSendMessage(String content, int type) {
-    // type: 0 = text, 1 = image
 
+    //Check if message is empty or not
     if (content.trim() != '') {
       textEditingController.clear();
 
-      var documentReference = FirebaseFirestore.instance
+      //Make a message document in firebase
+      FirebaseFirestore.instance
           .collection('messages')
           .doc(groupChatId)
           .collection(groupChatId)
-          .doc(DateTime.now().millisecondsSinceEpoch.toString());
-
-      FirebaseFirestore.instance.runTransaction((transaction) async {
-        transaction.set(
-          documentReference,
+          .doc(DateTime.now().millisecondsSinceEpoch.toString()).set(
           {
             'idFrom': userId,
             'idTo': peerId,
             'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
             'content': content,
-            'type': type
-          },
-        );
-      });
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+            'type': type //0 is text message, 1 is image message
+          }
+      );
     } else {
       Fluttertoast.showToast(
           msg: 'Please enter a message before sending.',
@@ -156,7 +245,6 @@ class ChatState extends State<Chat> {
           toastLength: Toast.LENGTH_LONG);
     }
   }
-
 
   Widget buildItem(int index, DocumentSnapshot document) {
     if (document.data()['idFrom'] == userId) {
@@ -176,7 +264,7 @@ class ChatState extends State<Chat> {
                 color: secondaryColor,
                 borderRadius: BorderRadius.circular(8.0)),
             margin: EdgeInsets.only(
-                bottom: isLastMessageRight(index) ? s10(context)*2 : s10(context),
+                bottom: s10(context),
                 right: s10(context)),
           )
               : //document.data()['type'] == 1
@@ -222,7 +310,7 @@ class ChatState extends State<Chat> {
               padding: EdgeInsets.all(0),
             ),
             margin: EdgeInsets.only(
-                bottom: isLastMessageRight(index) ? s10(context)*2 : s10(context),
+                bottom: s10(context),
                 right: s10(context)),
           )
 
@@ -230,258 +318,120 @@ class ChatState extends State<Chat> {
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
-    } else {
+    }
+    else {
       // Left (peer message)
       return Container(
-        child: Column(
+        child: Row(
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                isLastMessageLeft(index)
-                    ? Material(
-                  child: CachedNetworkImage(
-                    placeholder: (context, url) => Container(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1.0,
-                        valueColor:
-                        AlwaysStoppedAnimation<Color>(appColor),
-                      ),
-                      width: s10(context)*3.5,
-                      height: s10(context)*3.5,
-                      padding: EdgeInsets.all(s10(context)),
-                    ),
-                    imageUrl: peerAvatar,
-                    width: s10(context)*3.5,
-                    height: s10(context)*3.5,
-                    fit: BoxFit.cover,
+            //Display peer avatar
+            (index == 0)
+                ? Material(
+              child: CachedNetworkImage(
+                placeholder: (context, url) => Container(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.0,
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(appColor),
                   ),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(18.0),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                )
-                    : Container(width: s10(context)*3.5),
-                document.data()['type'] == 0
-                    ? Container(
-                  child: Text(
+                  width: s10(context)*3.5,
+                  height: s10(context)*3.5,
+                  padding: EdgeInsets.all(s10(context)),
+                ),
+                imageUrl: peerAvatar,
+                width: s10(context)*3.5,
+                height: s10(context)*3.5,
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.all(
+                Radius.circular(18.0),
+              ),
+              clipBehavior: Clip.hardEdge,
+            )
+                : Container(width: s10(context)*3.5),
+
+            //Display text message
+            document.data()['type'] == 0
+                ? Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     document.data()['content'],
                     style: GoogleFonts.lato(fontSize: 15, color: secondaryTextColor),
                   ),
-                  padding: EdgeInsets.fromLTRB(s5(context)*3, s10(context), s5(context)*3, s10(context)),
-                  width: s50(context)*4,
-                  decoration: BoxDecoration(
-                      color: mainColor,
-                      borderRadius: BorderRadius.circular(8.0)),
-                  margin: EdgeInsets.only(left: s10(context)),
-                )
-                    :
-                Container(
-                  child: FlatButton(
-                    child: Material(
-                      child: CachedNetworkImage(
-                        placeholder: (context, url) => Container(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                appColor),
-                          ),
-                          width: s50(context)*4,
-                          height: s50(context)*4,
-                          padding: EdgeInsets.all(s10(context)*7),
-                          decoration: BoxDecoration(
-                            color: secondaryColor,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(8.0),
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) =>
-                            Material(
-                              child: Icon(Icons.error),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8.0),
-                              ),
-                              clipBehavior: Clip.hardEdge,
-                            ),
-                        imageUrl: document.data()['content'],
-                        width: s50(context)*4,
-                        height: s50(context)*4,
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius:
-                      BorderRadius.all(Radius.circular(8.0)),
-                      clipBehavior: Clip.hardEdge,
+                  Container(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      DateFormat('kk:mm').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              int.parse(document.data()['timestamp']))),
+                      style: GoogleFonts.lato(fontSize: 11,color:Colors.grey[200]),
                     ),
-                    onPressed: () {
-                      imageClicked(context,document);
-                    },
-                    padding: EdgeInsets.all(0),
-                  ),
-                  margin: EdgeInsets.only(left: s10(context)),
-                )
-                ,
-              ],
-            ),
-
-            // Time
-            isLastMessageLeft(index)
-                ? Container(
-              child: Text(
-                DateFormat('dd MMM kk:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(document.data()['timestamp']))),
-                style: niceFont(size: 12,color: darkG),
+                  )
+                ],
               ),
-              margin: EdgeInsets.only(left: s50(context), top: s5(context), bottom: s5(context)),
+              padding: EdgeInsets.all( s10(context)),
+              width: s50(context)*4,
+              decoration: BoxDecoration(
+                  color: mainColor,
+                  borderRadius: BorderRadius.circular(8.0)),
+              margin: EdgeInsets.only(left: s10(context)),
             )
-                : Container()
+                :
+                //Display image message
+            Container(
+              child: FlatButton(
+                child: Material(
+                  child: CachedNetworkImage(
+                    placeholder: (context, url) => Container(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            appColor),
+                      ),
+                      width: s50(context)*4,
+                      height: s50(context)*4,
+                      padding: EdgeInsets.all(s10(context)*7),
+                      decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(8.0),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        Material(
+                          child: Icon(Icons.error),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                        ),
+                    imageUrl: document.data()['content'],
+                    width: s50(context)*4,
+                    height: s50(context)*4,
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius:
+                  BorderRadius.all(Radius.circular(8.0)),
+                  clipBehavior: Clip.hardEdge,
+                ),
+                onPressed: () {
+                  imageClicked(context,document);
+                },
+                padding: EdgeInsets.all(0),
+              ),
+              margin: EdgeInsets.only(left: s10(context)),
+            )
+            ,
+
+
           ],
-          crossAxisAlignment: CrossAxisAlignment.start,
         ),
         margin: EdgeInsets.only(bottom: s10(context)),
       );
     }
   }
 
-  bool isLastMessageLeft(int index) {
-    if ((index > 0 &&
-        listMessage != null &&
-        listMessage[index - 1].data()['idFrom'] == userId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool isLastMessageRight(int index) {
-    if ((index > 0 &&
-        listMessage != null &&
-        listMessage[index - 1].data()['idFrom'] != userId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Column(
-          children: <Widget>[
-            // List of messages
-            buildListMessage(),
-
-
-
-            // Input content
-            buildInput(),
-          ],
-        ),
-
-        // Loading
-        isLoading ? Center(child:CircularProgressIndicator()) : Container()
-      ],
-    );
-
-
-
-  }
-
-
-
-  Widget buildInput() {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          // Button send image
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.image),
-                onPressed: getImage,
-                color: darkG,
-              ),
-            ),
-            color: Colors.white,
-          ),
-
-          // Edit text
-          Flexible(
-            child: Container(
-              child: TextField(
-                onSubmitted: (value) {
-                  onSendMessage(textEditingController.text, 0);
-                },
-                style: TextStyle(color: darkG, fontSize: 15.0),
-                controller: textEditingController,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Enter your message...',
-                  hintStyle: TextStyle(color: darkG),
-                ),
-                focusNode: focusNode,
-              ),
-            ),
-          ),
-
-          // Button send message
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              child: IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => onSendMessage(textEditingController.text, 0),
-                color: darkG,
-              ),
-            ),
-            color: Colors.white,
-          ),
-        ],
-      ),
-      width: double.infinity,
-      height: s50(context),
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: darkG, width: 0.5)),
-          color: Colors.white),
-    );
-  }
-
-  Widget buildListMessage() {
-    return Flexible(
-      child: groupChatId == ''
-          ? Center(
-          child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(appColor)))
-          : StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('messages')
-            .doc(groupChatId)
-            .collection(groupChatId)
-            .orderBy('timestamp', descending: true)
-            .limit(_limit)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-                child: CircularProgressIndicator(
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(appColor)));
-          } else {
-            listMessage.addAll(snapshot.data.documents);
-            return ListView.builder(
-              padding: EdgeInsets.all(s10(context)),
-              itemBuilder: (context, index) =>
-                  buildItem(index, snapshot.data.documents[index]),
-              itemCount: snapshot.data.documents.length,
-              reverse: true,
-              controller: listScrollController,
-            );
-          }
-        },
-      ),
-    );
-  }
 }
