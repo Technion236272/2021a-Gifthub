@@ -13,6 +13,7 @@ import 'package:gifthub_2021a/user_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'chat.dart';
 import 'globals.dart' as globals;
 import 'package:gifthub_2021a/StoreScreen.dart';
 
@@ -275,7 +276,44 @@ class _ProductScreenState extends State<ProductScreen> {
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                  globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () {}), // TODO add "contact seller" function
+                                  globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () async {
+                                    String peerAvatar="https://cdn.vox-cdn.com/thumbor/mXo5ObKpTbHYi9YslBy6YhfedT4=/95x601:1280x1460/1200x800/filters:focal(538x858:742x1062)/cdn.vox-cdn.com/uploads/chorus_image/image/66699060/mgidarccontentnick.comc008fa9d_d.0.png";
+                                    //var peer="ERROR! GO TO YAHAV FOR HELP";
+                                    var peer=(await FirebaseFirestore.instance.collection("Users").doc(_prod.user).get())['Info'];
+                                    try {
+                                      peerAvatar =
+                                      await FirebaseStorage.instance
+                                          .ref("userImages/")
+                                          .child(_prod.user)
+                                          .getDownloadURL();
+                                    }
+                                    catch(e){
+                                      peerAvatar="https://ui-avatars.com/api/?bold=true&background=random&name=" +
+                                          peer[0]+"+"+peer[1];
+                                    }
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Scaffold(
+                                      appBar: AppBar(
+                                        centerTitle: true,
+                                        elevation: 0.0,
+                                        backgroundColor: Colors.lightGreen[800],
+                                        leading: IconButton(
+                                            icon: Icon(Icons.arrow_back),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            }),
+                                        title: Text(
+                                          "Chat with "+peer[0]+" "+peer[1],
+                                          style: GoogleFonts.lato(
+                                            fontSize: 26,
+                                            color: Colors.white,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+
+                                        body: Chat(userId: userRep.user.uid,peerId: _prod.user,peerAvatar:peerAvatar,)
+                                    )));
+                                  }),
                                   globals.regTextButton("Add to Wishlist", icon: Icon(Icons.favorite_outline_outlined), buttonColor: Colors.white, textColor: Colors.red, press: () async {
                                       if(userRep.status != Status.Authenticated){
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));

@@ -64,17 +64,13 @@ class _ChatScreenState extends State<ChatScreen> {
             centerTitle: true,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
-            leading: IconButton(
+            leading: inChat ? IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
-                  if (inChat) {
-                    setState(() {
-                      inChat = false;
-                    });
-                  } else {
-                    //TODO: return to previous screen
-                  }
-                }),
+                  setState(() {
+                    inChat = false;
+                  });
+                }):null,
             title: Text(
               "Chat",
               style: GoogleFonts.lato(

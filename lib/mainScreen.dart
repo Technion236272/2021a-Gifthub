@@ -243,7 +243,7 @@ class _MainScreenState extends State<MainScreen> {
           resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
-          appBar: 3 == _currentIndex ? null : AppBar(
+          appBar: 3 == _currentIndex||2 == _currentIndex ? null : AppBar(
             centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],

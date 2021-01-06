@@ -223,7 +223,7 @@ class ChatState extends State<Chat> {
     if (content.trim() != '') {
       textEditingController.clear();
 
-      //Add myself to peer's list of contacts in the first spot
+      //Add myself to peer's list of contacts in the first spot of the list
       var userDoc=(await Firestore.instance
           .collection('Users').doc(userId).get());
       String name=userDoc['Info'][0] + " "+ userDoc['Info'][1];
@@ -235,6 +235,18 @@ class ChatState extends State<Chat> {
       newMap.addAll(oldMap);
       Firestore.instance
           .collection('messageAlert').doc(peerId).set({'users':newMap});
+      //Add peer to my list of contacts in the first spot of the list
+      var peerDoc=(await Firestore.instance
+          .collection('Users').doc(peerId).get());
+      var peerName=peerDoc['Info'][0] + " "+ peerDoc['Info'][1];
+      map=await Firestore.instance
+          .collection('messageAlert').doc(userId).get();
+      oldMap=map['users'];
+      oldMap.removeWhere((element) => element['id']==peerId);
+      newMap=[{'id':peerId,'name':peerName}];
+      newMap.addAll(oldMap);
+      Firestore.instance
+          .collection('messageAlert').doc(userId).set({'users':newMap});
       //Make a message document in firebase
       FirebaseFirestore.instance
           .collection('messages')
