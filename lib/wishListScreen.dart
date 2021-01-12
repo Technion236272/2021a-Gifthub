@@ -36,6 +36,8 @@ class WishListScreen extends StatefulWidget {
 class _WishListScreenState extends State<WishListScreen> with SingleTickerProviderStateMixin {
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKeyWishList = new GlobalKey<ScaffoldState>();
+
+  ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
         width: 60,
@@ -45,6 +47,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
         )
     ),
   );
+
+  bool _addedToCart = false;
   
   @override
   void initState() {
@@ -141,7 +145,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                     return FutureBuilder(
                                       future: _getImage(productID),
                                       builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
-                                        if (imageURL.connectionState != ConnectionState.done) {
+                                        if (imageURL.connectionState != ConnectionState.done || !imageURL.hasData) {
                                           return _circularProgressIndicator;
                                         }
                                         ///if image url has error (meaning there is no product image)
@@ -183,25 +187,25 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                     });
                                                 ///showing snackbar upon completion
                                                 _scaffoldKeyWishList.currentState.showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('Product Successfully Added to Cart!',
-                                                        style: GoogleFonts.lato(
-                                                            fontSize: 13.0,
-                                                            color: Colors.white
-                                                        ),
+                                                  SnackBar(
+                                                    content: Text('Product Successfully Added to Cart!',
+                                                      style: GoogleFonts.lato(
+                                                          fontSize: 13.0,
+                                                          color: Colors.white
                                                       ),
-                                                      behavior: SnackBarBehavior.floating,
-                                                      action: SnackBarAction(
-                                                        label: 'Checkout',
-                                                        textColor: Colors.lime,
-                                                        onPressed: () => showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext context) {
-                                                            return CustomDialogBox();
-                                                          },
-                                                        ),
+                                                    ),
+                                                    behavior: SnackBarBehavior.floating,
+                                                    action: SnackBarAction(
+                                                      label: 'Checkout',
+                                                      textColor: Colors.lime,
+                                                      onPressed: () => showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return CustomDialogBox();
+                                                        },
                                                       ),
-                                                    )
+                                                    ),
+                                                  )
                                                 );
                                               },
                                             ),
