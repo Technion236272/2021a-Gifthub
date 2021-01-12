@@ -47,8 +47,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
         )
     ),
   );
-
-  bool _addedToCart = false;
   
   @override
   void initState() {
