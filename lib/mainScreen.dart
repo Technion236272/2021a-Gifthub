@@ -20,9 +20,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
-import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
+import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont, userCart;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'ChatScreen.dart';
+import 'package:badges/badges.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -244,27 +245,49 @@ class _MainScreenState extends State<MainScreen> {
           resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
-          appBar: 3 == _currentIndex||2 == _currentIndex ? null : AppBar(
+          appBar: 3 == _currentIndex || 2 == _currentIndex ? null : AppBar(
             centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
               /// Checkout - cart
               /// displays a checkout dialog box defined in checkoutScreen.dart
-              IconButton(
-                icon: Icon(Icons.shopping_cart_outlined),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CustomDialogBox();
-                    }
-                  );
-                }
+              Badge(
+                badgeContent: Text(
+                  userCart.length < 10 ? userCart.length.toString() : '10+',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: userCart.length < 10 ? 10.0 : 9.0,
+                  ),
+                ),
+                position: BadgePosition(
+                  top: 5.5,
+                  start: userCart.length < 10 ? 25 : 22,
+                ),
+                toAnimate: true,
+                animationType: BadgeAnimationType.scale,
+                badgeColor: Colors.red.shade600,
+                elevation: 8,
+                shape: BadgeShape.circle,
+                child: IconButton(
+                  iconSize: 27.0, ///<-- default is 24.0
+                  icon: Icon(Icons.shopping_cart_outlined),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomDialogBox();
+                      }
+                    );
+                  }
+                ),
               ),
               /// WishList
               /// on pressed - displays the user's wishlist
               IconButton(
+                iconSize: 27.0, ///<-- default is 24.0
                 icon: Icon(Icons.favorite),
                 onPressed: () =>
                 userRep.status == Status.Authenticated
@@ -281,8 +304,10 @@ class _MainScreenState extends State<MainScreen> {
             /// IF current user is authenticated then the icon is set to 'sign out' icon
             /// and an alert dialog pops up to ensure user's will to logout
             leading: IconButton(
-              icon: userRep.status == Status.Authenticated ?
-                Icon(Icons.logout) : Icon(Icons.login_outlined),
+              iconSize: 27.0, ///<-- default is 24.0
+              icon: userRep.status == Status.Authenticated
+                  ? Icon(Icons.logout)
+                  : Icon(Icons.login_outlined),
               onPressed: userRep.status == Status.Authenticated
                 ? () async {
                   showDialog(
