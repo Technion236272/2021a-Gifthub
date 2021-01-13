@@ -120,6 +120,20 @@ TextStyle calistogaFont({double size = 24.0, Color color=Colors.white}) {
     color: color,
   );
 }
+
+///returns a green Circular Progress Indicator
+Center greenCircularProgressIndicator(double height, double width) {
+  return Center(
+    child: SizedBox(
+      width: width,
+      height: height,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
+    ),
+  );
+}
+
 RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0}) {
   return RatingBar(
     initialRating: rate,
