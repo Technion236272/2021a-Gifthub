@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/StartScreen.dart';
 import 'package:gifthub_2021a/StoreScreen.dart';
+import 'package:gifthub_2021a/SpinnerDropdown.dart';
 import 'user_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
@@ -471,6 +472,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageURL;
   }
 
+  // ///extracts [_currCategory] String value from its Text child
+  // String _getCenterText(Center center) {
+  //   return center.toString().split('(\"')[1].split('\")')[0];
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -508,45 +514,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         color: Colors.transparent,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
-                              child: Center(
-                                child: Text('  Category: ',
-                                  style: niceFont(
-                                    color: Colors.black,
-                                    size: MediaQuery.of(context).size.height * 0.0256,
+                            Flexible(
+                              flex: 8,
+                              child: Padding(
+                                padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text('   Category:',
+                                    style: GoogleFonts.lato(
+                                      color: Colors.black,
+                                      fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                            Container(
-                              color: Colors.transparent,
-                              child: Theme(
-                                data: Theme.of(context).copyWith(
-                                  canvasColor: Colors.transparent,
-                                  buttonTheme: ButtonTheme.of(context).copyWith(
-                                    alignedDropdown: true,
-                                  )
-                                ),
-                                /// a drop down button to select wanted category
-                                child: DropdownButton<String>(
-                                  dropdownColor: Colors.white,
-                                  underline: Container(
-                                    height: 2,
-                                    color: Colors.lightGreen[300],
-                                  ),
-                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
-                                    color: Colors.lightGreen[200],
-                                  ),
-                                  elevation: 8,
+                            Flexible(
+                              flex: 10,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: CustomDropdownButton<String>(
                                   value: _currCategory,
                                   items: _categories
-                                      .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
-                                        child: Text(e, style: niceFont(color: Colors.lightGreen[300]),),
+                                      .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
+                                        child: Text(e,
+                                          textAlign: TextAlign.center,
+                                          style: niceFont(color: Colors.lightGreen[300]),
+                                        ),
                                         value: e,
                                     )
                                   ).toList(),
@@ -556,7 +555,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       _currCategory = value;
                                     });
                                   },
-                                )
+                                  style: GoogleFonts.lato(
+                                    color: Colors.lightGreen[300],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
+                                    color: Colors.lightGreen[200],
+                                  ),
+                                  dropdownColor: Colors.white,
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.lightGreen[300],
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -695,7 +706,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       prodPrice + '\$',
                                                       textAlign: TextAlign.right,
                                                       style: GoogleFonts.lato(
-                                                        fontSize: 11.0,
+                                                        fontSize: 12.0,
                                                         color: Colors.black,
                                                       ),
                                                     ),
