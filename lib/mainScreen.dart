@@ -542,7 +542,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   value: _currCategory,
                                   items: _categories
                                       .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
-                                        child: Text(e, style: niceFont(color: Colors.lightGreen[300]),),
+                                        child: Text(e,
+                                          textAlign: TextAlign.center,
+                                          style: niceFont(color: Colors.lightGreen[300]),
+                                        ),
                                         value: e,
                                     )
                                   ).toList(),
@@ -703,7 +706,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       prodPrice + '\$',
                                                       textAlign: TextAlign.right,
                                                       style: GoogleFonts.lato(
-                                                        fontSize: 11.0,
+                                                        fontSize: 12.0,
                                                         color: Colors.black,
                                                       ),
                                                     ),
