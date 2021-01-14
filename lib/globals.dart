@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'my_flutter_app_icons.dart';
+import 'package:badges/badges.dart';
+import 'checkoutScreen.dart';
 
 /// ------------------------------------------------
 /// globals
@@ -229,13 +231,50 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
       elevation: 0.0,
       backgroundColor: Colors.lightGreen[800],
       leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop()
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).pop(),
+        iconSize: 27.0,
       ),
+      actions: <Widget>[
+        /// Checkout - cart
+        /// displays a checkout dialog box defined in checkoutScreen.dart
+        Badge(
+          badgeContent: Text(
+            userCart.length < 10 ? userCart.length.toString() : '10+',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: userCart.length < 10 ? 10.0 : 9.0,
+            ),
+          ),
+          position: BadgePosition(
+            top: 5.5,
+            start: userCart.length < 10 ? 25 : 22,
+          ),
+          toAnimate: true,
+          animationType: BadgeAnimationType.scale,
+          badgeColor: Colors.red.shade600,
+          elevation: 8,
+          shape: BadgeShape.circle,
+          child: IconButton(
+              iconSize: 27.0, ///<-- default is 24.0
+              icon: Icon(Icons.shopping_cart_outlined),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CustomDialogBox();
+                    }
+                );
+              }
+          ),
+        ),
+      ],
       title: Text("Wish List",
         style: GoogleFonts.calistoga(
-            fontSize: 33,
-            color: Colors.white
+          fontSize: 33,
+          color: Colors.white
         ),
         textAlign: TextAlign.center,
       ),

@@ -27,6 +27,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  static final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +38,19 @@ class MyApp extends StatelessWidget {
           return ChangeNotifierProvider<UserRepository>(
             create: (_) => UserRepository.instance(),
             child: MaterialApp(
-                title: 'Flutter Demo',
-                theme: ThemeData(
-                  textSelectionHandleColor: Colors.transparent,
-                  cursorColor: Colors.lightGreen[800],
-                  primaryColor: Colors.green,
-                  accentColor: Colors.lightGreen[800],
-                  fontFamily: 'NewRomanTimes',
-                  textTheme: TextTheme(
-                    headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-                    headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-                  )
-                ),
-                home: MyHomePage()
+              title: 'Flutter Demo',
+              theme: ThemeData(
+                textSelectionHandleColor: Colors.transparent,
+                cursorColor: Colors.lightGreen[800],
+                primaryColor: Colors.green,
+                accentColor: Colors.lightGreen[800],
+                fontFamily: 'NewRomanTimes',
+                textTheme: TextTheme(
+                  headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+                  headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+                )
+              ),
+              home: MyHomePage()
             ),
           );
         }
