@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
         behavior: SnackBarBehavior.floating,
         content: Text('only verified users can access this screen',
           style: GoogleFonts.lato(
-              fontSize: MediaQuery.of(context).size.height * 0.0256 * (14.1/18)
+            fontSize: MediaQuery.of(context).size.width * 0.156 * (14/18) * (15/49),
           ),
         ),
         action: SnackBarAction(
