@@ -51,11 +51,11 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
   ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
-        width: 60,
-        height: 60,
-        child: CircularProgressIndicator(
-          valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
-        )
+      width: 60,
+      height: 60,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
     ),
   );
   
@@ -64,8 +64,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
     _onAddToCartSnackBar = SnackBar(
       content: Text('Product Successfully Added to Cart!',
         style: GoogleFonts.lato(
-            fontSize: 13.0,
-            color: Colors.white
+          fontSize: 13.0,
+          color: Colors.white
         ),
       ),
       behavior: SnackBarBehavior.floating,
@@ -98,22 +98,23 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                 if (!wishListCollectionSnapshot.hasData || wishListCollectionSnapshot.connectionState != ConnectionState.active) {
                   return _circularProgressIndicator;
                 }
-                if(_addedToCart){
+                if(_addedToCart){ ///displaying 'added to cart' snackbar
                   _addedToCart = false;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _scaffoldKeyWorkAround.currentState.showSnackBar(_onAddToCartSnackBar);
                   });
                 }
+                ///getting user's wishlist:
                 var wishListSnapshot = wishListCollectionSnapshot
                     .data
                     .docs
                     .firstWhere((element) => element.id == userRep.user.uid);
-                if (0 == wishListSnapshot.data()['Wishlist'].length) {
+                int totalProducts = wishListSnapshot.data()['Wishlist'].length;
+                if (0 == totalProducts) {
                   /// if user's wish list is empty then a blank, informative and interactive
                   /// screen is displayed. defined under globals.dart
                   return globals.emptyListErrorScreen(context, 'Wishlist');
                 }
-                int totalProducts = wishListSnapshot.data()['Wishlist'].length;
                 return RepaintBoundary(
                   key: _repaintBoundaryKey,
                   child: Scaffold(
@@ -361,7 +362,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                                 'Wishlist':FieldValue.arrayRemove(toRemoveList)
                                                               });
                                                               setState(() {
-                                                                ///so that orders list will be updated
+                                                                ///so that wishlist list will be updated
                                                               });
                                                               Navigator.pop(context);
                                                             },
@@ -492,9 +493,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
 
   ///checks whether current snapshot is the 'Counter' snapshot or not
   bool _isCounter(AsyncSnapshot<DocumentSnapshot> snapshot){
-    if(!snapshot.hasData){
-      return false;
-    }
-    return snapshot.data.id == 'Counter';
+    return snapshot.hasData && snapshot.data.id == 'Counter';
   }
 }

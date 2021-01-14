@@ -44,13 +44,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
 
   ///current review rating of user
   double _rating = 0.0;
+
+  ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
-        width: 60,
-        height: 60,
-        child: CircularProgressIndicator(
-          valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
-        )
+      width: 60,
+      height: 60,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
     ),
   );
 
