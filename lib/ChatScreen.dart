@@ -23,7 +23,7 @@ class ChatScreen extends StatefulWidget {
   ChatScreen({Key key, this.userID}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState( userID);
+  _ChatScreenState createState() => _ChatScreenState(userID);
 }
 class _ChatScreenState extends State<ChatScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKeyUserScreenSet =

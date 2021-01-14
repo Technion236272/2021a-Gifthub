@@ -278,7 +278,10 @@ class _ProductScreenState extends State<ProductScreen> {
                                   children: [
                                   globals.regTextButton("Contact Seller", icon: Icon(Icons.mail_outline), buttonColor: Colors.white, textColor: Colors.red, press: () async {
                                     String peerAvatar="https://cdn.vox-cdn.com/thumbor/mXo5ObKpTbHYi9YslBy6YhfedT4=/95x601:1280x1460/1200x800/filters:focal(538x858:742x1062)/cdn.vox-cdn.com/uploads/chorus_image/image/66699060/mgidarccontentnick.comc008fa9d_d.0.png";
-                                    //var peer="ERROR! GO TO YAHAV FOR HELP";
+                                    if(userRep.status != Status.Authenticated){
+                                      _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
+                                      return;
+                                    }
                                     var peer=(await FirebaseFirestore.instance.collection("Users").doc(_prod.user).get())['Info'];
                                     try {
                                       peerAvatar =
