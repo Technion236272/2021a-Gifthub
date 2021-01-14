@@ -278,15 +278,12 @@ class UserRepository with ChangeNotifier {
     }
   }
 
-  void updateToken(){
+  Future<void> updateToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    messaging.getToken().then((token) {
-      final FirebaseFirestore db = FirebaseFirestore.instance;
-      db.collection('tokens').doc(_user.uid)
-          .set({'token': token, 'registered_at': Timestamp.now()})
-          .then((value) => null);
-
-    });
-
+    var token=await messaging.getToken();
+    final FirebaseFirestore db = FirebaseFirestore.instance;
+    db.collection('tokens').doc(_user.uid)
+        .set({'token': token, 'registered_at': Timestamp.now()})
+        .then((value) => null);
   }
 }
