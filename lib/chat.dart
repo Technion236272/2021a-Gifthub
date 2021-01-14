@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart';
 
 
 
@@ -219,35 +220,35 @@ class ChatState extends State<Chat> {
 
   Future<void> onSendMessage(String content, int type) async {
 
-    //Check if message is empty or not
+    ///Check if message is empty or not
     if (content.trim() != '') {
       textEditingController.clear();
 
-      //Add myself to peer's list of contacts in the first spot of the list
-      var userDoc=(await Firestore.instance
+      ///Add myself to peer's list of contacts in the first spot of the list
+      var userDoc=(await FirebaseFirestore.instance
           .collection('Users').doc(userId).get());
       String name=userDoc['Info'][0] + " "+ userDoc['Info'][1];
-      var map=await Firestore.instance
+      var map=await FirebaseFirestore.instance
           .collection('messageAlert').doc(peerId).get();
       List oldMap=map['users'];
       oldMap.removeWhere((element) => element['id']==userId);
       List newMap=[{'id':userId,'name':name}];
       newMap.addAll(oldMap);
-      Firestore.instance
+      FirebaseFirestore.instance
           .collection('messageAlert').doc(peerId).set({'users':newMap});
-      //Add peer to my list of contacts in the first spot of the list
-      var peerDoc=(await Firestore.instance
+      ///Add peer to my list of contacts in the first spot of the list
+      var peerDoc=(await FirebaseFirestore.instance
           .collection('Users').doc(peerId).get());
       var peerName=peerDoc['Info'][0] + " "+ peerDoc['Info'][1];
-      map=await Firestore.instance
+      map=await FirebaseFirestore.instance
           .collection('messageAlert').doc(userId).get();
       oldMap=map['users'];
       oldMap.removeWhere((element) => element['id']==peerId);
       newMap=[{'id':peerId,'name':peerName}];
       newMap.addAll(oldMap);
-      Firestore.instance
+      FirebaseFirestore.instance
           .collection('messageAlert').doc(userId).set({'users':newMap});
-      //Make a message document in firebase
+      ///Make a message document in firebase
       FirebaseFirestore.instance
           .collection('messages')
           .doc(groupChatId)
@@ -261,6 +262,24 @@ class ChatState extends State<Chat> {
             'type': type //0 is text message, 1 is image message
           }
       );
+
+      ///Send a notification to peer that he got a message
+      String peerToken=(await FirebaseFirestore.instance
+          .collection('tokens').doc(peerId).get())['token'];
+      String requestBody= '   {  '  +
+          '       "title": "Received a message from '+name+'",  '  +
+          '       "message": "'+content+'",  '  +
+          '       "tokens": [  '  +
+          '           "'+peerToken+'"  '  +
+          '       ]  '  +
+          '  }  ' ;
+
+      // set up POST request arguments
+      String url = 'https://us-central1-gifthub-1c81c.cloudfunctions.net/sendBroadcastNotification';
+      Map<String, String> headers = {"Content-type": "application/json"};
+      // make POST request
+      await post(url, headers: headers, body: requestBody);
+
     } else {
       Fluttertoast.showToast(
           msg: 'Please enter a message before sending.',

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
@@ -121,6 +123,7 @@ class UserRepository with ChangeNotifier {
       }
       updateLocalUserFields();
       notifyListeners();
+      updateToken();
       return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
@@ -160,6 +163,7 @@ class UserRepository with ChangeNotifier {
         }
       });
       notifyListeners();
+      updateToken();
       return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
@@ -192,6 +196,7 @@ class UserRepository with ChangeNotifier {
     await FirebaseAuth.instance.signInWithCredential(credential);
     _status = Status.Authenticated;
     _user = FirebaseAuth.instance.currentUser;
+    updateToken();
   }
   ///After signing up with Google, we initialize class's parameters and initialize the needed lists on Firebase.
   void signInWithGoogleAddAccountInfo(String firstName,String lastName,String address,String apt,String city) async {
@@ -271,5 +276,17 @@ class UserRepository with ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  void updateToken(){
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    messaging.getToken().then((token) {
+      final FirebaseFirestore db = FirebaseFirestore.instance;
+      db.collection('tokens').doc(_user.uid)
+          .set({'token': token, 'registered_at': Timestamp.now()})
+          .then((value) => null);
+
+    });
+
   }
 }
