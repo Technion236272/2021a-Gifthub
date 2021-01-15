@@ -558,33 +558,55 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                           );
                                                                                           return;
                                                                                         }
-                                                                                        var location = await Geocoder.local.findAddressesFromQuery(
-                                                                                          _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
-                                                                                        );
-                                                                                        if(location.isEmpty){
+                                                                                        List<Address> locations = <Address>[];
+                                                                                        try{
+                                                                                          locations = await Geocoder.local.findAddressesFromQuery(
+                                                                                              _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
+                                                                                          );
+                                                                                        } on PlatformException catch (e){
                                                                                           Fluttertoast.showToast(
                                                                                             msg: 'Invalid address'
                                                                                           );
                                                                                           return;
                                                                                         }
-                                                                                        var first = location.first;
-                                                                                        print(' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
-                                                                                        print('${first.thoroughfare}');
-                                                                                        setState(() {
-                                                                                          _markers.clear();
-                                                                                          _markers.add(
-                                                                                            new Marker(
-                                                                                              markerId: MarkerId(''),
-                                                                                              visible: true,
-                                                                                              position: LatLng(first.coordinates.latitude, first.coordinates.longitude),
-                                                                                              icon: BitmapDescriptor.defaultMarker,
-                                                                                              infoWindow: InfoWindow(
-                                                                                                title: first.thoroughfare + ' ' + (first.subThoroughfare ?? ''),
-                                                                                                snippet: first.locality + ', ' + first.adminArea + ', ' + first.countryName,
-                                                                                              )
-                                                                                            )
+                                                                                        if(locations.isEmpty){
+                                                                                          Fluttertoast.showToast(
+                                                                                            msg: 'Invalid address'
                                                                                           );
-                                                                                        });
+                                                                                          return;
+                                                                                        }
+                                                                                        var first = locations.first;
+                                                                                        print('${first.locality}');
+                                                                                        print('${first.adminArea}');
+                                                                                        print('${first.subLocality}');
+                                                                                        print('${first.subAdminArea}');
+                                                                                        print('${first.addressLine}');
+                                                                                        print(' ${first.thoroughfare}');
+                                                                                        print('${first.subThoroughfare}');
+                                                                                        var coordinates = LatLng(first.coordinates.latitude, first.coordinates.longitude);
+                                                                                        _markers.clear();
+                                                                                        _markers.add(
+                                                                                          new Marker(
+                                                                                            markerId: MarkerId(coordinates.toString()),
+                                                                                            draggable: false,
+                                                                                            visible: true,
+                                                                                            position: coordinates,
+                                                                                            icon: BitmapDescriptor.defaultMarker,
+                                                                                            infoWindow: InfoWindow(
+                                                                                              title: first.thoroughfare + ' ' + (first.subThoroughfare ?? ''),
+                                                                                              snippet: ', ' + first.adminArea + ', ' + first.countryName,
+                                                                                            )
+                                                                                          )
+                                                                                        );
+                                                                                        var marker = _markers.first;
+                                                                                        print(marker.toString());
+                                                                                        print(marker.markerId);
+                                                                                        // return;
+                                                                                        double lat = marker.position.latitude;
+                                                                                        double long = marker.position.longitude;
+                                                                                        await _googleMapsController.moveCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
+                                                                                        await _googleMapsController.showMarkerInfoWindow(marker.markerId);
+                                                                                        setState(() {});
                                                                                       }
                                                                                     ),
                                                                                   ),
@@ -843,7 +865,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   child: RaisedButton(
-                                    elevation: 20.0,
+                                    elevation: 8.0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                       side: BorderSide(color: Colors.transparent),
@@ -1170,7 +1192,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
     var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
-    print(' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
     _address = first;
     return 'Success';
   }
