@@ -263,23 +263,43 @@ class ChatState extends State<Chat> {
           }
       );
 
-      ///Send a notification to peer that he got a message
-      String peerToken=(await FirebaseFirestore.instance
+      ///Notifications
+      String peerToken = (await FirebaseFirestore.instance
           .collection('tokens').doc(peerId).get())['token'];
-      String requestBody= '   {  '  +
-          '       "title": "Received a message from '+name+'",  '  +
-          '       "message": "'+content+'",  '  +
-          '       "tokens": [  '  +
-          '           "'+peerToken+'"  '  +
-          '       ]  '  +
-          '  }  ' ;
+      String requestBody,url;
+      Map<String, String> headers;
+      ///Send a notification to peer that he got a message (Type 0- Text message)
+      if(type==0) {
+        requestBody = '   {  ' +
+            '       "title": "Received a message from ' + name + '",  ' +
+            '       "message": "' + content + '",  ' +
+            '       "tokens": [  ' +
+            '           "' + peerToken + '"  ' +
+            '       ]  ' +
+            '  }  ';
 
-      // set up POST request arguments
-      String url = 'https://us-central1-gifthub-1c81c.cloudfunctions.net/sendBroadcastNotification';
-      Map<String, String> headers = {"Content-type": "application/json"};
-      // make POST request
-      await post(url, headers: headers, body: requestBody);
+        // set up POST request arguments
+        url = 'https://us-central1-gifthub-1c81c.cloudfunctions.net/sendBroadcastNotification';
+        headers = {"Content-type": "application/json"};
+        // make POST request
+        await post(url, headers: headers, body: requestBody);
+      }
+      else{
+        ///Send a notification to peer that he got a message (Type 1- Image message)
+        requestBody= '   {  '  +
+            '       "title": "Received a message from '+name+'",  '  +
+            '       "imageUrl": "'+content+'",  '  +
+            '       "tokens": [  '  +
+            '           "'+peerToken+'"  '  +
+            '       ]  '  +
+            '  }  ' ;
 
+        // set up POST request arguments
+        String url = 'https://us-central1-gifthub-1c81c.cloudfunctions.net/sendBroadcastNotificationImage';
+        headers = {"Content-type": "application/json"};
+        // make POST request
+        await post(url, headers: headers, body: requestBody);
+      }
     } else {
       Fluttertoast.showToast(
           msg: 'Please enter a message before sending.',
