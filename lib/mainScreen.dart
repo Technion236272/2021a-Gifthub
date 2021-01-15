@@ -727,12 +727,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ///product price goes here:
                                                   child: Align(
                                                     alignment: Alignment.centerRight,
-                                                    child: Text(
-                                                      prodPrice + '\$',
-                                                      textAlign: TextAlign.right,
-                                                      style: GoogleFonts.lato(
-                                                        fontSize: 12.0,
-                                                        color: Colors.black,
+                                                    child: Padding(
+                                                      padding: EdgeInsets.symmetric(horizontal: 5.0),
+                                                      child: Text(
+                                                        prodPrice + '\$',
+                                                        textAlign: TextAlign.right,
+                                                        style: GoogleFonts.lato(
+                                                          fontSize: 12.0,
+                                                          color: Colors.black,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
