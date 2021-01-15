@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'user_repository.dart';
@@ -13,6 +14,9 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoder/geocoder.dart';
 
 ///-----------------------------------------------------------------------------
 /// User Settings Screen
@@ -49,6 +53,20 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final FocusNode _googleStreetInputFocusNode = FocusNode();
   final FocusNode _googleCityInputFocusNode = FocusNode();
 
+  /// Google Map controller
+  GoogleMapController _googleMapsController;
+
+  /// initial camera position of the map - set to Sarina Market, TLV :)
+  static const LatLng _center = const LatLng(32.07163382209752, 34.78555801330857);
+
+  ///user's current location
+  LocationData _locationData;
+
+  /// user's address
+  Address _address;
+
+  final Set<Marker> _markers = {};
+
   /// true if user modified their avatar on edit mode, else false
   bool _avatarChanged = false;
 
@@ -70,6 +88,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   ///true if user chose to delete their avatar, else false
   bool _deletedAvatar = false;
 
+  /// true if user decided to use their current location, else false
+  bool _useCurrLocation = false;
+
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -89,6 +110,24 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressController.text = userRep.address;
     _cityController.text = userRep.city;
     _aptController.text = userRep.apt;
+  }
+
+  /// method that is called on map creation and takes a MapController as a parameter.
+  Future<void> _onMapCreated(GoogleMapController controller) async {
+    setState(() {
+      _googleMapsController = controller;
+    });
+    if(_markers.isEmpty){
+      return;
+    }
+    var marker = _markers.first;
+    double lat = marker.position.latitude;
+    double long = marker.position.longitude;
+    await _googleMapsController.moveCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
+    await _googleMapsController.showMarkerInfoWindow(marker.markerId);
+    setState(() {
+
+    });
   }
 
   InputDecoration _getInputDecoration(String hint) {
@@ -393,7 +432,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   child: Container(
                                     height: MediaQuery.of(context).size.height * 0.075 - 2,
                                     child: TextField(
-                                      readOnly: !_editingMode,
+                                      readOnly: true, //!_editingMode,
                                       decoration: InputDecoration(
                                         isDense: true,
                                         prefix: Transform.translate(
@@ -407,13 +446,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               onTap: () {
                                                 print('maps Pressed!');
                                                 _unfocusAll();
-                                                if(!_editingMode || _confirmEditingPressed){
+                                                if(!_editingMode || _confirmEditingPressed) {
                                                   return;
                                                 }
                                                 showDialog(
                                                   context: context,
                                                   barrierDismissible: true,
-                                                  builder: (context){
+                                                  builder: (context) {
                                                     return Center(
                                                       child: Padding(
                                                         padding: const EdgeInsets.all(20.0),
@@ -426,7 +465,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                             child: Material(
                                                               child: Container(
                                                                 color: Colors.transparent,
-                                                                height: MediaQuery.of(context).size.height * 0.75,
+                                                                height: MediaQuery.of(context).size.height * 0.8,
                                                                 width: MediaQuery.of(context).size.width,
                                                                 child: Column(
                                                                   mainAxisSize: MainAxisSize.min,
@@ -434,7 +473,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                                   children: <Widget>[
                                                                     Flexible(
-                                                                      flex: 1,
+                                                                      flex: 5,
                                                                       child: Row(
                                                                         mainAxisSize: MainAxisSize.min,
                                                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -447,7 +486,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 left: 8.0,
                                                                                 right: 4.0,
                                                                                 top: 12.0,
-                                                                                bottom: 12.0,
+                                                                                bottom: 9.0,
                                                                               ),
                                                                               child: TextField(
                                                                                 controller: _googleStreetController,
@@ -462,7 +501,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 textAlignVertical: TextAlignVertical.center,
                                                                                 keyboardType: TextInputType.streetAddress,
                                                                                 inputFormatters: [
-                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
+                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 . א-ת]'))
                                                                                 ],
                                                                               ),
                                                                             ),
@@ -471,10 +510,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                             flex: 3,
                                                                             child: Padding(
                                                                               padding: const EdgeInsets.only(
-                                                                                left: 8.0,
+                                                                                left: 4.0,
                                                                                 right: 4.0,
                                                                                 top: 12.0,
-                                                                                bottom: 12.0,
+                                                                                bottom: 9.0,
                                                                               ),
                                                                               child: TextField(
                                                                                 controller: _googleCityController,
@@ -485,7 +524,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 ),
                                                                                 keyboardType: TextInputType.streetAddress,
                                                                                 inputFormatters: [
-                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z .]'))
+                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z . א-ת]'))
                                                                                 ],
                                                                                 focusNode: _googleCityInputFocusNode,
                                                                                 autofocus: false,
@@ -496,34 +535,124 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                           ),
                                                                           Flexible(
                                                                             flex: 1,
-                                                                            child: Column(
-                                                                              mainAxisSize: MainAxisSize.min,
-                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                              children: <Widget>[
-                                                                                IconButton(
-                                                                                  icon: Icon(
-                                                                                    Icons.add_location_alt,
-                                                                                    color: Colors.deepOrange,
-                                                                                    size: 27.0,
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.only(bottom: 9.0),
+                                                                              child: Column(
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                children: <Widget>[
+                                                                                  Flexible(
+                                                                                    flex: 2,
+                                                                                    child: IconButton(
+                                                                                      icon: Icon(
+                                                                                        Icons.add_location_alt,
+                                                                                        color: Colors.deepOrange,
+                                                                                        size: 27.0,
+                                                                                      ),
+                                                                                      onPressed: () async {
+                                                                                        _unfocusAll();
+                                                                                        if(_isAddressEmpty()){
+                                                                                          Fluttertoast.showToast(
+                                                                                            msg: 'Please choose address'
+                                                                                          );
+                                                                                          return;
+                                                                                        }
+                                                                                        var location = await Geocoder.local.findAddressesFromQuery(
+                                                                                          _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
+                                                                                        );
+                                                                                        if(location.isEmpty){
+                                                                                          Fluttertoast.showToast(
+                                                                                            msg: 'Invalid address'
+                                                                                          );
+                                                                                          return;
+                                                                                        }
+                                                                                        var first = location.first;
+                                                                                        print(' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
+                                                                                        print('${first.thoroughfare}');
+                                                                                        setState(() {
+                                                                                          _markers.clear();
+                                                                                          _markers.add(
+                                                                                            new Marker(
+                                                                                              markerId: MarkerId(''),
+                                                                                              visible: true,
+                                                                                              position: LatLng(first.coordinates.latitude, first.coordinates.longitude),
+                                                                                              icon: BitmapDescriptor.defaultMarker,
+                                                                                              infoWindow: InfoWindow(
+                                                                                                title: first.thoroughfare + ' ' + (first.subThoroughfare ?? ''),
+                                                                                                snippet: first.locality + ', ' + first.adminArea + ', ' + first.countryName,
+                                                                                              )
+                                                                                            )
+                                                                                          );
+                                                                                        });
+                                                                                      }
+                                                                                    ),
                                                                                   ),
-                                                                                  onPressed: () {
-                                                                                    print('search pressed!');
-                                                                                  }
-                                                                                ),
-                                                                                Transform.translate(
-                                                                                  offset: Offset(0.0, -9.0),
-                                                                                  child: Text('Add')
-                                                                                ),
-                                                                              ],
+                                                                                  Flexible(
+                                                                                    flex: 1,
+                                                                                    child: Text('Add',
+                                                                                      style: GoogleFonts.lato(
+                                                                                        fontSize: MediaQuery.of(context).size.height * 0.0256 * (12/18) + 0.4,
+                                                                                        fontWeight: FontWeight.w600
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             )
                                                                           ),
                                                                         ],
-                                                                      )
+                                                                      ),
                                                                     ),
                                                                     Flexible(
-                                                                      flex: 7,
-                                                                      child: Container(color: Colors.red,)
+                                                                      flex: 33,
+                                                                      child: GoogleMap(
+                                                                        markers: _markers,
+                                                                        onTap: (LatLng details){
+                                                                          _unfocusAll();
+                                                                        },
+                                                                        onMapCreated: _onMapCreated,
+                                                                        initialCameraPosition: CameraPosition(
+                                                                          target: _center,
+                                                                          zoom: 11.0,
+                                                                        ),
+                                                                      ),
                                                                     ),
+                                                                    Flexible(
+                                                                      flex: 4,
+                                                                      child: Center(
+                                                                        child: OutlineButton.icon(
+                                                                          onPressed: () {
+                                                                            if(_isAddressEmpty()){
+                                                                              Fluttertoast.showToast(
+                                                                                msg: 'Please choose address'
+                                                                              );
+                                                                              return;
+                                                                            }
+                                                                          },
+                                                                          icon: Icon(
+                                                                            Icons.map,
+                                                                            color: Colors.black,
+                                                                            size: MediaQuery.of(context).size.height * 0.0256 * 25/18,
+                                                                          ),
+                                                                          label: Text(
+                                                                            'Submit chosen location',
+                                                                            textAlign: TextAlign.center,
+                                                                            style: GoogleFonts.lato(
+                                                                              fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                              fontWeight: FontWeight.w600,
+                                                                            ),
+                                                                          ),
+                                                                          borderSide: BorderSide(
+                                                                            color: Colors.black,
+                                                                            width: 1.5,
+                                                                          ),
+                                                                          shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(30.0),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    )
                                                                   ],
                                                                 ),
                                                               ),
@@ -1012,8 +1141,39 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _lastNameInputFocusNode.unfocus();
     _aptInputFocusNode.unfocus();
     _cityInputFocusNode.unfocus();
+    _googleCityInputFocusNode.unfocus();
+    _googleStreetInputFocusNode.unfocus();
   }
 
+  bool _isAddressEmpty(){
+    return _googleStreetController.text.isEmpty || _googleCityController.text.isEmpty;
+  }
+
+  /// called when user wants to use current location:
+  Future<String> _onCurrentLocationPressed() async {
+    String error = '';
+    Location location = new Location();
+    try {
+      _locationData = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'please grant permission';
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'permission denied - please enable it from app settings';
+      }
+      _locationData = null;
+      return error.isEmpty ? 'something unexpected occurred' : error;
+    } catch (_) {
+      return 'something unexpected occurred';
+    }
+    final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print(' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
+    _address = first;
+    return 'Success';
+  }
 
   ///hiding keyboard and un-focusing text field on user tap outside text field
   @override
