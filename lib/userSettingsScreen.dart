@@ -394,150 +394,160 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       readOnly: !_editingMode,
                                       decoration: InputDecoration(
                                         isDense: true,
-                                        suffix: Transform.translate(
+                                        prefix: Transform.translate(
                                           offset: Offset(0.0, 5.0),
-                                          child: InkWell(
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () {
-                                              print('maps Pressed!');
-                                              showDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                builder: (context){
-                                                  return Center(
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.all(20.0),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context).unfocus();
-                                                        },
-                                                        child: ClipRRect(
-                                                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                                          child: Material(
-                                                            child: Container(
-                                                              color: Colors.transparent,
-                                                              height: MediaQuery.of(context).size.height * 0.75,
-                                                              width: MediaQuery.of(context).size.width,
-                                                              child: Column(
-                                                                mainAxisSize: MainAxisSize.min,
-                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                children: <Widget>[
-                                                                  Flexible(
-                                                                    flex: 1,
-                                                                    child: Row(
-                                                                      mainAxisSize: MainAxisSize.min,
-                                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                                      children: <Widget>[
-                                                                        Flexible(
-                                                                          flex: 4,
-                                                                          child: Padding(
-                                                                            padding: const EdgeInsets.only(
-                                                                              left: 8.0,
-                                                                              right: 4.0,
-                                                                              top: 12.0,
-                                                                              bottom: 12.0,
-                                                                            ),
-                                                                            child: TextField(
-                                                                              decoration: _getInputDecoration('Street'),
-                                                                              style: GoogleFonts.lato(
-                                                                                fontWeight: FontWeight.w600,
-                                                                                fontSize: 16.0,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                            child: InkWell(
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor: Colors.transparent,
+                                              onTap: () {
+                                                print('maps Pressed!');
+                                                _unfocusAll();
+                                                if(!_editingMode || _confirmEditingPressed){
+                                                  return;
+                                                }
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (context){
+                                                    return Center(
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.all(20.0),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(context).unfocus();
+                                                          },
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                            child: Material(
+                                                              child: Container(
+                                                                color: Colors.transparent,
+                                                                height: MediaQuery.of(context).size.height * 0.75,
+                                                                width: MediaQuery.of(context).size.width,
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  children: <Widget>[
+                                                                    Flexible(
+                                                                      flex: 1,
+                                                                      child: Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        children: <Widget>[
+                                                                          Flexible(
+                                                                            flex: 4,
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.only(
+                                                                                left: 8.0,
+                                                                                right: 4.0,
+                                                                                top: 12.0,
+                                                                                bottom: 12.0,
                                                                               ),
-                                                                              focusNode: _googleStreetInputFocusNode,
-                                                                              autofocus: false,
-                                                                              textAlign: TextAlign.start,
-                                                                              textAlignVertical: TextAlignVertical.center,
-                                                                              keyboardType: TextInputType.streetAddress,
-                                                                              inputFormatters: [
-                                                                                FilteringTextInputFormatter.allow(RegExp('[a-z A-Z .]'))
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        Flexible(
-                                                                          flex: 3,
-                                                                          child: Padding(
-                                                                            padding: const EdgeInsets.only(
-                                                                              left: 8.0,
-                                                                              right: 4.0,
-                                                                              top: 12.0,
-                                                                              bottom: 12.0,
-                                                                            ),
-                                                                            child: TextField(
-                                                                              decoration: _getInputDecoration('City'),
-                                                                              style: GoogleFonts.lato(
-                                                                                fontWeight: FontWeight.w600,
-                                                                                fontSize: 16.0,
-                                                                              ),
-                                                                              keyboardType: TextInputType.streetAddress,
-                                                                              inputFormatters: [
-                                                                                FilteringTextInputFormatter.allow(RegExp('[a-z A-Z .]'))
-                                                                              ],
-                                                                              focusNode: _googleCityInputFocusNode,
-                                                                              autofocus: false,
-                                                                              textAlign: TextAlign.start,
-                                                                              textAlignVertical: TextAlignVertical.center,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        Flexible(
-                                                                          flex: 1,
-                                                                          child: Column(
-                                                                            // mainAxisSize: MainAxisSize.min,
-                                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                                            children: <Widget>[
-                                                                              IconButton(
-                                                                                icon: Icon(
-                                                                                  Icons.add_location_alt,
-                                                                                  color: Colors.deepOrange,
-                                                                                  size: 27.0,
+                                                                              child: TextField(
+                                                                                decoration: _getInputDecoration('Street'),
+                                                                                style: GoogleFonts.lato(
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                  fontSize: 16.0,
                                                                                 ),
-                                                                                onPressed: () {
-                                                                                  print('search pressed!');
-                                                                                }
+                                                                                focusNode: _googleStreetInputFocusNode,
+                                                                                autofocus: false,
+                                                                                textAlign: TextAlign.start,
+                                                                                textAlignVertical: TextAlignVertical.center,
+                                                                                keyboardType: TextInputType.streetAddress,
+                                                                                inputFormatters: [
+                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 .]'))
+                                                                                ],
                                                                               ),
-                                                                              Transform.translate(
-                                                                                offset: Offset(0.0, -9.0),
-                                                                                child: Text('Add')
+                                                                            ),
+                                                                          ),
+                                                                          Flexible(
+                                                                            flex: 3,
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.only(
+                                                                                left: 8.0,
+                                                                                right: 4.0,
+                                                                                top: 12.0,
+                                                                                bottom: 12.0,
                                                                               ),
-                                                                            ],
-                                                                          )
-                                                                        ),
-                                                                      ],
-                                                                    )
-                                                                  ),
-                                                                  Flexible(
-                                                                    flex: 7,
-                                                                    child: Container(color: Colors.red,)
-                                                                  ),
-                                                                ],
+                                                                              child: TextField(
+                                                                                decoration: _getInputDecoration('City'),
+                                                                                style: GoogleFonts.lato(
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                  fontSize: 16.0,
+                                                                                ),
+                                                                                keyboardType: TextInputType.streetAddress,
+                                                                                inputFormatters: [
+                                                                                  FilteringTextInputFormatter.allow(RegExp('[a-z A-Z .]'))
+                                                                                ],
+                                                                                focusNode: _googleCityInputFocusNode,
+                                                                                autofocus: false,
+                                                                                textAlign: TextAlign.start,
+                                                                                textAlignVertical: TextAlignVertical.center,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          Flexible(
+                                                                            flex: 1,
+                                                                            child: Column(
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                              children: <Widget>[
+                                                                                IconButton(
+                                                                                  icon: Icon(
+                                                                                    Icons.add_location_alt,
+                                                                                    color: Colors.deepOrange,
+                                                                                    size: 27.0,
+                                                                                  ),
+                                                                                  onPressed: () {
+                                                                                    print('search pressed!');
+                                                                                  }
+                                                                                ),
+                                                                                Transform.translate(
+                                                                                  offset: Offset(0.0, -9.0),
+                                                                                  child: Text('Add')
+                                                                                ),
+                                                                              ],
+                                                                            )
+                                                                          ),
+                                                                        ],
+                                                                      )
+                                                                    ),
+                                                                    Flexible(
+                                                                      flex: 7,
+                                                                      child: Container(color: Colors.red,)
+                                                                    ),
+                                                                  ],
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  );
-                                                }
-                                              );
-                                            },
-                                            child: Image.asset('Assets/GoogleMaps.png',
-                                              width: MediaQuery.of(context).size.width * 0.075,
-                                              height: MediaQuery.of(context).size.height * 0.04,
+                                                    );
+                                                  }
+                                                );
+                                              },
+                                              child: Image.asset(
+                                                _editingMode && !_confirmEditingPressed
+                                                  ? 'Assets/GoogleMaps.png'
+                                                  : 'Assets/GoogleMapsGrey.jpeg',
+                                                width: MediaQuery.of(context).size.width * 0.075,
+                                                height: MediaQuery.of(context).size.height * 0.04,
+                                              ),
                                             ),
                                           ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.grey),
-                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.grey),
-                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                       ),
                                       focusNode: _addressInputFocusNode,
