@@ -39,6 +39,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _aptController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _googleStreetController = TextEditingController();
+  final TextEditingController _googleCityController = TextEditingController();
   final FocusNode _firstNameInputFocusNode = FocusNode();
   final FocusNode _lastNameInputFocusNode = FocusNode();
   final FocusNode _addressInputFocusNode = FocusNode();
@@ -448,6 +450,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 bottom: 12.0,
                                                                               ),
                                                                               child: TextField(
+                                                                                controller: _googleStreetController,
                                                                                 decoration: _getInputDecoration('Street'),
                                                                                 style: GoogleFonts.lato(
                                                                                   fontWeight: FontWeight.w600,
@@ -474,6 +477,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 bottom: 12.0,
                                                                               ),
                                                                               child: TextField(
+                                                                                controller: _googleCityController,
                                                                                 decoration: _getInputDecoration('City'),
                                                                                 style: GoogleFonts.lato(
                                                                                   fontWeight: FontWeight.w600,
@@ -816,11 +820,15 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressInputFocusNode.dispose();
     _aptInputFocusNode.dispose();
     _cityInputFocusNode.dispose();
+    _googleCityInputFocusNode.dispose();
+    _googleStreetInputFocusNode.dispose();
     _lastNameController.dispose();
     _firstNameController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _aptController.dispose();
+    _googleCityController.dispose();
+    _googleStreetController.dispose();
     super.dispose();
   }
 
