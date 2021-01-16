@@ -19,12 +19,14 @@ class Constants {
   static const double padding = 20;
   static const double avatarRadius = 45;
 }
-
+var userRep=null;
 class CustomDialogBox extends StatefulWidget {
   final String title = "Shopping Cart", text = "Checkout";
 
-  const CustomDialogBox({Key key,})
-      : super(key: key);
+  CustomDialogBox({Key key,user})
+      : super(key: key){
+    userRep=user;
+  }
 
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
@@ -141,7 +143,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               ),
               Flexible( ///checkout button:
                 child: InkWell(
-                  onTap: () async {
+                     onTap: userRep.status == Status.Authenticated ? () async {
                     ///Fingerprint auth
                     final LocalAuthentication localAuth= LocalAuthentication();
                     if(await localAuth.canCheckBiometrics){
@@ -181,13 +183,15 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
                     globals.userCart.clear();
                     //TODO: make cool animation - Sprint 2
-                  },
+                  }:(){
+                    Fluttertoast.showToast(msg: "Please log in to place an order 😊");
+                      },
                   child: Container(
                     padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.02,
                         bottom: MediaQuery.of(context).size.height * 0.02),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: userRep.status == Status.Authenticated ? Colors.red : Colors.grey[850],
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(Constants.padding),
                           bottomRight: Radius.circular(Constants.padding)),
