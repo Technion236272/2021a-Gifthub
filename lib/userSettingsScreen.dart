@@ -565,13 +565,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                             );
                                                                                           } on PlatformException catch (_){
                                                                                             Fluttertoast.showToast(
-                                                                                              msg: 'Invalid address'
+                                                                                              msg: '   Invalid address   '
                                                                                             );
                                                                                             return;
                                                                                           }
                                                                                           if(locations.isEmpty){
                                                                                             Fluttertoast.showToast(
-                                                                                              msg: 'Invalid address'
+                                                                                              msg: '   Invalid address   '
                                                                                             );
                                                                                             return;
                                                                                           }
