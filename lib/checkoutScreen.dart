@@ -1,7 +1,10 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gifthub_2021a/all_confetti_widget.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'globals.dart' as globals;
 import 'package:flutter/cupertino.dart';
@@ -139,6 +142,24 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               Flexible( ///checkout button:
                 child: InkWell(
                   onTap: () async {
+                    ///Fingerprint auth
+                    final LocalAuthentication localAuth= LocalAuthentication();
+                    if(await localAuth.canCheckBiometrics){
+                      try {
+                        if (!(await localAuth.authenticateWithBiometrics(
+                            localizedReason: "GiftHub Checkout Authentication"))) {
+                          return;
+                        }
+                      }
+                      catch(e){
+                        Fluttertoast.showToast(msg: "Too many bad fingerprint attempts! Please lock and unlock your phone to free the fingerprint lock!\n");
+                        return;
+                      }
+                    }
+                    ///----------
+
+
+
                     Navigator.of(context).pop();
                     var userRep = Provider.of<UserRepository>(context, listen: false);
                     if(null == userRep.user || userRep.status != Status.Authenticated){
@@ -159,8 +180,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         .doc(Provider.of<UserRepository>(context, listen: false).user.uid)
                         .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
                     globals.userCart.clear();
-                    Navigator.pop(context);
-                    //TODO: make cool animation - prob. Sprint 2
+                    //TODO: make cool animation - Sprint 2
                   },
                   child: Container(
                     padding: EdgeInsets.only(
