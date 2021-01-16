@@ -537,62 +537,62 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                               flex: 1,
                                                                               child: Padding(
                                                                                 padding: const EdgeInsets.only(bottom: 9.0),
-                                                                                child: Column(
-                                                                                  mainAxisSize: MainAxisSize.min,
-                                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                                                  children: <Widget>[
-                                                                                    Flexible(
-                                                                                      flex: 2,
-                                                                                      child: IconButton(
-                                                                                        icon: Icon(
-                                                                                          Icons.search,
-                                                                                          color: Colors.deepOrange,
-                                                                                          size: 27.0,
-                                                                                        ),
-                                                                                        onPressed: () async {
-                                                                                          _unfocusAll();
-                                                                                          if(_isAddressEmpty()){
-                                                                                            Fluttertoast.showToast(
-                                                                                              msg: 'Please choose address'
-                                                                                            );
-                                                                                            return;
-                                                                                          }
-                                                                                          List<Address> locations = <Address>[];
-                                                                                          try{
-                                                                                            locations = await Geocoder.local.findAddressesFromQuery(
-                                                                                                _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
-                                                                                            );
-                                                                                          } on PlatformException catch (_){
-                                                                                            Fluttertoast.showToast(
-                                                                                              msg: '   Invalid address   '
-                                                                                            );
-                                                                                            return;
-                                                                                          }
-                                                                                          if(locations.isEmpty){
-                                                                                            Fluttertoast.showToast(
-                                                                                              msg: '   Invalid address   '
-                                                                                            );
-                                                                                            return;
-                                                                                          }
-                                                                                          var first = locations.first;
-                                                                                          await _goToAddress(first);
-                                                                                          //FIXME: throwing PlatformException:
-                                                                                          // await _googleMapsController.future..showMarkerInfoWindow(_markers.keys.first);
-                                                                                          setState(() {});
-                                                                                        }
-                                                                                      ),
-                                                                                    ),
-                                                                                    Flexible(
-                                                                                      flex: 1,
-                                                                                      child: Text('Search',
-                                                                                        style: GoogleFonts.lato(
-                                                                                          fontSize: MediaQuery.of(context).size.height * 0.0256 * (12/18) + 0.4,
-                                                                                          fontWeight: FontWeight.w600
+                                                                                child: InkWell(
+                                                                                  onTap: () async {
+                                                                                    _unfocusAll();
+                                                                                    if(_isAddressEmpty()){
+                                                                                      Fluttertoast.showToast(msg: 'Please choose address');
+                                                                                      return;
+                                                                                    }
+                                                                                    List<Address> locations = <Address>[];
+                                                                                    try{
+                                                                                      locations = await Geocoder.local.findAddressesFromQuery(
+                                                                                          _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
+                                                                                      );
+                                                                                    } on PlatformException catch (_){
+                                                                                      Fluttertoast.showToast(msg: '   Invalid address   ');
+                                                                                      return;
+                                                                                    }
+                                                                                    if(locations.isEmpty){
+                                                                                      Fluttertoast.showToast(msg: '   Invalid address   ');
+                                                                                      return;
+                                                                                    }
+                                                                                    var first = locations.first;
+                                                                                    await _goToAddress(first);
+                                                                                    //FIXME: throwing PlatformException:
+                                                                                    // await _googleMapsController.future..showMarkerInfoWindow(_markers.keys.first);
+                                                                                    setState(() {});
+                                                                                  },
+                                                                                  child: Column(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: <Widget>[
+                                                                                      Flexible(
+                                                                                        flex: 2,
+                                                                                        child: Padding(
+                                                                                          padding: const EdgeInsets.only(
+                                                                                            bottom: 1.0,
+                                                                                            top: 9.0,
+                                                                                          ),
+                                                                                          child: Image.asset(
+                                                                                            'Assets/search_location-512.png',
+                                                                                            width: MediaQuery.of(context).size.width * 0.075,
+                                                                                            height: MediaQuery.of(context).size.height * 0.04,
+                                                                                          ),
                                                                                         ),
                                                                                       ),
-                                                                                    ),
-                                                                                  ],
+                                                                                      Flexible(
+                                                                                        flex: 1,
+                                                                                        child: Text('Search',
+                                                                                          style: GoogleFonts.lato(
+                                                                                            fontSize: MediaQuery.of(context).size.height * 0.0256 * (12/18) + 0.4,
+                                                                                            fontWeight: FontWeight.w600
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
                                                                                 ),
                                                                               )
                                                                             ),

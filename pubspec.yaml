@@ -81,6 +81,7 @@ flutter:
     - Assets/no image product.png
     - Assets/GoogleMaps.png
     - Assets/GoogleMapsGrey.jpeg
+    - Assets/search_location-512.png
   fonts:
     - family: GiftHubIcon
       fonts:
