@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'dart:io';
+import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'user_repository.dart';
 import 'package:circular_profile_avatar/circular_profile_avatar.dart';
@@ -11,6 +13,10 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoder/geocoder.dart';
 
 ///-----------------------------------------------------------------------------
 /// User Settings Screen
@@ -37,11 +43,27 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _aptController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _googleStreetController = TextEditingController();
+  final TextEditingController _googleCityController = TextEditingController();
   final FocusNode _firstNameInputFocusNode = FocusNode();
   final FocusNode _lastNameInputFocusNode = FocusNode();
   final FocusNode _addressInputFocusNode = FocusNode();
   final FocusNode _aptInputFocusNode = FocusNode();
   final FocusNode _cityInputFocusNode = FocusNode();
+  final FocusNode _googleStreetInputFocusNode = FocusNode();
+  final FocusNode _googleCityInputFocusNode = FocusNode();
+
+  /// Google Map controller
+  Completer<GoogleMapController> _googleMapsController = Completer();
+
+  /// initial camera position of the map - set to Sarina Market, TLV :)
+  static const LatLng _center = const LatLng(32.07163382209752, 34.78555801330857);
+
+  ///user's current location
+  LocationData _locationData;
+
+  /// set of map markers that user inserted
+  final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
 
   /// true if user modified their avatar on edit mode, else false
   bool _avatarChanged = false;
@@ -71,6 +93,21 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     endIndent: 10,
   );
 
+  /// all map types available on our app:
+  final List<MapType> _mapTypes = <MapType>[
+    MapType.normal,
+    MapType.hybrid,
+  ];
+
+  /// this is the initial tilt of the map:
+  static const double _magicTilt = 59.440717697143555;
+
+  /// current map type displayed on screen (default is normal):
+  MapType _currentMapType = MapType.normal;
+
+  /// user's current address location
+  Address _address;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +120,47 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressController.text = userRep.address;
     _cityController.text = userRep.city;
     _aptController.text = userRep.apt;
+  }
+
+  /// method that is called on map creation and takes a MapController as a parameter.
+  Future<void> _onMapCreated(GoogleMapController controller) async {
+    setState(() {
+      _googleMapsController.complete(controller);
+    });
+    if(_markers.isEmpty){
+      return;
+    }
+    var marker = _markers.values.first;
+    double lat = marker.position.latitude;
+    double long = marker.position.longitude;
+    var c = await _googleMapsController.future;
+    await c.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
+    await c.showMarkerInfoWindow(marker.markerId);
+    setState(() {});
+  }
+
+  /// Map's text fields' input decoration
+  InputDecoration _getInputDecoration(String hint) {
+    return InputDecoration(
+      enabledBorder: _getOutlineInputBorder(),
+      focusedBorder: _getOutlineInputBorder(color: Colors.lightGreen.shade800),
+      hintText: hint,
+      suffixIcon: hint == 'City'
+        ? Icon(Icons.location_city_outlined)
+        : Icon(Icons.home_outlined),
+      contentPadding: EdgeInsets.fromLTRB(5.0 , 5.0 , 5.0 , 5.0),
+    );
+  }
+
+  /// Map's text fields' outline input border
+  OutlineInputBorder _getOutlineInputBorder({Color color = Colors.grey}) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(
+        color: color,
+        width: 1.3,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+    );
   }
 
   @override
@@ -365,16 +443,334 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   child: Container(
                                     height: MediaQuery.of(context).size.height * 0.075 - 2,
                                     child: TextField(
-                                      readOnly: !_editingMode,
+                                      readOnly: true, //!_editingMode,
                                       decoration: InputDecoration(
                                         isDense: true,
+                                        contentPadding: EdgeInsets.fromLTRB(5.0 , 20.0 , 5.0 , 18.0),
+                                        prefix: Transform.translate(
+                                          offset: Offset(0.0, 5.0),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                            child: InkWell(
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor: Colors.transparent,
+                                              onTap: () {
+                                                _unfocusAll();
+                                                if(!_editingMode || _confirmEditingPressed) {
+                                                  return;
+                                                }
+                                                /// Displaying Google Map:
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (context) {
+                                                    return StatefulBuilder(
+                                                      builder: (BuildContext context, void Function(void Function()) setState) =>
+                                                      Center(
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(20.0),
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              FocusScope.of(context).unfocus();
+                                                            },
+                                                            child: ClipRRect(
+                                                              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                              child: Material(
+                                                                child: Container(
+                                                                  color: Colors.transparent,
+                                                                  height: MediaQuery.of(context).size.height * 0.8,
+                                                                  width: MediaQuery.of(context).size.width,
+                                                                  child: Column(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                    children: <Widget>[
+                                                                      Flexible(
+                                                                        flex: 5,
+                                                                        child: Row(
+                                                                          mainAxisSize: MainAxisSize.min,
+                                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                                          children: <Widget>[
+                                                                            /// Google Street text field:
+                                                                            Flexible(
+                                                                              flex: 4,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.only(
+                                                                                  left: 8.0,
+                                                                                  right: 4.0,
+                                                                                  top: 12.0,
+                                                                                  bottom: 9.0,
+                                                                                ),
+                                                                                child: TextField(
+                                                                                  controller: _googleStreetController,
+                                                                                  decoration: _getInputDecoration('Street'),
+                                                                                  style: GoogleFonts.lato(
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    fontSize: 16.0,
+                                                                                  ),
+                                                                                  focusNode: _googleStreetInputFocusNode,
+                                                                                  autofocus: false,
+                                                                                  textAlign: TextAlign.start,
+                                                                                  textAlignVertical: TextAlignVertical.center,
+                                                                                  keyboardType: TextInputType.streetAddress,
+                                                                                  inputFormatters: [
+                                                                                    FilteringTextInputFormatter.allow(RegExp('[a-z A-Z 0-9 . א-ת]'))
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            /// Google City text field:
+                                                                            Flexible(
+                                                                              flex: 3,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.only(
+                                                                                  left: 4.0,
+                                                                                  right: 4.0,
+                                                                                  top: 12.0,
+                                                                                  bottom: 9.0,
+                                                                                ),
+                                                                                child: TextField(
+                                                                                  controller: _googleCityController,
+                                                                                  decoration: _getInputDecoration('City'),
+                                                                                  style: GoogleFonts.lato(
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    fontSize: 16.0,
+                                                                                  ),
+                                                                                  keyboardType: TextInputType.streetAddress,
+                                                                                  inputFormatters: [
+                                                                                    FilteringTextInputFormatter.allow(RegExp('[a-z A-Z . א-ת]'))
+                                                                                  ],
+                                                                                  focusNode: _googleCityInputFocusNode,
+                                                                                  autofocus: false,
+                                                                                  textAlign: TextAlign.start,
+                                                                                  textAlignVertical: TextAlignVertical.center,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            /// Search icon:
+                                                                            Flexible(
+                                                                              flex: 1,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.only(bottom: 9.0),
+                                                                                child: InkWell(
+                                                                                  onTap: () async {
+                                                                                    _unfocusAll();
+                                                                                    if(_isAddressEmpty()){
+                                                                                      Fluttertoast.showToast(msg: 'Please choose address');
+                                                                                      return;
+                                                                                    }
+                                                                                    List<Address> locations = <Address>[];
+                                                                                    try{
+                                                                                      locations = await Geocoder.local.findAddressesFromQuery(
+                                                                                          _googleStreetController.text.trim() + ' ' + _googleCityController.text.trim()
+                                                                                      );
+                                                                                    } on PlatformException catch (_){
+                                                                                      Fluttertoast.showToast(msg: '   Invalid address   ');
+                                                                                      return;
+                                                                                    }
+                                                                                    if(locations.isEmpty){
+                                                                                      Fluttertoast.showToast(msg: '   Invalid address   ');
+                                                                                      return;
+                                                                                    }
+                                                                                    var first = locations.first;
+                                                                                    await _goToAddress(first);
+                                                                                    //FIXME: throwing PlatformException:
+                                                                                    // await _googleMapsController.future..showMarkerInfoWindow(_markers.keys.first);
+                                                                                    setState(() {});
+                                                                                  },
+                                                                                  child: Column(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: <Widget>[
+                                                                                      Flexible(
+                                                                                        flex: 2,
+                                                                                        child: Padding(
+                                                                                          padding: const EdgeInsets.only(
+                                                                                            bottom: 1.0,
+                                                                                            top: 9.0,
+                                                                                          ),
+                                                                                          child: Image.asset(
+                                                                                            'Assets/search_location-512.png',
+                                                                                            width: MediaQuery.of(context).size.width * 0.075,
+                                                                                            height: MediaQuery.of(context).size.height * 0.04,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      Flexible(
+                                                                                        flex: 1,
+                                                                                        child: Text('Search',
+                                                                                          style: GoogleFonts.lato(
+                                                                                            fontSize: MediaQuery.of(context).size.height * 0.0256 * (12/18) + 0.4,
+                                                                                            fontWeight: FontWeight.w600
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              )
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      ///Google Map:
+                                                                      Flexible(
+                                                                        flex: 33,
+                                                                        child: Stack(
+                                                                          children: <Widget>[
+                                                                            GoogleMap(
+                                                                              markers: Set<Marker>.of(_markers.values),
+                                                                              onTap: (LatLng details) {
+                                                                                _unfocusAll();
+                                                                              },
+                                                                              mapType: _currentMapType,
+                                                                              compassEnabled: false,
+                                                                              myLocationEnabled: false,
+                                                                              myLocationButtonEnabled: false,
+                                                                              onMapCreated: (c) async {
+                                                                                await _onMapCreated(c);
+                                                                              },
+                                                                              initialCameraPosition: CameraPosition(
+                                                                                //TODO: think about alternative target place:
+                                                                                target: _center,
+                                                                                zoom: 17.6,
+                                                                                tilt: _magicTilt,
+                                                                              ),
+                                                                            ),
+                                                                            Padding(
+                                                                              padding: const EdgeInsets.all(16.0),
+                                                                              child: Align(
+                                                                                alignment: Alignment.topLeft,
+                                                                                child: Column(
+                                                                                  children: <Widget>[
+                                                                                    /// Change Map Type:
+                                                                                    FloatingActionButton(
+                                                                                      onPressed: () async {
+                                                                                        _unfocusAll();
+                                                                                        setState(() {
+                                                                                          _currentMapType =
+                                                                                          _currentMapType == _mapTypes[0]
+                                                                                            ? _mapTypes[1]
+                                                                                            : _mapTypes[0];
+                                                                                        });
+                                                                                      },
+                                                                                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                                                      backgroundColor: Colors.green.shade800,
+                                                                                      child: const Icon(Icons.map, size: 36.0),
+                                                                                    ),
+                                                                                    SizedBox(height: 16.0),
+                                                                                    /// Use Current Location:
+                                                                                    FloatingActionButton(
+                                                                                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                                                      backgroundColor: Colors.green.shade800,
+                                                                                      onPressed: () async {
+                                                                                        _unfocusAll();
+                                                                                        String msg = await _onCurrentLocationPressed();
+                                                                                        if (msg != 'Success') {
+                                                                                          Fluttertoast.showToast(msg: 'Error: ' + msg);
+                                                                                          return;
+                                                                                        }
+                                                                                        await _goToAddress(_address);
+                                                                                        setState(() {
+                                                                                          _googleStreetController.text = _getAddressAsString(_address).trim();
+                                                                                          _googleCityController.text = _address.locality.trim();
+                                                                                        });
+                                                                                      },
+                                                                                      child: Image.asset('Assets/current-location-icon.png',
+                                                                                        width: MediaQuery.of(context).size.width * 0.11,
+                                                                                        height: MediaQuery.of(context).size.height * 0.11,
+                                                                                        color: Colors.white,
+                                                                                      ),
+                                                                                    )
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      /// Submit Button:
+                                                                      Flexible(
+                                                                        flex: 4,
+                                                                        child: Center(
+                                                                          child: OutlineButton.icon(
+                                                                            onPressed: () {
+                                                                              if(_isAddressEmpty()){
+                                                                                Fluttertoast.showToast(
+                                                                                  msg: 'Please choose address'
+                                                                                );
+                                                                                return;
+                                                                              }
+                                                                              if(_markers.isEmpty){
+                                                                                Fluttertoast.showToast(
+                                                                                  msg: 'Please search map location first'
+                                                                                );
+                                                                                return;
+                                                                              }
+                                                                              /// updating user's address
+                                                                              String city = _address.locality ?? '';
+                                                                              super.setState(() {
+                                                                                _addressController.text = _getAddressAsString(_address) +
+                                                                                    (city.isNotEmpty ? ', ' + city : '');
+                                                                              });
+                                                                              Navigator.pop(context);
+                                                                            },
+                                                                            icon: Icon(
+                                                                              Icons.approval,
+                                                                              color: Colors.black,
+                                                                              size: MediaQuery.of(context).size.height * 0.0256 * 25/18,
+                                                                            ),
+                                                                            label: Text(
+                                                                              'Submit chosen location',
+                                                                              textAlign: TextAlign.center,
+                                                                              style: GoogleFonts.lato(
+                                                                                fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                                fontWeight: FontWeight.w600,
+                                                                              ),
+                                                                            ),
+                                                                            borderSide: BorderSide(
+                                                                              color: Colors.black,
+                                                                              width: 1.5,
+                                                                            ),
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(30.0),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    );
+                                                  }
+                                                );
+                                              },
+                                              /// Google Maps Image as Icon:
+                                              child: Image.asset(
+                                                _editingMode && !_confirmEditingPressed
+                                                  ? 'Assets/GoogleMaps.png'
+                                                  : 'Assets/GoogleMapsGrey.jpeg',
+                                                width: MediaQuery.of(context).size.width * 0.075,
+                                                height: MediaQuery.of(context).size.height * 0.04,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                         enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.grey),
-                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.grey),
-                                            borderRadius: BorderRadius.all(Radius.circular(30))
+                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                       ),
                                       focusNode: _addressInputFocusNode,
@@ -386,7 +782,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       ],
                                       onChanged: (text) => {},
                                       textAlignVertical: TextAlignVertical.top,
-                                      textAlign: TextAlign.center,
+                                      textAlign: TextAlign.start,
                                       style: GoogleFonts.lato(
                                         fontSize: 16.0,
                                         color: Colors.black
@@ -443,7 +839,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                     ),
                                                   ),
                                                   onChanged: (text) => {},
-                                                  textAlignVertical: TextAlignVertical.top,
+                                                  textAlignVertical: TextAlignVertical.center,
                                                   textAlign: TextAlign.center,
                                                   controller: _aptController,
                                                   maxLength: 6,
@@ -537,7 +933,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   child: RaisedButton(
-                                    elevation: 20.0,
+                                    elevation: 8.0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                       side: BorderSide(color: Colors.transparent),
@@ -643,11 +1039,15 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressInputFocusNode.dispose();
     _aptInputFocusNode.dispose();
     _cityInputFocusNode.dispose();
+    _googleCityInputFocusNode.dispose();
+    _googleStreetInputFocusNode.dispose();
     _lastNameController.dispose();
     _firstNameController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _aptController.dispose();
+    _googleCityController.dispose();
+    _googleStreetController.dispose();
     super.dispose();
   }
 
@@ -831,8 +1231,54 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _lastNameInputFocusNode.unfocus();
     _aptInputFocusNode.unfocus();
     _cityInputFocusNode.unfocus();
+    _googleCityInputFocusNode.unfocus();
+    _googleStreetInputFocusNode.unfocus();
   }
 
+  /// QoL function that validates user's address input isn't empty
+  bool _isAddressEmpty(){
+    return _googleStreetController.text.trim().isEmpty || _googleCityController.text.trim().isEmpty;
+  }
+
+  /// called when user wants to use current location:
+  Future<String> _onCurrentLocationPressed() async {
+    Location location = new Location();
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return 'Service is disabled';
+      }
+    }
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return 'permission denied - please enable it from app settings';
+      }
+    }
+    String error = '';
+    try {
+      _locationData = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'Permission Denied';
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'Permission Denied - please enable it from app settings';
+      }
+      _locationData = null;
+      return error.isEmpty ? 'Something unexpected occurred' : error;
+    } catch (_) {
+      return 'Something unexpected occurred';
+    }
+    final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    _address = addresses.first;
+    return 'Success';
+  }
 
   ///hiding keyboard and un-focusing text field on user tap outside text field
   @override
@@ -842,5 +1288,50 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     if(0 == value) {
       _unfocusAll();
     }
+  }
+
+  /// called upon successful search query of user's input.
+  /// animates camera to the location submitted by the user.
+  Future<void> _goToAddress(Address first) async {
+    final GoogleMapController controller = await _googleMapsController.future;
+    double lat = first.coordinates.latitude, long = first.coordinates.longitude;
+    var position = CameraPosition(
+      target: LatLng(lat, long),
+      zoom: 17.6,
+      tilt: _magicTilt,
+    );
+    controller.animateCamera(CameraUpdate.newCameraPosition(position));
+    if(_markers.isNotEmpty && await controller.isMarkerInfoWindowShown(_markers.keys.first)){
+      await controller.hideMarkerInfoWindow(_markers.keys.first);
+    }
+    _address = first;
+    _addMarker(LatLng(lat, long), first);
+  }
+
+  /// adds new marker on the map, corresponding to user's input.
+  void _addMarker(LatLng latLng, Address first) {
+    final MarkerId markerId = MarkerId(latLng.toString());
+    final Marker marker = Marker(
+      markerId: markerId,
+      draggable: false,
+      visible: true,
+      position: latLng,
+      icon: BitmapDescriptor.defaultMarker,
+      infoWindow: InfoWindow(
+        title: _getAddressAsString(first),
+        snippet: first.locality.trim() + ', ' + first.adminArea.trim() + ', ' + first.countryName.trim(),
+      )
+    );
+    _markers.clear();
+    setState(() {
+      _markers[markerId] = marker;
+    });
+  }
+
+  /// return a String formatted address from [Address]
+  String _getAddressAsString(Address first){
+    return null != first.thoroughfare || null != first.subThoroughfare
+        ? ((first.thoroughfare ?? '').trim() + ' ' + (first.subThoroughfare ?? '')).trim()
+        : _googleStreetController.text.trim() + ', ' + _googleCityController.text.trim();
   }
 }

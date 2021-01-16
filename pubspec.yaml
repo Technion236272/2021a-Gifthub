@@ -51,6 +51,9 @@ dependencies:
   badges: ^1.1.6
   firebase_messaging: ^8.0.0-dev.11
   local_auth: ^0.6.3
+  google_maps_flutter: ^1.1.1
+  location: ^3.0.0
+  geocoder: ^0.2.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 dev_dependencies:
@@ -76,6 +79,10 @@ flutter:
     - Assets/images/birthday_cake.jpg
     - Assets/Untitled.png
     - Assets/no image product.png
+    - Assets/GoogleMaps.png
+    - Assets/GoogleMapsGrey.jpeg
+    - Assets/search_location-512.png
+    - Assets/current-location-icon.png
   fonts:
     - family: GiftHubIcon
       fonts:
