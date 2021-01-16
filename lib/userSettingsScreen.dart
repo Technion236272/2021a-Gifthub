@@ -60,7 +60,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   static const LatLng _center = const LatLng(32.07163382209752, 34.78555801330857);
 
   ///user's current location
-  // LocationData _locationData;
+  LocationData _locationData;
 
   /// set of map markers that user inserted
   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
@@ -86,9 +86,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   ///true if user chose to delete their avatar, else false
   bool _deletedAvatar = false;
 
-  /// true if user decided to use their current location, else false
-  // bool _useCurrLocation = false;
-
   final Divider _avatarTilesDivider = Divider(
     color: Colors.grey[400],
     indent: 10,
@@ -107,6 +104,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
 
   /// current map type displayed on screen (default is normal):
   MapType _currentMapType = MapType.normal;
+
+  /// user's current address location
+  Address _address;
 
   @override
   void initState() {
@@ -459,6 +459,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 if(!_editingMode || _confirmEditingPressed) {
                                                   return;
                                                 }
+                                                /// Displaying Google Map:
                                                 showDialog(
                                                   context: context,
                                                   barrierDismissible: true,
@@ -491,6 +492,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                           crossAxisAlignment: CrossAxisAlignment.center,
                                                                           children: <Widget>[
+                                                                            /// Google Street text field:
                                                                             Flexible(
                                                                               flex: 4,
                                                                               child: Padding(
@@ -518,6 +520,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 ),
                                                                               ),
                                                                             ),
+                                                                            /// Google City text field:
                                                                             Flexible(
                                                                               flex: 3,
                                                                               child: Padding(
@@ -545,6 +548,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 ),
                                                                               ),
                                                                             ),
+                                                                            /// Search icon:
                                                                             Flexible(
                                                                               flex: 1,
                                                                               child: Padding(
@@ -611,6 +615,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                           ],
                                                                         ),
                                                                       ),
+                                                                      ///Google Map:
                                                                       Flexible(
                                                                         flex: 33,
                                                                         child: Stack(
@@ -638,26 +643,55 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                               padding: const EdgeInsets.all(16.0),
                                                                               child: Align(
                                                                                 alignment: Alignment.topLeft,
-                                                                                child: FloatingActionButton(
-                                                                                  onPressed: () async {
-                                                                                    setState(() {
-                                                                                      _currentMapType =
-                                                                                      _currentMapType == _mapTypes[0]
-                                                                                        ? _mapTypes[1]
-                                                                                        : _mapTypes[0];
-                                                                                    });
-                                                                                  },
-                                                                                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                                                                                  backgroundColor: Colors.green.shade800,
-                                                                                  child: const Icon(Icons.map,
-                                                                                    size: 27.0,
-                                                                                  ),
+                                                                                child: Column(
+                                                                                  children: <Widget>[
+                                                                                    /// Change Map Type:
+                                                                                    FloatingActionButton(
+                                                                                      onPressed: () async {
+                                                                                        _unfocusAll();
+                                                                                        setState(() {
+                                                                                          _currentMapType =
+                                                                                          _currentMapType == _mapTypes[0]
+                                                                                            ? _mapTypes[1]
+                                                                                            : _mapTypes[0];
+                                                                                        });
+                                                                                      },
+                                                                                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                                                      backgroundColor: Colors.green.shade800,
+                                                                                      child: const Icon(Icons.map, size: 36.0),
+                                                                                    ),
+                                                                                    SizedBox(height: 16.0),
+                                                                                    /// Use Current Location:
+                                                                                    FloatingActionButton(
+                                                                                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                                                      backgroundColor: Colors.green.shade800,
+                                                                                      onPressed: () async {
+                                                                                        _unfocusAll();
+                                                                                        String msg = await _onCurrentLocationPressed();
+                                                                                        if (msg != 'Success') {
+                                                                                          Fluttertoast.showToast(msg: 'Error: ' + msg);
+                                                                                          return;
+                                                                                        }
+                                                                                        await _goToAddress(_address);
+                                                                                        setState(() {
+                                                                                          _googleStreetController.text = _getAddressAsString(_address).trim();
+                                                                                          _googleCityController.text = _address.locality.trim();
+                                                                                        });
+                                                                                      },
+                                                                                      child: Image.asset('Assets/current-location-icon.png',
+                                                                                        width: MediaQuery.of(context).size.width * 0.11,
+                                                                                        height: MediaQuery.of(context).size.height * 0.11,
+                                                                                        color: Colors.white,
+                                                                                      ),
+                                                                                    )
+                                                                                  ],
                                                                                 ),
                                                                               ),
                                                                             ),
                                                                           ],
                                                                         ),
                                                                       ),
+                                                                      /// Submit Button:
                                                                       Flexible(
                                                                         flex: 4,
                                                                         child: Center(
@@ -705,6 +739,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   }
                                                 );
                                               },
+                                              /// Google Maps Image as Icon:
                                               child: Image.asset(
                                                 _editingMode && !_confirmEditingPressed
                                                   ? 'Assets/GoogleMaps.png'
@@ -1192,29 +1227,44 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   }
 
   /// called when user wants to use current location:
-  // Future<String> _onCurrentLocationPressed() async {
-  //   String error = '';
-  //   Location location = new Location();
-  //   try {
-  //     _locationData = await location.getLocation();
-  //   } on PlatformException catch (e) {
-  //     if (e.code == 'PERMISSION_DENIED') {
-  //       error = 'please grant permission';
-  //     }
-  //     if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
-  //       error = 'permission denied - please enable it from app settings';
-  //     }
-  //     _locationData = null;
-  //     return error.isEmpty ? 'something unexpected occurred' : error;
-  //   } catch (_) {
-  //     return 'something unexpected occurred';
-  //   }
-  //   final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
-  //   var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-  //   var first = addresses.first;
-  //   _address = first;
-  //   return 'Success';
-  // }
+  Future<String> _onCurrentLocationPressed() async {
+    Location location = new Location();
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return 'Service is disabled';
+      }
+    }
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return 'permission denied - please enable it from app settings';
+      }
+    }
+    String error = '';
+    try {
+      _locationData = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'permission denied';
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'permission denied - please enable it from app settings';
+      }
+      _locationData = null;
+      return error.isEmpty ? 'something unexpected occurred' : error;
+    } catch (_) {
+      return 'something unexpected occurred';
+    }
+    final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    _address = addresses.first;
+    return 'Success';
+  }
 
   ///hiding keyboard and un-focusing text field on user tap outside text field
   @override
