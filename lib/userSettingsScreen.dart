@@ -96,6 +96,18 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     endIndent: 10,
   );
 
+  /// all map types available on our app:
+  final List<MapType> _mapTypes = <MapType>[
+    MapType.normal,
+    MapType.hybrid,
+  ];
+
+  /// this is the initial tilt of the map:
+  static const double _magicTilt = 59.440717697143555;
+
+  /// current map type displayed on screen (default is normal):
+  MapType _currentMapType = MapType.normal;
+
   @override
   void initState() {
     super.initState();
@@ -601,22 +613,49 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                       ),
                                                                       Flexible(
                                                                         flex: 33,
-                                                                        child: GoogleMap(
-                                                                          markers: Set<Marker>.of(_markers.values),
-                                                                          onTap: (LatLng details){
-                                                                            _unfocusAll();
-                                                                          },
-                                                                          compassEnabled: false,
-                                                                          myLocationEnabled: false,
-                                                                          myLocationButtonEnabled: false,
-                                                                          onMapCreated: (c) async {
-                                                                            await _onMapCreated(c);
-                                                                          },
-                                                                          initialCameraPosition: CameraPosition(
-                                                                            target: _center,
-                                                                            zoom: 17.6,
-                                                                            tilt: 59.440717697143555
-                                                                          ),
+                                                                        child: Stack(
+                                                                          children: <Widget>[
+                                                                            GoogleMap(
+                                                                              markers: Set<Marker>.of(_markers.values),
+                                                                              onTap: (LatLng details) {
+                                                                                _unfocusAll();
+                                                                              },
+                                                                              mapType: _currentMapType,
+                                                                              compassEnabled: false,
+                                                                              myLocationEnabled: false,
+                                                                              myLocationButtonEnabled: false,
+                                                                              onMapCreated: (c) async {
+                                                                                await _onMapCreated(c);
+                                                                              },
+                                                                              initialCameraPosition: CameraPosition(
+                                                                                //TODO: think about alternative target place:
+                                                                                target: _center,
+                                                                                zoom: 17.6,
+                                                                                tilt: _magicTilt,
+                                                                              ),
+                                                                            ),
+                                                                            Padding(
+                                                                              padding: const EdgeInsets.all(16.0),
+                                                                              child: Align(
+                                                                                alignment: Alignment.topLeft,
+                                                                                child: FloatingActionButton(
+                                                                                  onPressed: () async {
+                                                                                    setState(() {
+                                                                                      _currentMapType =
+                                                                                      _currentMapType == _mapTypes[0]
+                                                                                        ? _mapTypes[1]
+                                                                                        : _mapTypes[0];
+                                                                                    });
+                                                                                  },
+                                                                                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                                                  backgroundColor: Colors.green.shade800,
+                                                                                  child: const Icon(Icons.map,
+                                                                                    size: 27.0,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
                                                                         ),
                                                                       ),
                                                                       Flexible(
@@ -661,7 +700,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
+                                                      )
                                                     );
                                                   }
                                                 );
@@ -1195,7 +1234,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     var position = CameraPosition(
       target: LatLng(lat, long),
       zoom: 17.6,
-      tilt: 59.440717697143555,
+      tilt: _magicTilt,
     );
     controller.animateCamera(CameraUpdate.newCameraPosition(position));
     if(_markers.isNotEmpty && await controller.isMarkerInfoWindowShown(_markers.keys.first)){
