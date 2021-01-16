@@ -10,6 +10,9 @@ include ':app'
 //assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 //apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
 
+/**
+ * These settings enable use of [Location] package! Please DO NOT change them!
+ * */
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 
 def plugins = new Properties()

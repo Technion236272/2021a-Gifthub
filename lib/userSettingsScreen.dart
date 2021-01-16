@@ -136,11 +136,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     var c = await _googleMapsController.future;
     await c.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
     await c.showMarkerInfoWindow(marker.markerId);
-    setState(() {
-
-    });
+    setState(() {});
   }
 
+  /// Map's text fields' input decoration
   InputDecoration _getInputDecoration(String hint) {
     return InputDecoration(
       enabledBorder: _getOutlineInputBorder(),
@@ -153,6 +152,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     );
   }
 
+  /// Map's text fields' outline input border
   OutlineInputBorder _getOutlineInputBorder({Color color = Colors.grey}) {
     return OutlineInputBorder(
       borderSide: BorderSide(
@@ -446,6 +446,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                       readOnly: true, //!_editingMode,
                                       decoration: InputDecoration(
                                         isDense: true,
+                                        contentPadding: EdgeInsets.fromLTRB(5.0 , 20.0 , 5.0 , 18.0),
                                         prefix: Transform.translate(
                                           offset: Offset(0.0, 5.0),
                                           child: Padding(
@@ -703,6 +704,19 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                                                 );
                                                                                 return;
                                                                               }
+                                                                              if(_markers.isEmpty){
+                                                                                Fluttertoast.showToast(
+                                                                                  msg: 'Please search map location first'
+                                                                                );
+                                                                                return;
+                                                                              }
+                                                                              /// updating user's address
+                                                                              String city = _address.locality ?? '';
+                                                                              super.setState(() {
+                                                                                _addressController.text = _getAddressAsString(_address) +
+                                                                                    (city.isNotEmpty ? ', ' + city : '');
+                                                                              });
+                                                                              Navigator.pop(context);
                                                                             },
                                                                             icon: Icon(
                                                                               Icons.approval,
@@ -825,7 +839,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                     ),
                                                   ),
                                                   onChanged: (text) => {},
-                                                  textAlignVertical: TextAlignVertical.top,
+                                                  textAlignVertical: TextAlignVertical.center,
                                                   textAlign: TextAlign.center,
                                                   controller: _aptController,
                                                   maxLength: 6,
@@ -1221,7 +1235,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _googleStreetInputFocusNode.unfocus();
   }
 
-  /// QoL function the validates user's address input isn't empty
+  /// QoL function that validates user's address input isn't empty
   bool _isAddressEmpty(){
     return _googleStreetController.text.trim().isEmpty || _googleCityController.text.trim().isEmpty;
   }
@@ -1250,15 +1264,15 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
       _locationData = await location.getLocation();
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
-        error = 'permission denied';
+        error = 'Permission Denied';
       }
       if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
-        error = 'permission denied - please enable it from app settings';
+        error = 'Permission Denied - please enable it from app settings';
       }
       _locationData = null;
-      return error.isEmpty ? 'something unexpected occurred' : error;
+      return error.isEmpty ? 'Something unexpected occurred' : error;
     } catch (_) {
-      return 'something unexpected occurred';
+      return 'Something unexpected occurred';
     }
     final coordinates = new Coordinates(_locationData.latitude, _locationData.longitude);
     var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
@@ -1290,6 +1304,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     if(_markers.isNotEmpty && await controller.isMarkerInfoWindowShown(_markers.keys.first)){
       await controller.hideMarkerInfoWindow(_markers.keys.first);
     }
+    _address = first;
     _addMarker(LatLng(lat, long), first);
   }
 
