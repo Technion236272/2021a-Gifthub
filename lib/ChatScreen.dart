@@ -73,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }):null,
             title: Text(
               "Chat",
-              style: GoogleFonts.lato(
+              style: GoogleFonts.calistoga(
                 fontSize: 28,
                 color: Colors.white,
               ),

@@ -306,7 +306,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                             }),
                                         title: Text(
                                           "Chat with "+peer[0]+" "+peer[1],
-                                          style: GoogleFonts.lato(
+                                          style: GoogleFonts.calistoga(
                                             fontSize: 26,
                                             color: Colors.white,
                                           ),
