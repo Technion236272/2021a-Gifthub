@@ -17,6 +17,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 ///-----------------------------------------------------------------------------
 /// User Settings Screen
@@ -107,6 +108,17 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
 
   /// user's current address location
   Address _address;
+
+  ///whether or not customers are allowed to call the user
+  ///TODO: pull it from the DB!!
+  bool _allowCall = false;
+
+  ///whether or not customers are allowed to navigate to the user
+  ///TODO: pull it from the DB!!
+  bool _allowNavigate = false;
+
+  ///space between Columned TextFields:
+  SizedBox _space = SizedBox(height: 10,);
 
   @override
   void initState() {
@@ -205,7 +217,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            SizedBox(height: 15),
+                            _space,
                             ///user's Avatar
                             Stack(
                               alignment: Alignment.center,
@@ -295,7 +307,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 ) : Container(),
                               ],
                             ),
-                            SizedBox(height: 15,),
+                            _space,
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -325,7 +337,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         Flexible(
                                           flex: 2,
                                           child: Container(
-                                            height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                            height: MediaQuery.of(context).size.height * 0.07 - 2,
                                             width: MediaQuery.of(context).size.width * 0.5 - 10,
                                             child: TextField(
                                               readOnly: !_editingMode,
@@ -333,6 +345,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               autofocus: false,
                                               decoration: InputDecoration(
                                                 isDense: true,
+                                                contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                 enabledBorder: OutlineInputBorder(
                                                   borderSide: BorderSide(color: Colors.grey),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
@@ -385,7 +398,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         Flexible(
                                           flex: 2,
                                           child: Container(
-                                            height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                            height: MediaQuery.of(context).size.height * 0.07 - 2,
                                             width: MediaQuery.of(context).size.width * 0.5 - 10,
                                             child: TextField(
                                               readOnly: !_editingMode,
@@ -393,6 +406,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               focusNode: _lastNameInputFocusNode,
                                               keyboardType: TextInputType.name,
                                               decoration: InputDecoration(
+                                                contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                 isDense: true,
                                                 enabledBorder: OutlineInputBorder(
                                                   borderSide: BorderSide(color: Colors.grey),
@@ -423,7 +437,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 )
                               ],
                             ),
-                            SizedBox(height: 15,),
+                            _space,
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -790,7 +804,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 15,),
+                                _space,
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -820,7 +834,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                             Flexible(
                                               flex: 2,
                                               child: Container(
-                                                height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                                height: MediaQuery.of(context).size.height * 0.07 - 2,
                                                 width: MediaQuery.of(context).size.width * 0.3,
                                                 child: TextField(
                                                   autofocus: false,
@@ -828,6 +842,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   keyboardType: TextInputType.number,
                                                   decoration: InputDecoration(
                                                     counterText: "",
+                                                    contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
                                                         borderSide: BorderSide(color: Colors.grey),
@@ -882,12 +897,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                             Flexible(
                                               flex: 2,
                                               child: Container(
-                                                height: MediaQuery.of(context).size.height * 0.075 - 2,
+                                                height: MediaQuery.of(context).size.height * 0.07 - 2,
                                                 width: MediaQuery.of(context).size.width * 0.7 - 10,
                                                 child: TextField(
                                                   autofocus: false,
                                                   readOnly: !_editingMode,
                                                   decoration: InputDecoration(
+                                                    contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
                                                         borderSide: BorderSide(color: Colors.grey),
@@ -921,100 +937,190 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 ),
                               ],
                             ),
-                            SizedBox(height: 60,),
-                            /// edit/submit changes button
-                            Align(
-                              alignment: FractionalOffset.bottomCenter,
-                              child: Container(
-                                height: 40,
-                                width: 200,
-                                child: InkWell(
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  child: RaisedButton(
-                                    elevation: 8.0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.0),
-                                      side: BorderSide(color: Colors.transparent),
-                                    ),
-                                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                                    color: _editingMode && !_confirmEditingPressed ? Colors.green[900] : Colors.grey[900],
-                                    textColor: Colors.white,
-                                    onPressed:
-                                    ///disabling button if we're uploading new avatar
-                                    _uploadingAvatar ? null
-                                      : _editingMode
-                                    ///if we're in edit mode then we submit our changes
-                                      ? () async {
-                                      setState(() {
-                                        _confirmEditingPressed = true;
-                                      });
-                                      if(_avatarChanged) {
-                                        setState(() {
-                                          _uploadingAvatar = true;
-                                        });
-                                        if(_deletedAvatar){
-                                          await userRep.deleteAvatar();
-                                          userRep.avatarURL = defaultAvatar;
-                                        } else {
-                                          await userRep.setAvatar(_picPath);
-                                        }
-                                        _avatarChanged = false;
-                                        _deletedAvatar = false;
-                                      }
-                                      setState(() {
-                                        if(_firstNameController.text.isNotEmpty) {
-                                          userRep.firstName = _firstNameController.text;
-                                        }
-                                        if(_lastNameController.text.isNotEmpty) {
-                                          userRep.lastName = _lastNameController.text;
-                                        }
-                                        if(_addressController.text.isNotEmpty) {
-                                          userRep.address = _addressController.text;
-                                        }
-                                        if(_aptController.text.isNotEmpty) {
-                                          userRep.apt = _aptController.text;
-                                        }
-                                        if(_cityController.text.isNotEmpty){
-                                          userRep.city = _cityController.text;
-                                        }
-                                        _editingMode = false;
-                                      });
-                                      await userRep.updateFirebaseUserList();
-                                      setState(() {
-                                        _uploadingAvatar = false;
-                                      });
-                                    }
-                                    ///setting edit mode:
-                                    : () {
-                                      _unfocusAll();
-                                      setState(() {
-                                        _editingMode = true;
-                                        _confirmEditingPressed = false;
-                                      });
-                                    },
-                                    child: Row(
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height * 0.4 - kBottomNavigationBarHeight ,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ///allow call
+                                  Flexible(
+                                    child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment:CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          _editingMode && !_confirmEditingPressed ? "Update   " : "Edit   ",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.openSans(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                            child: ListTileTheme(
+                                              contentPadding: EdgeInsets.all(0),
+                                              child: CheckboxListTile(
+                                                value: _allowCall,
+                                                isThreeLine: false,
+                                                title: AutoSizeText('Allow customers to call me',
+                                                  minFontSize: 15.0,
+                                                  maxLines: 1,
+                                                  style: GoogleFonts.lato(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                controlAffinity: ListTileControlAffinity.leading,
+                                                checkColor: Colors.white,
+                                                secondary: Icon(
+                                                  _allowCall
+                                                    ? Icons.phone_enabled
+                                                    : Icons.phone_disabled,
+                                                ),
+                                                autofocus: false,
+                                                // contentPadding:  EdgeInsets.fromLTRB(5.0 , 20.0 , 5.0 , 20.0),
+                                                onChanged: _editingMode && !_confirmEditingPressed
+                                                  ? (value) {
+                                                    setState(() {
+                                                      _allowCall = value;
+                                                    });
+                                                  } : null
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        Icon(_editingMode && !_confirmEditingPressed ? Icons.check_outlined : Icons.edit_outlined,
-                                          color: Colors.white,
-                                          size: 17.0,
+                                        ///allow navigation
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                            child: ListTileTheme(
+                                              contentPadding: EdgeInsets.all(0),
+                                              child: CheckboxListTile(
+                                                  value: _allowNavigate,
+                                                  isThreeLine: false,
+                                                  title: AutoSizeText('Allow customers to navigate to my store',
+                                                    minFontSize: 13.0,
+                                                    maxLines: 1,
+                                                    style: GoogleFonts.lato(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                  controlAffinity: ListTileControlAffinity.leading,
+                                                  checkColor: Colors.white,
+                                                  secondary: Icon(
+                                                    _allowNavigate
+                                                        ? Icons.near_me
+                                                        : Icons.near_me_disabled,
+                                                  ),
+                                                  autofocus: false,
+                                                  // contentPadding:  EdgeInsets.fromLTRB(5.0 , 20.0 , 5.0 , 20.0),
+                                                  onChanged: _editingMode && !_confirmEditingPressed
+                                                      ? (value) {
+                                                    setState(() {
+                                                      _allowNavigate = value;
+                                                    });
+                                                  } : null
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
+                                  /// edit/submit changes button
+                                  Flexible(
+                                    flex: 2,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: Container(
+                                        height: 40,
+                                        width: 200,
+                                        child: InkWell(
+                                          child: RaisedButton(
+                                            elevation: 8.0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(18.0),
+                                              side: BorderSide(color: Colors.transparent),
+                                            ),
+                                            visualDensity: VisualDensity.adaptivePlatformDensity,
+                                            color: _editingMode && !_confirmEditingPressed ? Colors.green[900] : Colors.grey[900],
+                                            textColor: Colors.white,
+                                            onPressed:
+                                            ///disabling button if we're uploading new avatar
+                                            _uploadingAvatar ? null
+                                              : _editingMode
+                                            ///if we're in edit mode then we submit our changes
+                                              ? () async {
+                                              setState(() {
+                                                _confirmEditingPressed = true;
+                                              });
+                                              if(_avatarChanged) {
+                                                setState(() {
+                                                  _uploadingAvatar = true;
+                                                });
+                                                if(_deletedAvatar){
+                                                  await userRep.deleteAvatar();
+                                                  userRep.avatarURL = defaultAvatar;
+                                                } else {
+                                                  await userRep.setAvatar(_picPath);
+                                                }
+                                                _avatarChanged = false;
+                                                _deletedAvatar = false;
+                                              }
+                                              setState(() {
+                                                if(_firstNameController.text.isNotEmpty) {
+                                                  userRep.firstName = _firstNameController.text;
+                                                }
+                                                if(_lastNameController.text.isNotEmpty) {
+                                                  userRep.lastName = _lastNameController.text;
+                                                }
+                                                if(_addressController.text.isNotEmpty) {
+                                                  userRep.address = _addressController.text;
+                                                }
+                                                if(_aptController.text.isNotEmpty) {
+                                                  userRep.apt = _aptController.text;
+                                                }
+                                                if(_cityController.text.isNotEmpty){
+                                                  userRep.city = _cityController.text;
+                                                }
+                                                _editingMode = false;
+                                              });
+                                              await userRep.updateFirebaseUserList();
+                                              setState(() {
+                                                _uploadingAvatar = false;
+                                              });
+                                            }
+                                            ///setting edit mode:
+                                            : () {
+                                              _unfocusAll();
+                                              setState(() {
+                                                _editingMode = true;
+                                                _confirmEditingPressed = false;
+                                              });
+                                            },
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment:CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  _editingMode && !_confirmEditingPressed ? "Update   " : "Edit   ",
+                                                  textAlign: TextAlign.center,
+                                                  style: GoogleFonts.openSans(
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.bold
+                                                  ),
+                                                ),
+                                                Icon(_editingMode && !_confirmEditingPressed ? Icons.check_outlined : Icons.edit_outlined,
+                                                  color: Colors.white,
+                                                  size: 17.0,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ]
