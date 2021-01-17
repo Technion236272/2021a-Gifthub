@@ -54,6 +54,7 @@ dependencies:
   google_maps_flutter: ^1.1.1
   location: ^3.0.0
   geocoder: ^0.2.1
+  auto_size_text: ^2.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 dev_dependencies:
@@ -83,6 +84,7 @@ flutter:
     - Assets/GoogleMapsGrey.jpeg
     - Assets/search_location-512.png
     - Assets/current-location-icon.png
+    - Assets/google.png
   fonts:
     - family: GiftHubIcon
       fonts:
