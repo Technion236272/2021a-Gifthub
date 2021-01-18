@@ -258,16 +258,16 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
           elevation: 8,
           shape: BadgeShape.circle,
           child: IconButton(
-              iconSize: 27.0, ///<-- default is 24.0
-              icon: Icon(Icons.shopping_cart_outlined),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CustomDialogBox();
-                    }
-                );
-              }
+            iconSize: 27.0, ///<-- default is 24.0
+            icon: Icon(Icons.shopping_cart_outlined),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CustomDialogBox();
+                }
+              );
+            }
           ),
         ),
       ],
