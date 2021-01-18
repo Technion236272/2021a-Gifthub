@@ -278,7 +278,7 @@ class _MainScreenState extends State<MainScreen> {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return CustomDialogBox(user: userRep);
+                        return CustomDialogBox();
                       }
                     );
                   }
