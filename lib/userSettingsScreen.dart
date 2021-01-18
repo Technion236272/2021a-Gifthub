@@ -944,13 +944,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  ///allow call
                                   Flexible(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
+                                        ///allow call
                                         Flexible(
                                           child: Padding(
                                             padding: const EdgeInsets.symmetric(horizontal: 10.0),
