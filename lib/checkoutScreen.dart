@@ -13,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:collection/collection.dart';
 import 'my_flutter_app_icons.dart';
 import 'user_repository.dart';
+import 'package:pimp_my_button/pimp_my_button.dart';
 
 class Constants {
   Constants._();
@@ -31,6 +32,7 @@ class CustomDialogBox extends StatefulWidget {
 }
 
 class _CustomDialogBoxState extends State<CustomDialogBox> {
+  bool enableCheckoutButton=true;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -148,69 +150,77 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.04,
                 ),
-                Flexible( ///checkout button:
-                  child: InkWell(
-                    onTap: userRep.status == Status.Authenticated
-                      ? () async {
-                      ///Fingerprint auth
-                      final LocalAuthentication localAuth= LocalAuthentication();
-                      if(await localAuth.canCheckBiometrics){
-                        try {
-                          if (!(await localAuth.authenticateWithBiometrics(
-                              localizedReason: "GiftHub Checkout Authentication"))) {
+                PimpedButton(
+                  particle: DemoParticle(),
+                  pimpedWidgetBuilder: (context, controller) {
+                    return Flexible( ///checkout button:
+                    child: InkWell(
+                      onTap: enableCheckoutButton?(userRep.status == Status.Authenticated
+                        ? () async {
+                        ///Fingerprint auth
+                        final LocalAuthentication localAuth= LocalAuthentication();
+                        if(await localAuth.canCheckBiometrics){
+                          try {
+                            if (!(await localAuth.authenticateWithBiometrics(
+                                localizedReason: "GiftHub Checkout Authentication"))) {
+                              return;
+                            }
+                          } catch(e) {
+                            Fluttertoast.showToast(msg: "Too many bad fingerprint attempts!");
                             return;
                           }
-                        } catch(e) {
-                          Fluttertoast.showToast(msg: "Too many bad fingerprint attempts!");
-                          return;
                         }
-                      }
-                      Navigator.of(context).pop();
-                      // var userRep = Provider.of<UserRepository>(context, listen: false);
-                      if(null == userRep.user || userRep.status != Status.Authenticated){
-                        return Future.delayed(Duration.zero);
-                      }
-                      ///updating user's order history:
-                      var ordersToAdd = [];
-                      globals.userCart.forEach((element) {
-                        ordersToAdd.add({
-                          'Date': DateFormat("dd-MM-yyyy").format(DateTime.now()),
-                          'name': element.name,
-                          'price': element.price.toString(),
-                          'productID': element.productId,
-                          'quantity': _getQuantity(element.name, productList)
+                        controller.forward(from: 0.0);
+                        setState(() {
+                          enableCheckoutButton=false;
                         });
-                      });
-                      await FirebaseFirestore.instance
-                          .collection('Orders')
-                          .doc(userRep.user.uid)
-                          .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
-                      globals.userCart.clear();
-                      //TODO: make cool animation - Sprint 2
-                    } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊"),
-                    child: Container(
-                      padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.02,
-                        bottom: MediaQuery.of(context).size.height * 0.02
-                      ),
-                      decoration: BoxDecoration(
-                        color: userRep.status == Status.Authenticated ? Colors.red : Colors.grey[850],
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(Constants.padding),
-                          bottomRight: Radius.circular(Constants.padding)
+                        Future.delayed(const Duration(seconds: 1), (){Navigator.of(context).pop();});
+                        // var userRep = Provider.of<UserRepository>(context, listen: false);
+                        if(null == userRep.user || userRep.status != Status.Authenticated){
+                          return Future.delayed(Duration.zero);
+                        }
+                        ///updating user's order history:
+                        var ordersToAdd = [];
+                        globals.userCart.forEach((element) {
+                          ordersToAdd.add({
+                            'Date': DateFormat("dd-MM-yyyy").format(DateTime.now()),
+                            'name': element.name,
+                            'price': element.price.toString(),
+                            'productID': element.productId,
+                            'quantity': _getQuantity(element.name, productList)
+                          });
+                        });
+                        await FirebaseFirestore.instance
+                            .collection('Orders')
+                            .doc(userRep.user.uid)
+                            .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+                        globals.userCart.clear();
+
+                      } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")):null,
+                      child: Container(
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.02,
+                          bottom: MediaQuery.of(context).size.height * 0.02
                         ),
-                      ),
-                      child: Text(
-                        widget.text,
-                        style: GoogleFonts.openSans(
-                          color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width * 0.05,
-                          fontWeight: FontWeight.w600,
+                        decoration: BoxDecoration(
+                          color: userRep.status == Status.Authenticated && enableCheckoutButton? Colors.red : Colors.grey[850],
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(Constants.padding),
+                            bottomRight: Radius.circular(Constants.padding)
+                          ),
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          widget.text,
+                          style: GoogleFonts.openSans(
+                            color: Colors.white,
+                            fontSize: MediaQuery.of(context).size.width * 0.05,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
+                  );},
                 ),
               ],
             ),

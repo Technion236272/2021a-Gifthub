@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'globals.dart' as globals;
 import 'user_repository.dart';
-import 'package:device_apps/device_apps.dart';
+//import 'package:device_apps/device_apps.dart';
 import 'package:intl/intl.dart';
 import 'AllReviewsScreen.dart';
 import 'package:tuple/tuple.dart';
@@ -232,7 +232,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 ),
                                 IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: null),
                                 IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
-                                  await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
+                                  //await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
                                 }),
                               ],
                             ),
