@@ -17,6 +17,7 @@ import 'package:flutter_launcher_icons/xml_templates.dart';
 
 void main() {
   globals.userCart = <globals.Product>[];
+  globals.userCartOptions = <Map>[];
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
@@ -37,19 +38,19 @@ class MyApp extends StatelessWidget {
           return ChangeNotifierProvider<UserRepository>(
             create: (_) => UserRepository.instance(),
             child: MaterialApp(
-                title: 'Flutter Demo',
-                theme: ThemeData(
-                  textSelectionHandleColor: Colors.transparent,
-                  cursorColor: Colors.lightGreen[800],
-                  primaryColor: Colors.green,
-                  accentColor: Colors.lightGreen[800],
-                  fontFamily: 'NewRomanTimes',
-                  textTheme: TextTheme(
-                    headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-                    headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-                  )
-                ),
-                home: MyHomePage()
+              title: 'Flutter Demo',
+              theme: ThemeData(
+                textSelectionHandleColor: Colors.transparent,
+                cursorColor: Colors.lightGreen[800],
+                primaryColor: Colors.green,
+                accentColor: Colors.lightGreen[800],
+                fontFamily: 'NewRomanTimes',
+                textTheme: TextTheme(
+                  headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+                  headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+                )
+              ),
+              home: MyHomePage()
             ),
           );
         }

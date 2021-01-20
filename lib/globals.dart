@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'my_flutter_app_icons.dart';
+import 'package:badges/badges.dart';
+import 'checkoutScreen.dart';
 
 /// ------------------------------------------------
 /// globals
@@ -25,6 +27,8 @@ s10(context) => s50(context) / 5;
 s5(context) => s10(context) / 2;
 ///NOTE: font size of 18.0 is usually approx. "MediaQuery.of(context).size.height * 0.0256"
 
+const Map falseOptions = {'wrapping': false, 'greeting': false, 'fast': false};
+
 class Product {
   String _productId;
   String _userId;
@@ -34,6 +38,7 @@ class Product {
   List _reviews = <Review>[];
   String _category;
   String _description;
+  Map _options = falseOptions;
 
   String get productId => _productId;
   String get user => _userId;
@@ -43,9 +48,11 @@ class Product {
   List get reviews => _reviews;
   String get category => _category;
   String get description => _description;
+  Map get options => _options;
+  set options(dict) { _options = dict;}
 
-  Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description)
-      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _category = category, _description = description {
+  Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description, Map options)
+      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _category = category, _description = description, _options = options {
     _reviews = reviews.map<Review>((v) =>
         Review(v['user'], double.parse(v['rating']), v['content'])
     ).toList();
@@ -86,6 +93,7 @@ class Review {
 }
 
 List<Product> userCart;
+List<Map> userCartOptions;
 
 final List<String> categories = ['', 'Cakes', 'Chocolate', 'Balloons', 'Flowers', 'Greeting Cards','Gift Cards', 'Other'];
 
@@ -120,6 +128,20 @@ TextStyle calistogaFont({double size = 24.0, Color color=Colors.white}) {
     color: color,
   );
 }
+
+///returns a green Circular Progress Indicator
+Center greenCircularProgressIndicator(double height, double width) {
+  return Center(
+    child: SizedBox(
+      width: width,
+      height: height,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
+    ),
+  );
+}
+
 RatingBar fixedStarBar(double rate, {Color color= Colors.red, double itemSize = 40.0}) {
   return RatingBar(
     initialRating: rate,
@@ -215,13 +237,50 @@ Widget emptyListErrorScreen(BuildContext context, String list) {
       elevation: 0.0,
       backgroundColor: Colors.lightGreen[800],
       leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop()
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).pop(),
+        iconSize: 27.0,
       ),
+      actions: <Widget>[
+        /// Checkout - cart
+        /// displays a checkout dialog box defined in checkoutScreen.dart
+        Badge(
+          badgeContent: Text(
+            userCart.length < 10 ? userCart.length.toString() : '10+',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: userCart.length < 10 ? 10.0 : 9.0,
+            ),
+          ),
+          position: BadgePosition(
+            top: 5.5,
+            start: userCart.length < 10 ? 25 : 22,
+          ),
+          toAnimate: true,
+          animationType: BadgeAnimationType.scale,
+          badgeColor: Colors.red.shade600,
+          elevation: 8,
+          shape: BadgeShape.circle,
+          child: IconButton(
+              iconSize: 27.0, ///<-- default is 24.0
+              icon: Icon(Icons.shopping_cart_outlined),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CustomDialogBox();
+                    }
+                );
+              }
+          ),
+        ),
+      ],
       title: Text("Wish List",
         style: GoogleFonts.calistoga(
-            fontSize: 33,
-            color: Colors.white
+          fontSize: 33,
+          color: Colors.white
         ),
         textAlign: TextAlign.center,
       ),

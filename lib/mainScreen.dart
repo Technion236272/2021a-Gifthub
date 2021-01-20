@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/StartScreen.dart';
 import 'package:gifthub_2021a/StoreScreen.dart';
+import 'package:gifthub_2021a/SpinnerDropdown.dart';
 import 'user_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
@@ -19,9 +20,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'my_flutter_app_icons.dart';
 import 'checkoutScreen.dart';
 import 'StartScreen.dart';
-import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont;
+import 'package:gifthub_2021a/globals.dart' show emptyListOfCategories, niceFont, userCart;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'ChatScreen.dart';
+import 'package:badges/badges.dart';
 
 /// ----------------------------------------------------------------------------
 /// The Main Screen:
@@ -77,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
         behavior: SnackBarBehavior.floating,
         content: Text('only verified users can access this screen',
           style: GoogleFonts.lato(
-              fontSize: MediaQuery.of(context).size.height * 0.0256 * (14.1/18)
+            fontSize: MediaQuery.of(context).size.width * 0.156 * (14/18) * (15/49),
           ),
         ),
         action: SnackBarAction(
@@ -243,27 +245,49 @@ class _MainScreenState extends State<MainScreen> {
           resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.transparent,
           key: _scaffoldKeyMainScreen,
-          appBar: 3 == _currentIndex||2 == _currentIndex ? null : AppBar(
+          appBar: 3 == _currentIndex || 2 == _currentIndex ? null : AppBar(
             centerTitle: _currentIndex != 0,
             elevation: 0.0,
             backgroundColor: Colors.lightGreen[800],
             actions: <Widget>[
               /// Checkout - cart
               /// displays a checkout dialog box defined in checkoutScreen.dart
-              IconButton(
-                icon: Icon(Icons.shopping_cart_outlined),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CustomDialogBox();
-                    }
-                  );
-                }
+              Badge(
+                badgeContent: Text(
+                  userCart.length < 10 ? userCart.length.toString() : '10+',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: userCart.length < 10 ? 10.0 : 9.0,
+                  ),
+                ),
+                position: BadgePosition(
+                  top: 5.5,
+                  start: userCart.length < 10 ? 25 : 22,
+                ),
+                toAnimate: true,
+                animationType: BadgeAnimationType.scale,
+                badgeColor: Colors.red.shade600,
+                elevation: 8,
+                shape: BadgeShape.circle,
+                child: IconButton(
+                  iconSize: 27.0, ///<-- default is 24.0
+                  icon: Icon(Icons.shopping_cart_outlined),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomDialogBox(user: userRep);
+                      }
+                    );
+                  }
+                ),
               ),
               /// WishList
               /// on pressed - displays the user's wishlist
               IconButton(
+                iconSize: 27.0, ///<-- default is 24.0
                 icon: Icon(Icons.favorite),
                 onPressed: () =>
                 userRep.status == Status.Authenticated
@@ -280,8 +304,10 @@ class _MainScreenState extends State<MainScreen> {
             /// IF current user is authenticated then the icon is set to 'sign out' icon
             /// and an alert dialog pops up to ensure user's will to logout
             leading: IconButton(
-              icon: userRep.status == Status.Authenticated ?
-                Icon(Icons.logout) : Icon(Icons.login_outlined),
+              iconSize: 27.0, ///<-- default is 24.0
+              icon: userRep.status == Status.Authenticated
+                  ? Icon(Icons.logout)
+                  : Icon(Icons.login_outlined),
               onPressed: userRep.status == Status.Authenticated
                 ? () async {
                   showDialog(
@@ -471,6 +497,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageURL;
   }
 
+  // ///extracts [_currCategory] String value from its Text child
+  // String _getCenterText(Center center) {
+  //   return center.toString().split('(\"')[1].split('\")')[0];
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -508,45 +539,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         color: Colors.transparent,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
-                              child: Center(
-                                child: Text('  Category: ',
-                                  style: niceFont(
-                                    color: Colors.black,
-                                    size: MediaQuery.of(context).size.height * 0.0256,
+                            Flexible(
+                              flex: 8,
+                              child: Padding(
+                                padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text('   Category:',
+                                    style: GoogleFonts.lato(
+                                      color: Colors.black,
+                                      fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                            Container(
-                              color: Colors.transparent,
-                              child: Theme(
-                                data: Theme.of(context).copyWith(
-                                  canvasColor: Colors.transparent,
-                                  buttonTheme: ButtonTheme.of(context).copyWith(
-                                    alignedDropdown: true,
-                                  )
-                                ),
-                                /// a drop down button to select wanted category
-                                child: DropdownButton<String>(
-                                  dropdownColor: Colors.white,
-                                  underline: Container(
-                                    height: 2,
-                                    color: Colors.lightGreen[300],
-                                  ),
-                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
-                                    color: Colors.lightGreen[200],
-                                  ),
-                                  elevation: 8,
+                            Flexible(
+                              flex: 10,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: CustomDropdownButton<String>(
                                   value: _currCategory,
                                   items: _categories
-                                      .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
-                                        child: Text(e, style: niceFont(color: Colors.lightGreen[300]),),
+                                      .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
+                                        child: Text(e,
+                                          textAlign: TextAlign.center,
+                                          style: niceFont(color: Colors.lightGreen[300]),
+                                        ),
                                         value: e,
                                     )
                                   ).toList(),
@@ -556,7 +580,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       _currCategory = value;
                                     });
                                   },
-                                )
+                                  style: GoogleFonts.lato(
+                                    color: Colors.lightGreen[300],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
+                                    color: Colors.lightGreen[200],
+                                  ),
+                                  dropdownColor: Colors.white,
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.lightGreen[300],
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -691,12 +727,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ///product price goes here:
                                                   child: Align(
                                                     alignment: Alignment.centerRight,
-                                                    child: Text(
-                                                      prodPrice + '\$',
-                                                      textAlign: TextAlign.right,
-                                                      style: GoogleFonts.lato(
-                                                        fontSize: 11.0,
-                                                        color: Colors.black,
+                                                    child: Padding(
+                                                      padding: EdgeInsets.symmetric(horizontal: 5.0),
+                                                      child: Text(
+                                                        prodPrice + '\$',
+                                                        textAlign: TextAlign.right,
+                                                        style: GoogleFonts.lato(
+                                                          fontSize: 12.0,
+                                                          color: Colors.black,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),

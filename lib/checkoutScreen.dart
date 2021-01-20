@@ -1,7 +1,10 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gifthub_2021a/all_confetti_widget.dart';
 import 'package:gifthub_2021a/user_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'globals.dart' as globals;
 import 'package:flutter/cupertino.dart';
@@ -16,12 +19,14 @@ class Constants {
   static const double padding = 20;
   static const double avatarRadius = 45;
 }
-
+var userRep=null;
 class CustomDialogBox extends StatefulWidget {
   final String title = "Shopping Cart", text = "Checkout";
 
-  const CustomDialogBox({Key key,})
-      : super(key: key);
+  CustomDialogBox({Key key,user})
+      : super(key: key){
+    userRep=user;
+  }
 
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
@@ -115,12 +120,15 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                       ///product deletion option:
                       trailing: IconButton(
                         onPressed: () {
+                          int i = 0;
                           for(globals.Product p in globals.userCart){
                             if(p.name == productList[index].split('  x')[0]){
                               globals.userCart.remove(p);
                               break;
                             }
+                            i++;
                           }
+                          globals.userCartOptions.removeAt(i);
                           setState(() {
                             ///setting state so that the cart list will be updated
                           });
@@ -138,7 +146,25 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
               ),
               Flexible( ///checkout button:
                 child: InkWell(
-                  onTap: () async {
+                     onTap: userRep.status == Status.Authenticated ? () async {
+                    ///Fingerprint auth
+                    final LocalAuthentication localAuth= LocalAuthentication();
+                    // if(await localAuth.canCheckBiometrics){
+                    //   try {
+                    //     if (!(await localAuth.authenticateWithBiometrics(
+                    //         localizedReason: "GiftHub Checkout Authentication"))) {
+                    //       return;
+                    //     }
+                    //   }
+                    //   catch(e){
+                    //     Fluttertoast.showToast(msg: "Too many bad fingerprint attempts! Please lock and unlock your phone to free the fingerprint lock!\n");
+                    //     return;
+                    //   }
+                    // }
+                    ///----------
+
+
+
                     Navigator.of(context).pop();
                     var userRep = Provider.of<UserRepository>(context, listen: false);
                     if(null == userRep.user || userRep.status != Status.Authenticated){
@@ -155,19 +181,26 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         'quantity': _getQuantity(element.name, productList)
                       });
                     });
+                    for(int i=0;i<ordersToAdd.length;i++){
+                      ordersToAdd[i]['wrapping'] = globals.userCartOptions[i]['wrapping'].toString();
+                      ordersToAdd[i]['greeting'] = globals.userCartOptions[i]['greeting'];
+                      ordersToAdd[i]['fast'] = globals.userCartOptions[i]['fast'].toString();
+                      ordersToAdd[i]['special'] = globals.userCartOptions[i]['special'];
+                    }
                     await FirebaseFirestore.instance.collection('Orders')
                         .doc(Provider.of<UserRepository>(context, listen: false).user.uid)
                         .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
                     globals.userCart.clear();
-                    Navigator.pop(context);
-                    //TODO: make cool animation - prob. Sprint 2
-                  },
+                    //TODO: make cool animation - Sprint 2
+                  }:(){
+                    Fluttertoast.showToast(msg: "Please log in to place an order 😊");
+                      },
                   child: Container(
                     padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.02,
                         bottom: MediaQuery.of(context).size.height * 0.02),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: userRep.status == Status.Authenticated ? Colors.red : Colors.grey[850],
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(Constants.padding),
                           bottomRight: Radius.circular(Constants.padding)),

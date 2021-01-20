@@ -164,7 +164,8 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                     userRep.user.uid,
                                                     prodName,
                                                     double.parse(prodPrice),
-                                                    prodDate, [], "", "")
+                                                    prodDate, [], "", "", globals.falseOptions,
+                                                )
                                                 );
                                                 ///removing product from wishlist
                                                 List toRemove = [];

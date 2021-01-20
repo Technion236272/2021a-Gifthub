@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +51,8 @@ bool checkEmailSigninFields() {
 
 bool emailInUse = false;
 
-void firstSignUpSheet(var context, int screen) {
+Future<void> firstSignUpSheet(var context, int screen) async {
+  bool clicked=true;
   /**This function shows the bottom sheet when pressing on one of the "Continue with ...".
     Receives the ID of the screen it should show.
     IDs:
@@ -842,9 +846,10 @@ void firstSignUpSheet(var context, int screen) {
                         FlatButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(80.0)),
-                          onPressed: checkEmailSigninFields()
+                          onPressed: checkEmailSigninFields() && clicked
                               ? () async {
-                                  if (!checkEmailSigninFields()) return;
+                            clicked=false;
+                            if (!checkEmailSigninFields()) return;
                                   String message = await userRep.signIn(
                                       emailController.text,
                                       passwordController.text);
@@ -857,17 +862,18 @@ void firstSignUpSheet(var context, int screen) {
                                   }
                                   if (message ==
                                       'The password is invalid or the user does not have a password.') {
-                                    //TODO: show snackbar wrong password. For sprint 2
+                                    Fluttertoast.showToast(msg: 'The password is invalid or the user does not have a password.');
                                   }
                                   if (message ==
                                       'A network error (such as timeout, interrupted connection or unreachable host) has occurred.') {
-                                    //TODO: show snackbar netwrok error. For sprint 2
+                                    Fluttertoast.showToast(msg: 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.');
                                   }
                                   if (message ==
                                       'There is no user record corresponding to this identifier. The user may have been deleted.') {
                                     screen = 2;
                                   }
                                   setState(() {});
+                                  clicked=true;
                                 }
                               : null,
                           color: Colors.red,
@@ -965,6 +971,7 @@ Widget startScreenScaffold(context) => Material(
                             'Continue with Google',
                             textAlign: TextAlign.center,
                             style: TextStyle(
+
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.05,
                                 fontFamily: 'TimesNewRoman'),
@@ -975,6 +982,15 @@ Widget startScreenScaffold(context) => Material(
                         borderRadius: new BorderRadius.circular(30.0),
                       ),
                       onPressed: () async {
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            //Everything is good in the hood.
+                          }
+                        } on SocketException catch (_) {
+                          Fluttertoast.showToast(msg: 'No internet connection!');
+                          return;
+                        }
                         await userRep.signInWithGoogle();
                         if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                           firstSignUpSheet(context, 3);
@@ -1019,7 +1035,16 @@ Widget startScreenScaffold(context) => Material(
                       shape: new RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(30.0),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            //Everything is good in the hood.
+                          }
+                        } on SocketException catch (_) {
+                          Fluttertoast.showToast(msg: 'No internet connection!');
+                          return;
+                        }
                         firstSignUpSheet(context, 5);
                       },
                     ),
@@ -1041,6 +1066,15 @@ Widget startScreenScaffold(context) => Material(
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () async {
+                      try {
+                        final result = await InternetAddress.lookup('google.com');
+                        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                          //Everything is good in the hood.
+                        }
+                      } on SocketException catch (_) {
+                        Fluttertoast.showToast(msg: 'No internet connection!');
+                        return;
+                      }
                       userRep.status = Status.Unauthenticated;
                       await FirebaseAuth.instance.signInAnonymously();
                       Navigator.pushAndRemoveUntil(
