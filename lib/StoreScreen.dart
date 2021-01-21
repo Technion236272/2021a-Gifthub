@@ -12,6 +12,7 @@ import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'globals.dart' as globals;
 import 'user_repository.dart';
 //import 'package:device_apps/device_apps.dart';
@@ -230,9 +231,22 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       textAlign: TextAlign.start,
                                       style: globals.niceFont()),
                                 ),
-                                IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: null),
+                                IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: () async {
+                                  String addrForUrl = Uri.encodeFull(_storeAddr);
+                                  String navUrl = 'https://www.google.com/maps/dir/?api=1&destination=$addrForUrl';
+                                  if(await canLaunch(navUrl)){
+                                    await launch(navUrl);
+                                  } else {
+                                    _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch navigation app")));
+                                  }
+                                }),
                                 IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
-                                  //await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
+                                  String phoneUrl = 'tel: $_storePhone';
+                                  if(await canLaunch(phoneUrl)){
+                                    await launch(phoneUrl);
+                                  } else{
+                                    _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch phone")));
+                                  }
                                 }),
                               ],
                             ),
