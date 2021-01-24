@@ -129,6 +129,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    Map ordered = null;
+    List<ListTile> orderTiles = [];
     return Consumer<UserRepository>(
         builder: (context, userRep, _) {
           return FutureBuilder(
@@ -138,12 +140,38 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
                 _storeRating = _getStoreRating();
+                if (userRep.status != Status.Authenticated && _storeId == userRep.user.uid) {
+                  for (var user in (await storeDoc.get()).data()['Ordered']) {
+                    ordered[user] = [];
+                    var orderDoc = (await userRep.firestore.collection('Orders').doc(user).get());
+                    var ordersMap = orderDoc.data()['NewOrders'];
+                    ordersMap[_storeId].asMap().forEach((index, prod) {
+                      ordered[user].add(prod);
+                      orderTiles.add(ListTile(
+                        title: Text(prod['name']),
+                        subtitle: Text('amount: ' + prod['quantity']),
+                        trailing: DropdownButton(
+                            value: prod['orderStatus'],
+                            items: ['Ordered', 'Confirmed', 'Shipped'].map<DropdownMenuItem>(
+                                    (s) => DropdownMenuItem(child: Text(s))
+                            ).toList(),
+                            onChanged: (value) async {
+                              ordersMap[_storeId][index]['orderStatus'] = prod['orderStatus'] = value;
+                              await userRep.firestore.collection('Orders').doc(user).update({
+                                'NewOrders': ordersMap,
+                              });
+                            }),
+                      ));
+                    });
+                  }
+                }
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.hasError) {
                     return globals.emptyErrorScaffold(snapshot.error.toString());
                   }
+
                   /// Shows the store's information.
                   /// Supports editing mode that allows the owner to change
                   /// some of the store's info.
@@ -190,7 +218,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 });
                               }
                             },
-                            )
+                          )
                               : Container(
                             decoration: BoxDecoration(
                               border: Border.all(width: 5),
@@ -237,7 +265,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: () async {
                                   String addrForUrl = Uri.encodeFull(_storeAddr);
                                   String navUrl = 'https://www.google.com/maps/dir/?api=1&destination=$addrForUrl';
-                                  if(await canLaunch(navUrl)){
+                                  if (await canLaunch(navUrl)) {
                                     await launch(navUrl);
                                   } else {
                                     _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch navigation app")));
@@ -245,9 +273,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 }),
                                 IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
                                   String phoneUrl = 'tel: $_storePhone';
-                                  if(await canLaunch(phoneUrl)){
+                                  if (await canLaunch(phoneUrl)) {
                                     await launch(phoneUrl);
-                                  } else{
+                                  } else {
                                     _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch phone")));
                                   }
                                 }),
@@ -300,7 +328,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
                                       return;
                                     }
-                                    if(userRep.user.uid == _storeId){
+                                    if (userRep.user.uid == _storeId) {
                                       _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("You can't add a review to your own store")));
                                       return;
                                     }
@@ -312,6 +340,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         ]
                     ),
                   );
+
                   /// Shows the store's product in a pretty grid.
                   /// Users can access any product by clicking it.
                   final itemsTab = GridView.count(
@@ -355,8 +384,17 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                       );
                     }).toList(),
                   );
+                  List tiles = <ListTile>[];
+                  // ordered?.forEach((key, value) {});
+                  final ordersTab = ListView(
+                      children: ListTile.divideTiles(
+                        context: context,
+                        tiles: orderTiles ?? [],
+                    ).toList(),
+                  );
+                  bool isMyStore = userRep.status == Status.Authenticated && userRep.user.uid == _storeId;
                   return DefaultTabController(
-                    length: 2,
+                    length: isMyStore? 3 : 2,
                     child: Material(
                         color: Colors.lightGreen,
                         child: Consumer<UserRepository>(
@@ -375,7 +413,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     )
                                         : Text(_storeName, style: globals.calistogaFont(),),
                                     bottom: TabBar(
-                                      tabs: [
+                                      tabs: isMyStore ?
+                                      [
+                                        Tab(text: "About"),
+                                        Tab(text: "Items"),
+                                        Tab(text: "Orders"),
+                                      ]
+                                          : [
                                         Tab(text: "About"),
                                         Tab(text: "Items"),
                                       ],
@@ -383,6 +427,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
+
                                     ///Let the user edit and save store changes only if it's the owner
                                     actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
@@ -422,7 +467,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     backgroundColor: Colors.red[900],
                                   ) : null,
                                   body: TabBarView(
-                                      children: [
+                                      children: isMyStore ?
+                                      [
+                                        aboutTab,
+                                        itemsTab,
+                                        ordersTab,
+                                      ]:
+                                      [
                                         aboutTab,
                                         itemsTab,
                                       ]
