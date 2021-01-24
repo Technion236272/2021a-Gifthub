@@ -429,9 +429,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                           .update({
                                                         'Orders':FieldValue.arrayRemove(toRemoveList)
                                                       });
-                                                      setState(() {
-                                                        ///so that orders list will be updated
-                                                      });
                                                       Navigator.pop(context);
                                                     },
                                                   ),
