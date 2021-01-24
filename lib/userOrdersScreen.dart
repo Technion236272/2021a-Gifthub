@@ -523,7 +523,6 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         style: GoogleFonts.lato(
                                           fontSize: 18.0,
                                           color: Colors.black,
-                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       ///order's price, date of order and order status
