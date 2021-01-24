@@ -995,7 +995,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                               child: CheckboxListTile(
                                                   value: _allowNavigate,
                                                   isThreeLine: false,
-                                                  title: AutoSizeText('Allow customers to navigate to my store',
+                                                  title: AutoSizeText('Allow customers navigate to my store',
                                                     minFontSize: 13.0,
                                                     maxLines: 1,
                                                     style: GoogleFonts.lato(

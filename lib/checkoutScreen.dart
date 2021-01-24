@@ -54,9 +54,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
     ///generating user's shopping cart to be displayed as follows:
     ///Product some_product -> (some_product's name)  x(some_product's quantity in cart)
     List<String> productList = [];
-    groupBy(globals.userCart.
-    map((e) => e.name)
-        .toList(), (p) => p)
+    groupBy(globals.userCart.map((e) => e.name).toList(), (p) => p)
         .forEach((key, value) => productList.add(key.toString() + '  x' + value.length.toString()));
     ///calculating total price of order:
     double price = globals.userCart
@@ -166,9 +164,9 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                       }
                       controller.forward(from: 0.0);
                       setState(() {
-                        enableCheckoutButton=false;
+                        enableCheckoutButton = false;
                       });
-                      Future.delayed(const Duration(seconds: 1), () {
+                      Future.delayed(const Duration(milliseconds: 600), () {
                         Navigator.of(context).pop();
                       });
                       if(null == userRep.user || userRep.status != Status.Authenticated){
@@ -182,7 +180,8 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           'name': element.name,
                           'price': element.price.toString(),
                           'productID': element.productId,
-                          'quantity': _getQuantity(element.name, productList)
+                          'quantity': _getQuantity(element.name, productList),
+                          'orderStatus': 'Ordered',
                         });
                       });
                       for(int i = 0; i < ordersToAdd.length; i++){
@@ -192,11 +191,48 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         ordersToAdd[i]['special'] = globals.userCartOptions[i]['special'];
                       }
                       await FirebaseFirestore.instance.collection('Orders')
+                        .doc(userRep.user.uid)
+                        .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+
+                      var data = await FirebaseFirestore.instance.collection('Orders')
+                          .doc(userRep.user.uid).get();
+                      Map newOrders = data.data()['NewOrders'] ?? {};
+
+                      ///updating user's new orders
+                      if(newOrders.isEmpty){
+                        Map<String, List> map = {};
+                        for (int i = 0; i < globals.userCart.length; i++) {
+                          if(null == map[globals.userCart[i].user]){
+                            map[globals.userCart[i].user] = new List();
+                          }
+                          map[globals.userCart[i].user].add(ordersToAdd[i]);
+                        }
+                        await FirebaseFirestore.instance.collection('Orders')
                           .doc(userRep.user.uid)
-                          .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+                          .update({'NewOrders': map});
+                      } else {
+                        for(int i = 0; i < globals.userCart.length; i++){
+                          if(null == newOrders[globals.userCart[i].user]) {
+                            newOrders[globals.userCart[i].user] = new List();
+                          }
+                          newOrders[globals.userCart[i].user].add(ordersToAdd[i]);
+                        }
+                        await FirebaseFirestore.instance.collection('Orders')
+                          .doc(userRep.user.uid)
+                          .update({'NewOrders': newOrders});
+                      }
+
+                      ///updating store's order list
+                      globals.userCart.forEach((element) async {
+                        await FirebaseFirestore.instance
+                          .collection('Stores')
+                          .doc(element.user)
+                          .update({'Ordered' : FieldValue.arrayUnion([userRep.user.uid])});
+                      });
+
+                      ///clearing user's cart
                       globals.userCart.clear();
-                      Navigator.pop(context);
-                      //TODO: make cool animation - prob. Sprint 2
+                      globals.userCartOptions.clear();
                     } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")) : null,
                     child: Container(
                       padding: EdgeInsets.only(

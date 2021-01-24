@@ -631,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisSpacing: 5,
                           mainAxisSpacing: 5,
                           children: List.generate(
-                            min(16, productsList.length),
+                            productsList.length,
                             (index) {
                               /// fetching product's attributes:
                               var productData = productsList[index].data();
