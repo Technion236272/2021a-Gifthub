@@ -95,7 +95,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                 /// fetching user's wish list from FB storage
                 stream: userRep.firestore.collection('Wishlists').snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> wishListCollectionSnapshot) {
-                  print(wishListCollectionSnapshot.connectionState);
                   if (!wishListCollectionSnapshot.hasData || wishListCollectionSnapshot.connectionState != ConnectionState.active) {
                     return _circularProgressIndicator;
                   }
