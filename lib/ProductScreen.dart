@@ -264,8 +264,12 @@ class _ProductScreenState extends State<ProductScreen> {
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () async {
-                                      try{
+                                      try {
+                                        int beforeAdd = globals.userCart.length;
                                         await showDialog(context: context, builder: (BuildContext context) => AddToCartDialogBox(_prod));
+                                        if(beforeAdd == globals.userCart.length){
+                                          return;
+                                        }
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Item added to cart")));
                                       } catch(e) {
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("There was a problem")));

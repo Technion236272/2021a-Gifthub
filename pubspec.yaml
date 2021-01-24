@@ -78,7 +78,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - Assets/images/birthday_cake.jpg
     - Assets/Untitled.png
     - Assets/no image product.png
     - Assets/GoogleMaps.png
