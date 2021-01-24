@@ -205,6 +205,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           if(null == map[globals.userCart[i].user]){
                             map[globals.userCart[i].user] = new List();
                           }
+                          ordersToAdd[i]['quantity'] = '1';
                           map[globals.userCart[i].user].add(ordersToAdd[i]);
                         }
                         await FirebaseFirestore.instance.collection('Orders')
@@ -215,6 +216,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           if(null == newOrders[globals.userCart[i].user]) {
                             newOrders[globals.userCart[i].user] = new List();
                           }
+                          ordersToAdd[i]['quantity'] = '1';
                           newOrders[globals.userCart[i].user].add(ordersToAdd[i]);
                         }
                         await FirebaseFirestore.instance.collection('Orders')
