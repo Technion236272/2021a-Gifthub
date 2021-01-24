@@ -128,6 +128,12 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               String prodDate = ordersProduct[i ~/ 2]['Date'];
                               String prodID = ordersProduct[i ~/ 2]['productID'];
                               String prodQuantity = ordersProduct[i ~/ 2]['quantity'];
+                              String prodWrap = ordersProduct[i ~/ 2]['wrapping'] ?? '';
+                              String prodDelivery = ordersProduct[i ~/ 2]['fast'] ?? '';
+                              String prodGreeting = ordersProduct[i ~/ 2]['greeting'] ?? '';
+                              String prodSpecial = ordersProduct[i ~/ 2]['special'] ?? '';
+                              String prodStatus = ordersProduct[i ~/ 2]['orderStatus'] ?? '';
+                              Map ordersOptions = snapshot.data()['NewOrders'] ?? {};
                               return FutureBuilder(
                                 /// fetching order's images
                                 future: _getImage(prodID),
@@ -424,11 +430,37 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                       var toRemoveItem = ordersProduct[i ~/ 2];
                                                       toRemoveList.add(toRemoveItem);
                                                       await userRep.firestore
-                                                          .collection('Orders')
-                                                          .doc(userRep.user.uid)
-                                                          .update({
-                                                        'Orders':FieldValue.arrayRemove(toRemoveList)
+                                                        .collection('Orders')
+                                                        .doc(userRep.user.uid)
+                                                        .update({'Orders':FieldValue.arrayRemove(toRemoveList)
                                                       });
+                                                      if(ordersOptions.isNotEmpty){
+                                                        Map<String, List> save = Map.from(ordersOptions);
+                                                        for(MapEntry<String, dynamic> mapEntry in ordersOptions.entries){
+                                                          int j = 0;
+                                                          for(Map<String, dynamic> options in mapEntry.value){
+                                                            bool ok = true;
+                                                            ok = ok && prodID == options['productID'];
+                                                            ok = ok && prodWrap == options['wrapping'];
+                                                            ok = ok && prodDelivery == options['fast'];
+                                                            ok = ok && prodSpecial == options['special'];
+                                                            ok = ok && prodDate == options['Date'];
+                                                            ok = ok && prodStatus == options['orderStatus'];
+                                                            ok = ok && prodGreeting == options['greeting'];
+                                                            if(ok) {
+                                                              save[mapEntry.key].removeAt(j);
+                                                              await FirebaseFirestore.instance
+                                                                .collection('Orders')
+                                                                .doc(userRep.user.uid).update(
+                                                                {'NewOrders':save}
+                                                              );
+                                                              Navigator.pop(context);
+                                                              return;
+                                                            }
+                                                            j++;
+                                                          }
+                                                        }
+                                                      }
                                                       Navigator.pop(context);
                                                     },
                                                   ),
