@@ -650,9 +650,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.all(Radius.circular(4.0)),
                                     child: InkWell(
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
                                       onTap: () { ///navigating to the user tapped product:
                                         Navigator.of(context).push(
                                           new MaterialPageRoute<void>(
