@@ -221,10 +221,18 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           .doc(userRep.user.uid)
                           .update({'NewOrders': newOrders});
                       }
+
+                      ///updating store's order list
+                      globals.userCart.forEach((element) async {
+                        await FirebaseFirestore.instance
+                          .collection('Stores')
+                          .doc(element.user)
+                          .update({'Ordered' : FieldValue.arrayUnion([userRep.user.uid])});
+                      });
+
                       ///clearing user's cart
                       globals.userCart.clear();
                       globals.userCartOptions.clear();
-                      //TODO: make cool animation - prob. Sprint 2
                     } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")) : null,
                     child: Container(
                       padding: EdgeInsets.only(
