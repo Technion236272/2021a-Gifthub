@@ -20,6 +20,7 @@ import 'dart:io';
 import 'user_repository.dart';
 import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
+import 'ProductScreen.dart' show AddToCartDialogBox;
 
 ///-----------------------------------------------------------------------------
 /// User Orders Screen:
@@ -144,16 +145,25 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         color: Colors.transparent,
                                         foregroundColor: Colors.amberAccent,
                                         icon: Icons.attach_money_outlined,
-                                        onTap: () {
+                                        onTap: () async {
+                                          int beforeAdd = globals.userCart.length;
+                                          await showDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (context) => AddToCartDialogBox(
+                                              globals.Product(
+                                                prodID,
+                                                userRep.user.uid,
+                                                prodName,
+                                                double.parse(prodPrice),
+                                                prodDate, [], "", "", globals.falseOptions)
+                                            )
+                                          );
                                           ///adding order to cart and displaying
                                           ///success snackbar with checkout option
-                                          globals.userCart.add(globals.Product(
-                                            prodID,
-                                            userRep.user.uid,
-                                            prodName,
-                                            double.parse(prodPrice),
-                                            prodDate, [], "", "", globals.falseOptions)
-                                          );
+                                          if(globals.userCart.length == beforeAdd){
+                                            return;
+                                          }
                                           _scaffoldKeyOrders.currentState.showSnackBar(
                                             SnackBar(
                                               content: Text('Product Successfully Added to Cart!',
