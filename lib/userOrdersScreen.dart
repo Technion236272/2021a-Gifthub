@@ -30,7 +30,7 @@ import 'ProductScreen.dart' show AddToCartDialogBox;
 /// all list items are slidable and multiple options offered as will be described below
 ///-----------------------------------------------------------------------------
 
-enum OrderStatus { Ordered, Pending, Confirmed, Arrived }
+enum OrderStatus { Ordered, Shipped, Confirmed, Arrived }
 
 class UserOrdersScreen extends StatefulWidget {
   UserOrdersScreen({Key key}) : super(key: key);
