@@ -146,6 +146,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         foregroundColor: Colors.amberAccent,
                                         icon: Icons.attach_money_outlined,
                                         onTap: () async {
+                                          var tempSnapshot = await userRep.firestore
+                                              .collection('Products')
+                                              .doc(prodID).get();
+                                          var prodOptions = tempSnapshot.data()['Options'] ?? globals.falseOptions;
                                           int beforeAdd = globals.userCart.length;
                                           await showDialog(
                                             context: context,
@@ -156,7 +160,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                 userRep.user.uid,
                                                 prodName,
                                                 double.parse(prodPrice),
-                                                prodDate, [], "", "", globals.falseOptions)
+                                                prodDate, [], "", "", prodOptions)
                                             )
                                           );
                                           ///adding order to cart and displaying

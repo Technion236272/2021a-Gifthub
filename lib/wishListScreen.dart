@@ -18,6 +18,7 @@ import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
 import 'ProductScreen.dart';
 import 'package:badges/badges.dart';
+import 'ProductScreen.dart' show AddToCartDialogBox;
 
 ///-----------------------------------------------------------------------------
 /// User Wish List Screen:
@@ -222,6 +223,7 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                           String prodName = productData['name'];
                                           String prodPrice = productData['price'];
                                           String prodDate = productData['date'];
+                                          var productOptions = productSnapshot.data.data()['Options'] ?? globals.falseOptions;
                                           return FutureBuilder(
                                             future: _getImage(productID),
                                             builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
@@ -243,13 +245,22 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                                     foregroundColor: Colors.amberAccent,
                                                     icon: Icons.add_shopping_cart,
                                                     onTap: () async {
-                                                      globals.userCart.add(globals.Product(
-                                                          productID,
-                                                          userRep.user.uid,
-                                                          prodName,
-                                                          double.parse(prodPrice),
-                                                          prodDate, [], "", "", globals.falseOptions)
+                                                      int beforeAdd = globals.userCart.length;
+                                                      await showDialog(
+                                                        context: context,
+                                                        barrierDismissible: true,
+                                                        builder: (context) =>
+                                                          AddToCartDialogBox(globals.Product(
+                                                            productID,
+                                                            userRep.user.uid,
+                                                            prodName,
+                                                            double.parse(prodPrice),
+                                                            prodDate, [], "", "", productOptions)
+                                                          )
                                                       );
+                                                      if(beforeAdd == globals.userCart.length){
+                                                        return;
+                                                      }
                                                       _addedToCart = true;
                                                       ///removing product from wishlist
                                                       List toRemove = [];
