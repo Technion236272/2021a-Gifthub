@@ -54,9 +54,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
     ///generating user's shopping cart to be displayed as follows:
     ///Product some_product -> (some_product's name)  x(some_product's quantity in cart)
     List<String> productList = [];
-    groupBy(globals.userCart.
-    map((e) => e.name)
-        .toList(), (p) => p)
+    groupBy(globals.userCart.map((e) => e.name).toList(), (p) => p)
         .forEach((key, value) => productList.add(key.toString() + '  x' + value.length.toString()));
     ///calculating total price of order:
     double price = globals.userCart
@@ -192,10 +190,36 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                         ordersToAdd[i]['special'] = globals.userCartOptions[i]['special'];
                       }
                       await FirebaseFirestore.instance.collection('Orders')
+                        .doc(userRep.user.uid)
+                        .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+                      var data = await FirebaseFirestore.instance.collection('Orders')
+                          .doc(userRep.user.uid).get();
+
+                      Map newOrders = data.data()['NewOrders'] ?? {};
+
+                      if(newOrders.isEmpty){
+                        Map<String, List> map = {};
+                        for (int i = 0; i < globals.userCart.length; i++) {
+                          if(null == map[globals.userCart[i].user]){
+                            map[globals.userCart[i].user] = new List();
+                          }
+                          map[globals.userCart[i].user].add(ordersToAdd[i]);
+                        }
+                        await FirebaseFirestore.instance.collection('Orders')
                           .doc(userRep.user.uid)
-                          .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+                          .update({'NewOrders': map});
+                      } else {
+                        for(int i = 0; i < globals.userCart.length; i++){
+                          if(null == newOrders[globals.userCart[i].user]) {
+                            newOrders[globals.userCart[i].user] = new List();
+                          }
+                          newOrders[globals.userCart[i].user].add(ordersToAdd[i]);
+                        }
+                        await FirebaseFirestore.instance.collection('Orders')
+                          .doc(userRep.user.uid)
+                          .update({'NewOrders': newOrders});
+                      }
                       globals.userCart.clear();
-                      Navigator.pop(context);
                       //TODO: make cool animation - prob. Sprint 2
                     } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")) : null,
                     child: Container(
