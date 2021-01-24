@@ -70,6 +70,18 @@ class Product {
     _description = prodArgs['user'];
   }
 
+  @override
+  bool operator==(Object o) {
+    if(o is! Product){
+      return false;
+    }
+    Product prod = o;
+    return this.productId == prod.productId;
+  }
+
+  @override
+  int get hashCode => super.hashCode;
+
 }
 
 class Review {
@@ -116,7 +128,7 @@ var gifthub_logo = Column(
     ]);
 
 TextStyle niceFont({double size= 16.0, Color color=Colors.white}) {
-  return GoogleFonts.montserrat(
+  return GoogleFonts.lato(
     fontSize: size,
     color: color,
   );

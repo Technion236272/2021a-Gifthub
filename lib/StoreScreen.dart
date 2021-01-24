@@ -129,8 +129,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    Map ordered = null;
-    List<ListTile> orderTiles = [];
+    Map ordered = {};
+    List<Widget> orderTiles = [];
     return Consumer<UserRepository>(
         builder: (context, userRep, _) {
           return FutureBuilder(
@@ -140,27 +140,43 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
                 _storeRating = _getStoreRating();
-                if (userRep.status != Status.Authenticated && _storeId == userRep.user.uid) {
+                if (userRep.status == Status.Authenticated && _storeId == userRep.user.uid) {
                   for (var user in (await storeDoc.get()).data()['Ordered']) {
                     ordered[user] = [];
+                    var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user).get();
                     var orderDoc = (await userRep.firestore.collection('Orders').doc(user).get());
                     var ordersMap = orderDoc.data()['NewOrders'];
-                    ordersMap[_storeId].asMap().forEach((index, prod) {
+                    ordersMap[_storeId]?.asMap()?.forEach((index, prod) async {
                       ordered[user].add(prod);
-                      orderTiles.add(ListTile(
-                        title: Text(prod['name']),
-                        subtitle: Text('amount: ' + prod['quantity']),
-                        trailing: DropdownButton(
-                            value: prod['orderStatus'],
-                            items: ['Ordered', 'Confirmed', 'Shipped'].map<DropdownMenuItem>(
-                                    (s) => DropdownMenuItem(child: Text(s))
-                            ).toList(),
-                            onChanged: (value) async {
-                              ordersMap[_storeId][index]['orderStatus'] = prod['orderStatus'] = value;
-                              await userRep.firestore.collection('Orders').doc(user).update({
-                                'NewOrders': ordersMap,
-                              });
-                            }),
+                      orderTiles.add(Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                          child: ListTile(
+                            tileColor: Colors.grey[200],
+                            isThreeLine: true,
+                            title: Text(prod['name'], style: globals.niceFont(color: Colors.green)),
+                            subtitle: Text('Ordered at: ' + prod['Date'] + '\n ship to: ' + userDoc?.data()['Info'][2], style: globals.niceFont(color: Colors.green, size: 12.0)),
+
+                            trailing: StatefulBuilder(
+                                builder: (context, setState) {
+                                  return DropdownButton(
+                                      value: prod['orderStatus'],
+                                      items: ['Ordered', 'Confirmed', 'Shipped'].map<DropdownMenuItem>(
+                                              (s) => DropdownMenuItem(value: s, child: Text(s, style: globals.niceFont(color: Colors.green)))
+                                      ).toList(),
+                                      dropdownColor: Colors.white,
+                                      onChanged: (value) async {
+                                        ordersMap[_storeId][index]['orderStatus'] = prod['orderStatus'] = value;
+                                        await userRep.firestore.collection('Orders').doc(user).update({
+                                          'NewOrders': ordersMap,
+                                        });
+                                        setState(() {});
+                                      });
+                                }
+                            ),
+                          ),
+                        ),
                       ));
                     });
                   }
@@ -390,7 +406,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                       children: ListTile.divideTiles(
                         context: context,
                         tiles: orderTiles ?? [],
-                    ).toList(),
+                      ).toList(),
                   );
                   bool isMyStore = userRep.status == Status.Authenticated && userRep.user.uid == _storeId;
                   return DefaultTabController(
