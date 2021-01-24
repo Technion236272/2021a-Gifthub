@@ -12,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:collection/collection.dart';
 import 'my_flutter_app_icons.dart';
-import 'user_repository.dart';
-import 'package:pimp_my_button/pimp_my_button.dart';
 
 class Constants {
   Constants._();
@@ -25,14 +23,14 @@ class Constants {
 class CustomDialogBox extends StatefulWidget {
   final String title = "Shopping Cart", text = "Checkout";
 
-  CustomDialogBox({Key key}) : super(key: key);
+  const CustomDialogBox({Key key,})
+      : super(key: key);
 
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
 }
 
 class _CustomDialogBoxState extends State<CustomDialogBox> {
-  bool enableCheckoutButton=true;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -62,207 +60,179 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
         .map<double>((e) => e.price)
         .toList()
         .fold<double>(0.0, (previousValue, element) => previousValue + element);
-    return Consumer<UserRepository>(
-      builder: (context, userRep, _) => Stack(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(top: Constants.avatarRadius + Constants.padding),
-            margin: EdgeInsets.only(top: Constants.avatarRadius),
-            decoration: BoxDecoration(
+    return Stack(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.only(top: Constants.avatarRadius + Constants.padding),
+          margin: EdgeInsets.only(top: Constants.avatarRadius),
+          decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               color: Colors.white,
               borderRadius: BorderRadius.circular(Constants.padding),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black,
-                  offset: Offset(0, 10),
-                  blurRadius: 10
-                ),
-              ]
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Spacer(flex: 7),
-                  Text(widget.title,
+                    color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+              ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Spacer(flex: 7),
+                Text(widget.title,
                     style: GoogleFonts.openSans(
-                      fontSize: MediaQuery.of(context).size.width * 0.06,
-                      fontWeight: FontWeight.w600
-                    ),
-                    textAlign: TextAlign.center
-                  ),
-                  Spacer(flex: 3),
-                  ///total price of order:
-                  Text('\$' + price.toStringAsFixed(1),
+                        fontSize: MediaQuery.of(context).size.width * 0.06,
+                        fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center),
+                Spacer(flex: 3),
+                ///total price of order:
+                Text('\$' + price.toStringAsFixed(1),
                     style: GoogleFonts.openSans(
-                      fontSize: MediaQuery.of(context).size.width * 0.045,
-                      fontWeight: FontWeight.w600
-                    )
-                  ),
-                  Spacer(),
-                ]),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                ),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: productList.isEmpty ? 0 : productList.length * 2 - 1,
-                    itemBuilder: (BuildContext context, int index) {
-                      if(index.isOdd){
-                        return Container(
-                          height: MediaQuery.of(context).size.height * 0.0004,
-                          child: Divider(
-                            color: Colors.lightGreen,
-                            thickness: 1.0,
-                            indent: 10,
-                            endIndent: 10,
-                          ),
-                        );
-                      }
-                      index ~/= 2;
-                      return ListTile(
-                        ///product's name
-                        title: Text(productList[index]),
-                        ///product deletion option:
-                        trailing: IconButton(
-                          onPressed: () {
-                            for(globals.Product p in globals.userCart){
-                              if(p.name == productList[index].split('  x')[0]){
-                                globals.userCart.remove(p);
-                                break;
-                              }
-                            }
-                            setState(() {
-                              ///setting state so that the cart list will be updated
-                            });
-                          },
-                          icon: Icon(Icons.delete_outline,
-                            color: Colors.red,
-                          ),
+                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontWeight: FontWeight.w600)),
+                Spacer(),
+              ]),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: productList.isEmpty ? 0 : productList.length * 2 - 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if(index.isOdd){
+                      return Container(
+                        height: MediaQuery.of(context).size.height * 0.0004,
+                        child: Divider(
+                          color: Colors.lightGreen,
+                          thickness: 1.0,
+                          indent: 10,
+                          endIndent: 10,
                         ),
                       );
-                    },
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.04,
-                ),
-                PimpedButton(
-                  particle: DemoParticle(),
-                  pimpedWidgetBuilder: (context, controller) {
-                    return Flexible( ///checkout button:
-                    child: InkWell(
-                      onTap: enableCheckoutButton?(userRep.status == Status.Authenticated
-                        ? () async {
-                        ///Fingerprint auth
-                        final LocalAuthentication localAuth= LocalAuthentication();
-                        if(await localAuth.canCheckBiometrics){
-                          try {
-                            if (!(await localAuth.authenticateWithBiometrics(
-                                localizedReason: "GiftHub Checkout Authentication"))) {
-                              return;
+                    }
+                    index ~/= 2;
+                    return ListTile(
+                      ///product's name
+                      title: Text(productList[index]),
+                      ///product deletion option:
+                      trailing: IconButton(
+                        onPressed: () {
+                          for(globals.Product p in globals.userCart){
+                            if(p.name == productList[index].split('  x')[0]){
+                              globals.userCart.remove(p);
+                              break;
                             }
-                          } catch(e) {
-                            Fluttertoast.showToast(msg: "Too many bad fingerprint attempts!");
-                            return;
                           }
-                        }
-                        controller.forward(from: 0.0);
-                        setState(() {
-                          enableCheckoutButton=false;
-                        });
-                        Future.delayed(const Duration(seconds: 1), (){Navigator.of(context).pop();});
-                        // var userRep = Provider.of<UserRepository>(context, listen: false);
-                        if(null == userRep.user || userRep.status != Status.Authenticated){
-                          return Future.delayed(Duration.zero);
-                        }
-                        ///updating user's order history:
-                        var ordersToAdd = [];
-                        globals.userCart.forEach((element) {
-                          ordersToAdd.add({
-                            'Date': DateFormat("dd-MM-yyyy").format(DateTime.now()),
-                            'name': element.name,
-                            'price': element.price.toString(),
-                            'productID': element.productId,
-                            'quantity': _getQuantity(element.name, productList)
+                          setState(() {
+                            ///setting state so that the cart list will be updated
                           });
-                        });
-                        await FirebaseFirestore.instance
-                            .collection('Orders')
-                            .doc(userRep.user.uid)
-                            .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
-                        globals.userCart.clear();
-
-                      } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")):null,
-                      child: Container(
-                        padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * 0.02,
-                          bottom: MediaQuery.of(context).size.height * 0.02
-                        ),
-                        decoration: BoxDecoration(
-                          color: userRep.status == Status.Authenticated && enableCheckoutButton? Colors.red : Colors.grey[850],
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(Constants.padding),
-                            bottomRight: Radius.circular(Constants.padding)
-                          ),
-                        ),
-                        child: Text(
-                          widget.text,
-                          style: GoogleFonts.openSans(
-                            color: Colors.white,
-                            fontSize: MediaQuery.of(context).size.width * 0.05,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
+                        },
+                        icon: Icon(Icons.delete_outline,
+                          color: Colors.red,
                         ),
                       ),
-                    ),
-                  );},
+                    );
+                  },
                 ),
-              ],
-            ),
-          ),
-          ///GiftHub logo decoration
-          Positioned(
-            left: Constants.padding,
-            right: Constants.padding,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: Constants.avatarRadius,
-              child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.all(Radius.circular(Constants.avatarRadius)),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.04,
+              ),
+              Flexible( ///checkout button:
+                child: InkWell(
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    var userRep = Provider.of<UserRepository>(context, listen: false);
+                    if(null == userRep.user || userRep.status != Status.Authenticated){
+                      return Future.delayed(Duration.zero);
+                    }
+                    ///updating user's order history:
+                    var ordersToAdd = [];
+                    globals.userCart.forEach((element) {
+                      ordersToAdd.add({
+                        'Date': DateFormat("dd-MM-yyyy").format(DateTime.now()),
+                        'name': element.name,
+                        'price': element.price.toString(),
+                        'productID': element.productId,
+                        'quantity': _getQuantity(element.name, productList)
+                      });
+                    });
+                    for(int i=0;i<ordersToAdd.length;i++){
+                      ordersToAdd[i]['wrapping'] = globals.userCartOptions[i]['wrapping'].toString();
+                      ordersToAdd[i]['greeting'] = globals.userCartOptions[i]['greeting'];
+                      ordersToAdd[i]['fast'] = globals.userCartOptions[i]['fast'].toString();
+                      ordersToAdd[i]['special'] = globals.userCartOptions[i]['special'];
+                    }
+                    await FirebaseFirestore.instance.collection('Orders')
+                        .doc(Provider.of<UserRepository>(context, listen: false).user.uid)
+                        .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+                    globals.userCart.clear();
+                    Navigator.pop(context);
+                    //TODO: make cool animation - prob. Sprint 2
+                  },
                   child: Container(
-                    width: MediaQuery.of(context).size.height * 0.15,
-                    color: Colors.lightGreenAccent,
-                    child: Center(
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                          Icon(
-                            GiftHubIcons.gift,
-                            color: Colors.red,
-                            size: MediaQuery.of(context).size.height * 0.06,
-                          ),
-                          Text(
-                            'GiftHub',
-                            style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.height * 0.03,
-                                fontFamily: 'TimesNewRoman',
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          )
-                        ])),
-                  )),
-            ),
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).size.height * 0.02,
+                        bottom: MediaQuery.of(context).size.height * 0.02),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(Constants.padding),
+                          bottomRight: Radius.circular(Constants.padding)),
+                    ),
+                    child: Text(
+                      widget.text,
+                      style: GoogleFonts.openSans(
+                        color: Colors.white,
+                        fontSize: MediaQuery.of(context).size.width * 0.05,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        ///GiftHub logo decoration
+        Positioned(
+          left: Constants.padding,
+          right: Constants.padding,
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            radius: Constants.avatarRadius,
+            child: ClipRRect(
+                borderRadius:
+                BorderRadius.all(Radius.circular(Constants.avatarRadius)),
+                child: Container(
+                  width: MediaQuery.of(context).size.height * 0.15,
+                  color: Colors.lightGreenAccent,
+                  child: Center(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              GiftHubIcons.gift,
+                              color: Colors.red,
+                              size: MediaQuery.of(context).size.height * 0.06,
+                            ),
+                            Text(
+                              'GiftHub',
+                              style: TextStyle(
+                                  fontSize:
+                                  MediaQuery.of(context).size.height * 0.03,
+                                  fontFamily: 'TimesNewRoman',
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          ])),
+                )),
+          ),
+        ),
+      ],
     );
   }
 

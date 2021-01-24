@@ -17,6 +17,7 @@ import 'package:flutter_launcher_icons/xml_templates.dart';
 
 void main() {
   globals.userCart = <globals.Product>[];
+  globals.userCartOptions = <Map>[];
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])

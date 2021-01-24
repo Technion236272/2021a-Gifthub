@@ -152,7 +152,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                             userRep.user.uid,
                                             prodName,
                                             double.parse(prodPrice),
-                                            prodDate, [], "", "")
+                                            prodDate, [], "", "", globals.falseOptions)
                                           );
                                           _scaffoldKeyOrders.currentState.showSnackBar(
                                             SnackBar(

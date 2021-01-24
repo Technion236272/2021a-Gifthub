@@ -27,6 +27,8 @@ s10(context) => s50(context) / 5;
 s5(context) => s10(context) / 2;
 ///NOTE: font size of 18.0 is usually approx. "MediaQuery.of(context).size.height * 0.0256"
 
+const Map falseOptions = {'wrapping': false, 'greeting': false, 'fast': false};
+
 class Product {
   String _productId;
   String _userId;
@@ -36,6 +38,7 @@ class Product {
   List _reviews = <Review>[];
   String _category;
   String _description;
+  Map _options = falseOptions;
 
   String get productId => _productId;
   String get user => _userId;
@@ -45,9 +48,11 @@ class Product {
   List get reviews => _reviews;
   String get category => _category;
   String get description => _description;
+  Map get options => _options;
+  set options(dict) { _options = dict;}
 
-  Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description)
-      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _category = category, _description = description {
+  Product(String prodId, String userId, String name, double price, String date, List reviews, String category, String description, Map options)
+      : _productId = prodId, _userId = userId, _name = name, _price = price, _date = date, _category = category, _description = description, _options = options {
     _reviews = reviews.map<Review>((v) =>
         Review(v['user'], double.parse(v['rating']), v['content'])
     ).toList();
@@ -88,6 +93,7 @@ class Review {
 }
 
 List<Product> userCart;
+List<Map> userCartOptions;
 
 final List<String> categories = ['', 'Cakes', 'Chocolate', 'Balloons', 'Flowers', 'Greeting Cards','Gift Cards', 'Other'];
 

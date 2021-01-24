@@ -73,7 +73,9 @@ class _ProductScreenState extends State<ProductScreen> {
         _prodArgs['date'],
         _prodArgs['reviews'],
         _prodArgs['category'],
-        _prodArgs['description']);
+        _prodArgs['description'],
+        doc.data()['Options'] ?? globals.falseOptions,
+    );
     /// Get the store's image from the storage if it exists or show a default image.
     Completer<Size> completer = Completer<Size>();
     try {
@@ -261,9 +263,9 @@ class _ProductScreenState extends State<ProductScreen> {
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () {
+                                    globals.regTextButton("Add to Cart", icon: Icon(Icons.add_shopping_cart_outlined), press: () async {
                                       try{
-                                        globals.userCart.add(_prod);
+                                        await showDialog(context: context, builder: (BuildContext context) => AddToCartDialogBox(_prod));
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("Item added to cart")));
                                       } catch(e) {
                                         _scaffoldKeyProductScreenSet.currentState.showSnackBar(SnackBar(content: Text("There was a problem")));
@@ -455,3 +457,161 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 }
+
+class AddToCartDialogBox extends StatefulWidget {
+  final String title="Choose gift options",textConfirm="Add to Cart";
+  globals.Product prod;
+
+  @override
+  _AddToCartDialogBoxState createState() => _AddToCartDialogBoxState();
+
+  AddToCartDialogBox(globals.Product prod) : prod = prod;
+}
+
+class _AddToCartDialogBoxState extends State<AddToCartDialogBox> {
+  Map optionsAnswers = {'wrapping': false, 'greeting': TextEditingController(), 'fast': false, 'special': TextEditingController()};
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserRepository>(
+      builder: (context, userRep, _) =>
+          Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(globals.Constants.padding),
+            ),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            child: contentBox(context),
+          ),
+    );
+  }
+
+  contentBox(context) {
+    var wrappingWidget = CheckboxListTile(
+      title: Text("Wrap your gift?"),
+      value: optionsAnswers['wrapping'],
+      onChanged: (b) {
+        setState(() {
+          optionsAnswers['wrapping'] = b;
+        });
+      },
+    );
+    var greetingWidget = TextField(
+      controller: optionsAnswers['greeting'],
+      maxLines: null,
+      minLines: 1,
+      // expands: true,
+      decoration: InputDecoration(
+        hintText: "Add a greeting?",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: BorderSide(
+            color: Colors.amber,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
+    );
+    var fastWidget = CheckboxListTile(
+      title: Text("Do you want fast delivery?"),
+        subtitle: Text("Extra charges may apply"),
+        value: optionsAnswers['fast'],
+        onChanged: (b) {
+          setState(() {
+            optionsAnswers['fast'] = b;
+          });
+        }
+    );
+    return Stack(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.only(top: 2.0),
+          // margin: EdgeInsets.only(top: globals.Constants.avatarRadius),
+          decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(globals.Constants.padding),
+              boxShadow: [
+                BoxShadow(color: Colors.black, offset: Offset(0, 10),
+                    blurRadius: 10
+                ),
+              ]
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(widget.title, style: GoogleFonts.openSans(fontSize: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.06, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                widget.prod.options['wrapping'] ? wrappingWidget : Container(),
+                widget.prod.options['wrapping'] ? SizedBox(height: 10.0) : Container(),
+                widget.prod.options['fast'] ? fastWidget : Container(),
+                widget.prod.options['fast'] ? SizedBox(height: 10.0) : Container(),
+                widget.prod.options['greeting'] ? Container(
+                    child:greetingWidget) : Container(),
+                SizedBox(height: 10.0),
+                Container(
+                  child: TextField(
+                    controller: optionsAnswers['special'],
+                    maxLines: null,
+                    minLines: 1,
+                    decoration: InputDecoration(
+                      hintText: "Special requests?",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(
+                          color: Colors.amber,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                InkWell(
+                  onTap: () async {
+                    globals.userCart.add(widget.prod);
+                    globals.userCartOptions.add({
+                      'wrapping': optionsAnswers['wrapping'],
+                      'greeting': optionsAnswers['greeting'].text,
+                      'fast': optionsAnswers['fast'],
+                      'special': optionsAnswers['special'].text,
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(top: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.02, bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.02),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(globals.Constants.padding),
+                          bottomRight: Radius.circular(globals.Constants.padding)),
+                    ),
+                    child: Text
+                      (widget.textConfirm,
+                      style: GoogleFonts.openSans(color: Colors.white, fontSize: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.05, fontWeight: FontWeight.w600,),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
