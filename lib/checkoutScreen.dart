@@ -164,9 +164,9 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                       }
                       controller.forward(from: 0.0);
                       setState(() {
-                        enableCheckoutButton=false;
+                        enableCheckoutButton = false;
                       });
-                      Future.delayed(const Duration(seconds: 1), () {
+                      Future.delayed(const Duration(milliseconds: 600), () {
                         Navigator.of(context).pop();
                       });
                       if(null == userRep.user || userRep.status != Status.Authenticated){
@@ -180,7 +180,8 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           'name': element.name,
                           'price': element.price.toString(),
                           'productID': element.productId,
-                          'quantity': _getQuantity(element.name, productList)
+                          'quantity': _getQuantity(element.name, productList),
+                          'orderStatus': 'Ordered',
                         });
                       });
                       for(int i = 0; i < ordersToAdd.length; i++){
@@ -192,11 +193,12 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                       await FirebaseFirestore.instance.collection('Orders')
                         .doc(userRep.user.uid)
                         .update({'Orders': FieldValue.arrayUnion(ordersToAdd)});
+
                       var data = await FirebaseFirestore.instance.collection('Orders')
                           .doc(userRep.user.uid).get();
-
                       Map newOrders = data.data()['NewOrders'] ?? {};
 
+                      ///updating user's new orders
                       if(newOrders.isEmpty){
                         Map<String, List> map = {};
                         for (int i = 0; i < globals.userCart.length; i++) {
@@ -219,7 +221,9 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                           .doc(userRep.user.uid)
                           .update({'NewOrders': newOrders});
                       }
+                      ///clearing user's cart
                       globals.userCart.clear();
+                      globals.userCartOptions.clear();
                       //TODO: make cool animation - prob. Sprint 2
                     } : () => Fluttertoast.showToast(msg: "Please log in to place an order 😊")) : null,
                     child: Container(
