@@ -18,21 +18,21 @@ final firstNameController = TextEditingController();
 final lastNameController = TextEditingController();
 final emailController = TextEditingController();
 final aptController = TextEditingController();
-final cityController = TextEditingController();
+final phoneController = TextEditingController();
 final addressController = TextEditingController();
 final passwordController = TextEditingController();
-
+bool clickedSignUp=false;
 
 bool checkEmailSignupFields() {
   /*
   This function checks that the fields for sign up, it checks that they are not empty and have the right kind of text (for example, email should have '@' after the first section).
   Returns a bool, if everything has passed or not.
    */
-  return (emailController.text.isNotEmpty &&
+  return (!clickedSignUp&&emailController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
           firstNameController.text.isNotEmpty &&
           lastNameController.text.isNotEmpty &&
-          cityController.text.isNotEmpty &&
+          phoneController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
           aptController.text.isNotEmpty) &&
       RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
@@ -290,7 +290,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                       labelStyle: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
-                                      labelText: 'City',
+                                      labelText: 'Phone',
                                       isDense: true,
                                       enabledBorder: OutlineInputBorder(
                                           borderSide:
@@ -303,7 +303,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                     ),
-                                    controller: cityController,
+                                    controller: phoneController,
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     validator: (text) {
@@ -314,7 +314,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                       }
                                     },
                                     autofocus: false,
-                                    keyboardType: TextInputType.streetAddress,
+                                    keyboardType: TextInputType.phone,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         fontSize:
@@ -422,6 +422,9 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                           onPressed: checkEmailSignupFields()
                               ? () async {
                                   if (!checkEmailSignupFields()) return;
+                                  setState(() {
+                                    clickedSignUp=true;
+                                  });
                                   String code = await userRep.signUp(
                                     emailController.text,
                                     passwordController.text,
@@ -429,7 +432,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                     lastNameController.text,
                                     addressController.text,
                                     aptController.text,
-                                    cityController.text,
+                                    phoneController.text,
                                   );
                                   if (code == 'Success') {
                                     Navigator.pushAndRemoveUntil(
@@ -441,7 +444,9 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                   if (code == 'email-already-in-use') {}
                                   emailInUse = true;
 
-                                  setState(() {});
+                                  setState(() {
+                                    clickedSignUp=false;
+                                  });
                                 }
                               : null,
                           color: Colors.red,
@@ -622,7 +627,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                       labelStyle: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
-                                      labelText: 'City',
+                                      labelText: 'Phone',
                                       isDense: true,
                                       enabledBorder: OutlineInputBorder(
                                           borderSide:
@@ -635,7 +640,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                     ),
-                                    controller: cityController,
+                                    controller: phoneController,
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     validator: (text) {
@@ -646,7 +651,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                                       }
                                     },
                                     autofocus: false,
-                                    keyboardType: TextInputType.streetAddress,
+                                    keyboardType: TextInputType.phone,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         fontSize:
@@ -704,22 +709,26 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         FlatButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(80.0)),
-                          onPressed: () {
+                          onPressed: !clickedSignUp?() {
+                            setState(() {
+                              clickedSignUp=false;
+                            });
                             userRep.signInWithGoogleAddAccountInfo(
                               firstNameController.text,
                               lastNameController.text,
                               addressController.text,
                               aptController.text,
-                              cityController.text,
+                              phoneController.text,
                             );
                             setState(() {
+                              clickedSignUp=true;
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   new MaterialPageRoute<void>(
                                       builder: (context) => MainScreen()),
                                   (r) => false);
                             });
-                          },
+                          }:null,
                           color: Colors.red,
                           textColor: Colors.white,
                           child: Text('Continue',
