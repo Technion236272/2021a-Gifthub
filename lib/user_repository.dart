@@ -26,6 +26,8 @@ class UserRepository with ChangeNotifier {
   String _address = "";
   String _apt = "";
   String _city = "";
+  bool _allowCall = false;
+  bool _allowNavigate = false;
 
   ///This function gets user's information from firebase and initializes the local class variables with it.
   void updateLocalUserFields() async {
@@ -43,10 +45,20 @@ class UserRepository with ChangeNotifier {
     } catch (_){
       _avatarURL = defaultAvatar;
     }
+    try {
+      _allowCall = list['Info'][5];
+    } catch(_){
+      _allowCall = false;
+    }
+    try {
+      _allowNavigate = list['Info'][6];
+    } catch(_){
+      _allowNavigate = false;
+    }
   }
   ///This function takes the current information stored in this class's variables and uploads it to the user's information list on firebase.
   Future<void> updateFirebaseUserList() async {
-    var list=[_firstName,_lastName,_address,_apt,_city];
+    var list=[_firstName,_lastName,_address,_apt,_city, _allowCall, _allowNavigate];
     await _db.collection('Users').doc(_user.uid).set({'Info':list});
     notifyListeners();
   }
@@ -106,6 +118,12 @@ class UserRepository with ChangeNotifier {
 
   String get avatarURL => _avatarURL;
 
+  bool get allowCall => _allowCall;
+
+  set allowCall(bool value) {
+    _allowCall = value;
+  }
+
   ///This function is used for Email sign in
   ///Returns "Success" string if succeeded
   Future<String> signIn(String email, String password) async {
@@ -146,6 +164,7 @@ class UserRepository with ChangeNotifier {
       _address=address;
       _apt=apt;
       _city=city;
+      _allowCall = _allowNavigate = false;
       updateFirebaseUserList();
       var list=[];
       await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
@@ -206,6 +225,7 @@ class UserRepository with ChangeNotifier {
     _address=address;
     _apt=apt;
     _city=city;
+    _allowCall = _allowNavigate = false;
     updateFirebaseUserList();
     var list=[];
     await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
@@ -285,5 +305,11 @@ class UserRepository with ChangeNotifier {
     db.collection('tokens').doc(_user.uid)
         .set({'token': token, 'registered_at': Timestamp.now()})
         .then((value) => null);
+  }
+
+  bool get allowNavigate => _allowNavigate;
+
+  set allowNavigate(bool value) {
+    _allowNavigate = value;
   }
 }

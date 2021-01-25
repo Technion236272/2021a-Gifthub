@@ -132,6 +132,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _addressController.text = userRep.address;
     _cityController.text = userRep.city;
     _aptController.text = userRep.apt;
+    _allowCall = userRep.allowCall;
+    _allowNavigate = userRep.allowNavigate;
   }
 
   /// method that is called on map creation and takes a MapController as a parameter.
@@ -939,7 +941,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             ),
                             Container(
                               width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.4 - kBottomNavigationBarHeight ,
+                              height: MediaQuery.of(context).size.height * 0.3 - kBottomNavigationBarHeight ,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -1027,9 +1029,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   ),
                                   /// edit/submit changes button
                                   Flexible(
-                                    flex: 2,
+                                    flex: 1,
                                     child: Align(
-                                      alignment: Alignment(0.0, -0.5),
+                                      alignment: Alignment(0.0, 0.2),
                                       child: Container(
                                         height: 40,
                                         width: 200,
@@ -1081,6 +1083,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                 if(_cityController.text.isNotEmpty){
                                                   userRep.city = _cityController.text;
                                                 }
+                                                userRep.allowCall = _allowCall;
+                                                userRep.allowNavigate = _allowNavigate;
                                                 _editingMode = false;
                                               });
                                               await userRep.updateFirebaseUserList();
