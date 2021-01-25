@@ -96,7 +96,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -140,7 +140,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -186,7 +186,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -235,7 +235,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -282,7 +282,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -326,7 +326,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -372,7 +372,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -477,7 +477,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -521,7 +521,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -567,7 +567,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -614,7 +614,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -658,7 +658,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -736,7 +736,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
                 child: Container(
-                    height: MediaQuery.of(context).size.height * 0.065 * 5,
+                    height: MediaQuery.of(context).size.height * 0.075 * 5,
                     decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.only(
@@ -750,7 +750,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -799,7 +799,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -928,7 +928,7 @@ Widget startScreenScaffold(context) => Material(
                               GiftHubIcons.gift,
                               color: Colors.red,
                               size:
-                                  MediaQuery.of(context).size.height * 0.065 * 2,
+                                  MediaQuery.of(context).size.height * 0.075 * 2,
                             ),
                             Text(
                               'GiftHub',
@@ -953,7 +953,7 @@ Widget startScreenScaffold(context) => Material(
                     height: MediaQuery.of(context).size.height * 0.1,
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.75,
+                    width: MediaQuery.of(context).size.width * 0.65,
                     child: OutlineButton(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -1006,7 +1006,7 @@ Widget startScreenScaffold(context) => Material(
                     ),
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.75,
+                    width: MediaQuery.of(context).size.width * 0.65,
                     child: OutlineButton(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
