@@ -147,7 +147,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     double long = marker.position.longitude;
     var c = await _googleMapsController.future;
     await c.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
-    await c.showMarkerInfoWindow(marker.markerId);
+    // await c.showMarkerInfoWindow(marker.markerId);
     setState(() {});
   }
 
