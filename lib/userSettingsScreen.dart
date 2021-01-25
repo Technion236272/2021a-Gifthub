@@ -444,12 +444,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Text('Street address',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    )
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  )
                                 ),
                                 ///user's address
                                 Padding(
