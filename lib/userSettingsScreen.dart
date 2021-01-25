@@ -110,11 +110,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   Address _address;
 
   ///whether or not customers are allowed to call the user
-  ///TODO: pull it from the DB!!
   bool _allowCall = false;
 
   ///whether or not customers are allowed to navigate to the user
-  ///TODO: pull it from the DB!!
   bool _allowNavigate = false;
 
   ///space between Columned TextFields:
@@ -149,7 +147,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     double long = marker.position.longitude;
     var c = await _googleMapsController.future;
     await c.animateCamera(CameraUpdate.newLatLng(LatLng(lat, long)));
-    await c.showMarkerInfoWindow(marker.markerId);
+    // await c.showMarkerInfoWindow(marker.markerId);
     setState(() {});
   }
 
@@ -179,7 +177,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
     });
     return Material(
@@ -353,7 +351,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                                 focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderSide: BorderSide(color: Colors.green),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                               ),
@@ -415,7 +413,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                                 focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderSide: BorderSide(color: Colors.green),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                               ),
@@ -785,7 +783,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderSide: BorderSide(color: Colors.green),
                                           borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                       ),
@@ -851,7 +849,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                         borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                     focusedBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
+                                                        borderSide: BorderSide(color: Colors.green),
                                                         borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                   ),
@@ -909,12 +907,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                     contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.grey),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                     focusedBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.green),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                   ),
                                                   onChanged: (text) => {},

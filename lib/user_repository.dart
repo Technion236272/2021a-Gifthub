@@ -51,8 +51,8 @@ class UserRepository with ChangeNotifier {
       _city = "";
     } catch(_){
       _phone = "";
-      if(_address.split(', ').length != 2){
-        _address = _address + ', ' + _city;
+      if(2 != _address.split(', ').length){
+        _address += (', ' + _city.trim());
       }
     }
     try {
@@ -180,7 +180,13 @@ class UserRepository with ChangeNotifier {
       _lastName=lastName;
       _address=address;
       _apt=apt;
-      _city=city;
+      try {
+        int.parse(city);
+        _phone = city;
+        _city = '';
+      } catch (_) {
+        _phone = '';
+      }
       _allowCall = _allowNavigate = false;
       updateFirebaseUserList();
       var list=[];
@@ -241,7 +247,14 @@ class UserRepository with ChangeNotifier {
     _lastName=lastName;
     _address=address;
     _apt=apt;
-    _city=city;
+    try {
+      int.parse(city);
+      _phone = city;
+      _city = '';
+    } catch (_) {
+      _phone = '';
+      _city = city;
+    }
     _allowCall = _allowNavigate = false;
     updateFirebaseUserList();
     var list=[];
