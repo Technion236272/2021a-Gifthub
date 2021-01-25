@@ -110,11 +110,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
   Address _address;
 
   ///whether or not customers are allowed to call the user
-  ///TODO: pull it from the DB!!
   bool _allowCall = false;
 
   ///whether or not customers are allowed to navigate to the user
-  ///TODO: pull it from the DB!!
   bool _allowNavigate = false;
 
   ///space between Columned TextFields:
@@ -130,8 +128,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _firstNameController.text = userRep.firstName;
     _lastNameController.text = userRep.lastName;
     _addressController.text = userRep.address;
-    _cityController.text = userRep.city;
+    _cityController.text = userRep.phone;
     _aptController.text = userRep.apt;
+    _allowCall = userRep.allowCall;
+    _allowNavigate = userRep.allowNavigate;
   }
 
   /// method that is called on map creation and takes a MapController as a parameter.
@@ -177,7 +177,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
     });
     return Material(
@@ -351,7 +351,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                                 focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderSide: BorderSide(color: Colors.green),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                               ),
@@ -413,7 +413,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                                 focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(color: Colors.grey),
+                                                  borderSide: BorderSide(color: Colors.green),
                                                   borderRadius: BorderRadius.all(Radius.circular(30))
                                                 ),
                                               ),
@@ -443,7 +443,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text('Street address',
+                                Text('Address',
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.montserrat(
                                     fontSize: 16.0,
@@ -777,7 +777,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
+                                          borderSide: BorderSide(color: Colors.green),
                                           borderRadius: BorderRadius.all(Radius.circular(30))
                                         ),
                                       ),
@@ -839,12 +839,12 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                     contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.grey),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                     focusedBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.green),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                   ),
                                                   onChanged: (text) => {},
@@ -867,7 +867,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         ),
                                       ),
                                     ),
-                                    ///user's city
+                                    ///user's phone number
                                     Padding(
                                       padding: const EdgeInsets.only(right: 10.0, left: 5.0),
                                       child: Container(
@@ -879,7 +879,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: <Widget>[
                                             Flexible(
-                                              child: Text('City',
+                                              child: Text('Phone Number',
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -897,15 +897,16 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   autofocus: false,
                                                   readOnly: !_editingMode,
                                                   decoration: InputDecoration(
+                                                    hintText: 'Enter phone number...',
                                                     contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.grey),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                     focusedBorder: OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.grey),
-                                                        borderRadius: BorderRadius.all(Radius.circular(30))
+                                                      borderSide: BorderSide(color: Colors.green),
+                                                      borderRadius: BorderRadius.all(Radius.circular(30))
                                                     ),
                                                   ),
                                                   onChanged: (text) => {},
@@ -913,8 +914,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   textAlignVertical: TextAlignVertical.top,
                                                   controller: _cityController,
                                                   inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
+                                                    FilteringTextInputFormatter.allow(RegExp('[0-9]'))
                                                   ],
+                                                  keyboardType: TextInputType.phone,
                                                   focusNode: _cityInputFocusNode,
                                                   style: GoogleFonts.lato(
                                                     fontSize: 16.0,
@@ -933,7 +935,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                             ),
                             Container(
                               width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.4 - kBottomNavigationBarHeight ,
+                              height: MediaQuery.of(context).size.height * 0.3 - kBottomNavigationBarHeight ,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -1021,9 +1023,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                   ),
                                   /// edit/submit changes button
                                   Flexible(
-                                    flex: 2,
+                                    flex: 1,
                                     child: Align(
-                                      alignment: Alignment(0.0, -0.5),
+                                      alignment: Alignment(0.0, 0.2),
                                       child: Container(
                                         height: 40,
                                         width: 200,
@@ -1073,8 +1075,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   userRep.apt = _aptController.text;
                                                 }
                                                 if(_cityController.text.isNotEmpty){
-                                                  userRep.city = _cityController.text;
+                                                  userRep.phone = _cityController.text;
                                                 }
+                                                userRep.allowCall = _allowCall;
+                                                userRep.allowNavigate = _allowNavigate;
                                                 _editingMode = false;
                                               });
                                               await userRep.updateFirebaseUserList();
