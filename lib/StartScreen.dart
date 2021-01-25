@@ -39,7 +39,18 @@ bool checkEmailSignupFields() {
           .hasMatch(emailController.text) &&
       passwordController.text.length >= 6;
 }
-
+bool checkGoogleSignupFields() {
+  /*
+  This function checks that the fields for sign up, it checks that they are not empty and have the right kind of text (for example, email should have '@' after the first section).
+  Returns a bool, if everything has passed or not.
+   */
+  return (!clickedSignUp&&
+      firstNameController.text.isNotEmpty &&
+      lastNameController.text.isNotEmpty &&
+      phoneController.text.isNotEmpty &&
+      addressController.text.isNotEmpty &&
+      aptController.text.isNotEmpty);
+}
 bool checkEmailSigninFields() {
   /*
   This function checks that the fields for sign up, it checks that they are not empty
@@ -709,7 +720,7 @@ Future<void> firstSignUpSheet(var context, int screen) async {
                         FlatButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(80.0)),
-                          onPressed: !clickedSignUp?() {
+                          onPressed: checkGoogleSignupFields()?() {
                             setState(() {
                               clickedSignUp=false;
                             });
