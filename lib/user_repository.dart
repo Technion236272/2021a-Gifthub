@@ -75,7 +75,7 @@ class UserRepository with ChangeNotifier {
   }
   ///This function takes the current information stored in this class's variables and uploads it to the user's information list on firebase.
   Future<void> updateFirebaseUserList() async {
-    var list=[_firstName,_lastName,_address,_apt,_city, _allowCall, _allowNavigate];
+    var list=[_firstName,_lastName,_address,_apt, _phone, _allowCall, _allowNavigate];
     await _db.collection('Users').doc(_user.uid).set({'Info':list});
     notifyListeners();
   }
