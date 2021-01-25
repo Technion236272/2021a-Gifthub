@@ -156,7 +156,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             tileColor: Colors.grey[200],
                             isThreeLine: true,
                             title: Text(prod['name'], style: globals.niceFont(color: Colors.green)),
-                            subtitle: Text('Ordered at: ' + prod['Date'] + '\n ship to: ' + userDoc?.data()['Info'][2], style: globals.niceFont(color: Colors.green, size: 12.0)),
+                            subtitle: Text('Ordered at: ' + prod['Date'] + '\nShip to: ' + userDoc?.data()['Info'][2], style: globals.niceFont(color: Colors.green, size: 12.0)),
 
                             trailing: StatefulBuilder(
                                 builder: (context, setState) {

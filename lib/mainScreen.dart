@@ -108,9 +108,9 @@ class _MainScreenState extends State<MainScreen> {
         child: Stack(
           children: <Widget>[
             Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.width * 0.44,
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.058),
+              width: 300,
+              height: 150,
+              margin: EdgeInsets.only(top: 40),
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
                 color: Colors.white,
@@ -132,13 +132,13 @@ class _MainScreenState extends State<MainScreen> {
                   ListTile(
                     tileColor: Colors.white,
                     leading: Image(
-                      width: MediaQuery.of(context).size.width * 0.06,
-                      height: MediaQuery.of(context).size.height * 0.06,
+                      width: 25,
+                      height: 25,
                       image: AssetImage("Assets/google.png"),
                     ),
                     title: Text('Continue with Google',
                       style: GoogleFonts.lato(
-                        fontSize: 18.0,
+                        fontSize: 15.9,
                         color: Colors.black,
                       ),
                     ),
@@ -153,7 +153,7 @@ class _MainScreenState extends State<MainScreen> {
                     },
                   ),
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.004,
+                    height: 1,
                     child: Divider(
                       color: Colors.red[400],
                       indent: 10,
@@ -164,7 +164,7 @@ class _MainScreenState extends State<MainScreen> {
                   ListTile(
                     title: Text('Continue with Email',
                       style: GoogleFonts.lato(
-                        fontSize: 18.0,
+                        fontSize: 15.9,
                         color: Colors.black,
                       ),
                     ),
@@ -187,8 +187,8 @@ class _MainScreenState extends State<MainScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(45)),
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    height: MediaQuery.of(context).size.height * 0.12,
+                    width: 120,
+                    height: 80,
                     color: Colors.lightGreenAccent,
                     child: Center(
                       child: Column(
@@ -198,11 +198,11 @@ class _MainScreenState extends State<MainScreen> {
                           Icon(
                             GiftHubIcons.gift,
                             color: Colors.red,
-                            size: MediaQuery.of(context).size.height * 0.06,
+                            size: 45,
                           ),
                           Text('GiftHub',
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.height * 0.03,
+                              fontSize: 19,
                               fontFamily: 'TimesNewRoman',
                               color: Colors.black,
                               fontWeight: FontWeight.bold
