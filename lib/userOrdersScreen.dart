@@ -463,8 +463,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                             ok = ok && prodDelivery == options['fast'];
                                                             ok = ok && prodSpecial == options['special'];
                                                             ok = ok && prodDate == options['Date'];
-                                                            ok = ok && prodStatus == options['orderStatus'];
+                                                            ok = ok && prodStatusFromNewOrders == options['orderStatus'];
                                                             ok = ok && prodGreeting == options['greeting'];
+                                                            ok = ok && prodQuantity == options['quantity'];
                                                             if(ok) {
                                                               save[mapEntry.key].removeAt(j);
                                                               await FirebaseFirestore.instance
