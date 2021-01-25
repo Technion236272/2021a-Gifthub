@@ -141,7 +141,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
                 _storeRating = _getStoreRating();
                 if (userRep.status == Status.Authenticated && _storeId == userRep.user.uid) {
-                  for (var user in (await storeDoc.get()).data()['Ordered']) {
+                  for (var user in (await storeDoc.get()).data()['Ordered'] ?? []) {
                     ordered[user] = [];
                     var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user).get();
                     var orderDoc = (await userRep.firestore.collection('Orders').doc(user).get());
