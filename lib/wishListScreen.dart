@@ -132,42 +132,6 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                           onPressed: () => Navigator.of(context).pop(),
                           iconSize: 27.0,
                         ),
-                        actions: <Widget>[
-                          /// Checkout - cart
-                          /// displays a checkout dialog box defined in checkoutScreen.dart
-                          Badge(
-                            badgeContent: Text(
-                              globals.userCart.length < 10 ? globals.userCart.length.toString() : '10+',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lato(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: globals.userCart.length < 10 ? 10.0 : 9.0,
-                              ),
-                            ),
-                            position: BadgePosition(
-                              top: 5.5,
-                              start: globals.userCart.length < 10 ? 25 : 22,
-                            ),
-                            toAnimate: true,
-                            animationType: BadgeAnimationType.scale,
-                            badgeColor: Colors.red.shade600,
-                            elevation: 8,
-                            shape: BadgeShape.circle,
-                            child: IconButton(
-                                iconSize: 27.0, ///<-- default is 24.0
-                                icon: Icon(Icons.shopping_cart_outlined),
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return CustomDialogBox();
-                                      }
-                                  );
-                                }
-                            ),
-                          ),
-                        ],
                         title: Text("Wish List",
                           style: GoogleFonts.calistoga(
                               fontSize: 33,
