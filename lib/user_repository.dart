@@ -28,6 +28,13 @@ class UserRepository with ChangeNotifier {
   String _city = "";
   bool _allowCall = false;
   bool _allowNavigate = false;
+  String _phone = "";
+
+  String get phone => _phone;
+
+  set phone(String value) {
+    _phone = value;
+  }
 
   ///This function gets user's information from firebase and initializes the local class variables with it.
   void updateLocalUserFields() async {
@@ -37,11 +44,21 @@ class UserRepository with ChangeNotifier {
     _lastName = list['Info'][1];
     _address = list['Info'][2];
     _apt = list['Info'][3];
-    _city = list['Info'][4];
+    try{
+      _city = list['Info'][4];
+      int phone = int.parse(_city);
+      _phone = _city;
+      _city = "";
+    } catch(_){
+      _phone = "";
+      if(_address.split(', ').length != 2){
+        _address = _address + ', ' + _city;
+      }
+    }
     try {
       _avatarURL = await FirebaseStorage.instance.ref("userImages")
-          .child(_user.uid)
-          .getDownloadURL() ?? defaultAvatar;
+        .child(_user.uid)
+        .getDownloadURL() ?? defaultAvatar;
     } catch (_){
       _avatarURL = defaultAvatar;
     }

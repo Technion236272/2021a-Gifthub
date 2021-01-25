@@ -130,7 +130,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     _firstNameController.text = userRep.firstName;
     _lastNameController.text = userRep.lastName;
     _addressController.text = userRep.address;
-    _cityController.text = userRep.city;
+    _cityController.text = userRep.phone;
     _aptController.text = userRep.apt;
     _allowCall = userRep.allowCall;
     _allowNavigate = userRep.allowNavigate;
@@ -445,13 +445,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Text('Street address',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    )
+                                Text('Address',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  )
                                 ),
                                 ///user's address
                                 Padding(
@@ -875,7 +875,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                         ),
                                       ),
                                     ),
-                                    ///user's city
+                                    ///user's phone number
                                     Padding(
                                       padding: const EdgeInsets.only(right: 10.0, left: 5.0),
                                       child: Container(
@@ -887,7 +887,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: <Widget>[
                                             Flexible(
-                                              child: Text('City',
+                                              child: Text('Phone Number',
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 16.0,
                                                   color: Colors.black,
@@ -905,6 +905,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   autofocus: false,
                                                   readOnly: !_editingMode,
                                                   decoration: InputDecoration(
+                                                    hintText: 'Enter phone number...',
                                                     contentPadding: EdgeInsets.fromLTRB(5.0 , 13.0 , 5.0 , 13.0),
                                                     isDense: true,
                                                     enabledBorder: OutlineInputBorder(
@@ -921,8 +922,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   textAlignVertical: TextAlignVertical.top,
                                                   controller: _cityController,
                                                   inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(RegExp('[a-zA-Z .]'))
+                                                    FilteringTextInputFormatter.allow(RegExp('[0-9]'))
                                                   ],
+                                                  keyboardType: TextInputType.phone,
                                                   focusNode: _cityInputFocusNode,
                                                   style: GoogleFonts.lato(
                                                     fontSize: 16.0,
@@ -1081,7 +1083,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
                                                   userRep.apt = _aptController.text;
                                                 }
                                                 if(_cityController.text.isNotEmpty){
-                                                  userRep.city = _cityController.text;
+                                                  userRep.phone = _cityController.text;
                                                 }
                                                 userRep.allowCall = _allowCall;
                                                 userRep.allowNavigate = _allowNavigate;
