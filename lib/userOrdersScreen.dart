@@ -134,6 +134,24 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               String prodSpecial = ordersProduct[i ~/ 2]['special'] ?? '';
                               String prodStatus = ordersProduct[i ~/ 2]['orderStatus'] ?? '';
                               Map ordersOptions = snapshot.data()['NewOrders'] ?? {};
+                              String prodStatusFromNewOrders = '';
+                              if(ordersOptions.isNotEmpty){
+                                for(MapEntry<String, dynamic> mapEntry in ordersOptions.entries) {
+                                  for(Map<String, dynamic> options in mapEntry.value){
+                                    bool ok = true;
+                                    ok = ok && prodID == options['productID'];
+                                    ok = ok && prodWrap == options['wrapping'];
+                                    ok = ok && prodDelivery == options['fast'];
+                                    ok = ok && prodSpecial == options['special'];
+                                    ok = ok && prodDate == options['Date'];
+                                    ok = ok && prodQuantity == options['quantity'];
+                                    ok = ok && prodGreeting == options['greeting'];
+                                    if(ok) {
+                                      prodStatusFromNewOrders = options['orderStatus'];
+                                    }
+                                  }
+                                }
+                              }
                               return FutureBuilder(
                                 /// fetching order's images
                                 future: _getImage(prodID),
@@ -528,9 +546,11 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                       ///order's price, date of order and order status
                                       subtitle: Text(prodPrice + "\$  |  " +
                                           prodDate + "  |  " +
-                                          ((null != prodStatus && prodStatus.isNotEmpty)
-                                            ? prodStatus
-                                            : OrderStatus.values[i % 4].toString().substring(12)),
+                                          (prodStatusFromNewOrders.isNotEmpty
+                                            ? prodStatusFromNewOrders
+                                            : ((null != prodStatus && prodStatus.isNotEmpty)
+                                              ? prodStatus
+                                              : OrderStatus.values[i % 4].toString().substring(12))),
                                         style: GoogleFonts.lato(
                                           fontSize: 12.0,
                                           color: Colors.grey,
