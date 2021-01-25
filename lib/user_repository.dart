@@ -186,6 +186,8 @@ class UserRepository with ChangeNotifier {
         _city = '';
       } catch (_) {
         _phone = '';
+        _city = city;
+        _address += (', ' + _city).trim();
       }
       _allowCall = _allowNavigate = false;
       updateFirebaseUserList();
