@@ -201,22 +201,20 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                       ///updating user's new orders
                       if(newOrders.isEmpty){
                         Map<String, List> map = {};
-                        for (int i = 0; i < globals.userCart.length; i++) {
+                        for (int i = 0; i < productList.length; i++) {
                           if(null == map[globals.userCart[i].user]){
                             map[globals.userCart[i].user] = new List();
                           }
-                          ordersToAdd[i]['quantity'] = '1';
                           map[globals.userCart[i].user].add(ordersToAdd[i]);
                         }
                         await FirebaseFirestore.instance.collection('Orders')
                           .doc(userRep.user.uid)
                           .update({'NewOrders': map});
                       } else {
-                        for(int i = 0; i < globals.userCart.length; i++){
+                        for(int i = 0; i < productList.length; i++){
                           if(null == newOrders[globals.userCart[i].user]) {
                             newOrders[globals.userCart[i].user] = new List();
                           }
-                          ordersToAdd[i]['quantity'] = '1';
                           newOrders[globals.userCart[i].user].add(ordersToAdd[i]);
                         }
                         await FirebaseFirestore.instance.collection('Orders')
