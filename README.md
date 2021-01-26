@@ -15,19 +15,22 @@ A social and user-friendly app for buying and selling romantic gifts :heart:
 
 ## Core Features
 
-* [ ] View stores around your location.
-* [ ] Filter nearby stores by distance, rating and keywords.
-* [ ] Filter gifts by topics, distance and price.
+* [ ] Filter gifts by categories and price.
 * [ ] Buy and sell gifts on an easy, interactive platform.
 * [ ] Write reviews to share your experience with other users.
+* [ ] Save your favorite products for later in a wish list.
+* [ ] Interact with sellers via chat messages.
 
 ## Complementary features
 
-* [ ] Sign up and login with Google.
-* [ ] Save your favorite stores for later in a favorites list.
-* [ ] Save your favorite products for later in a wish list.
+* [ ] Sign up and login with Google or your e-mail.
+* [ ] Visit as a guest.
+* [ ] Design your own store, upload your amazing products keep track of them!
 * [ ] Share your favourite gifts with friends.
-* [ ] Pay with credit card or PayPal.
+* [ ] Navigate or call a seller as easy as pressing a button!
+* [ ] Receive notifications when someone sends you a message.
+* [ ] Add an extra layer of protection with your fingerprint!
+* [ ] Manage your profile with extreme ease, and even choose your address with a map interface!
 
 ## Table of Contents
 1. [Application structure](docs/applicationstracture2.md)
