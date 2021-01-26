@@ -5,12 +5,12 @@ A social and user-friendly app for buying and selling romantic gifts :heart:
 
 <a href='https://play.google.com/store/apps/details?id=com.technion.gifthub_2021a&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
 
+<img src="docs/1.jpeg" width="250">
+<img src="docs/2.jpeg" width="250">
+<img src="docs/3.jpeg" width="250">
+<img src="docs/4.jpeg" width="250">
+<img src="docs/5.jpeg" width="250">
 
-![Screenshot 1](docs/1.jpeg =100x20 "Screenshot 1 Diagram")
-![Screenshot 2](docs/2.jpeg =100x20 "Screenshot 2 Diagram")
-![Screenshot 3](docs/3.jpeg =100x20 "Screenshot 3 Diagram")
-![Screenshot 4](docs/4.jpeg =100x20 "Screenshot 4 Diagram")
-![Screenshot 5](docs/5.jpeg =100x20 "Screenshot 5 Diagram")
 
 ## Motivation
 
