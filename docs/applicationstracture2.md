@@ -1,4 +1,4 @@
-![App Stracture Diagram](AppStracture2.PNG "App Stracture Diagram")
+![App Stracture Diagram](AppStracture.PNG "App Stracture Diagram")
 
 
 # List of screens:
