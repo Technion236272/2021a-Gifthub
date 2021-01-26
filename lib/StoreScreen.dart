@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,13 +9,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'globals.dart' as globals;
 import 'user_repository.dart';
-import 'package:device_apps/device_apps.dart';
 import 'package:intl/intl.dart';
 import 'AllReviewsScreen.dart';
 import 'package:tuple/tuple.dart';
@@ -41,7 +43,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   String _storeId;
   String _storeName;
   String _storeImageURL;
-  NetworkImage _storeImage;
+  Image _storeImage;
   Size _storeImageSize;
   String _storeDesc;
   String _storeAddr;
@@ -49,6 +51,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   double _storeRating = 1.0;
   List _products = <globals.Product>[];
   List _reviews = <globals.Review>[];
+  bool _navEnabled;
+  bool _callEnabled;
   bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyStoreScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
@@ -70,13 +74,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     _storeName = storeArgs['name'];
     _storeDesc = storeArgs['description'];
     _storeAddr = storeArgs['address'];
-    _storePhone = storeArgs['phone'];
+    //_storePhone = storeArgs['phone'];
     Completer<Size> completer = Completer<Size>();
     /// Get the store's image from the storage if it exists or show a default image.
     try {
       _storeImageURL = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
-      _storeImage = NetworkImage(_storeImageURL);
-      _storeImage.resolve(ImageConfiguration()).addListener(ImageStreamListener(
+      _storeImage = Image.network(_storeImageURL,);
+      _storeImage.image.resolve(ImageConfiguration()).addListener(ImageStreamListener(
               (i, b) {
             completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
           }
@@ -99,7 +103,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     ///Get all the store's products.
     _products = <globals.Product>[];
     for (var p in doc.data()['Products']) {
-      var prodArgs = (await ref.doc(p).get()).data()['Product'];
+      var docRef = await ref.doc(p).get();
+      var prodArgs = docRef.data()['Product'];
       _products.add(globals.Product(
           p,
           prodArgs['user'],
@@ -108,7 +113,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           prodArgs['date'],
           prodArgs['reviews'],
           prodArgs['category'],
-          prodArgs['description']));
+          prodArgs['description'],
+          docRef.data()['Options'] ?? globals.falseOptions,)
+      );
     }
     _reviews = doc.data()['Reviews'].map<globals.Review>((v) =>
         globals.Review(v['user'], double.parse(v['rating']), v['content'])
@@ -125,6 +132,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    Map ordered = {};
+    List<Widget> orderTiles = [];
     return Consumer<UserRepository>(
         builder: (context, userRep, _) {
           return FutureBuilder(
@@ -134,12 +143,70 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
                 _storeRating = _getStoreRating();
+                var userDoc = await userRep.firestore.collection('Users').doc(_storeId).get();
+                try {
+                  _storePhone = userDoc.data()['Info'][4];
+                } on RangeError {
+                  _storePhone = "0000000000";
+                }
+                try {
+                  _callEnabled = userDoc.data()['Info'][5];
+                } on RangeError {
+                  _callEnabled = true;
+                }
+                try {
+                  _navEnabled = userDoc.data()['Info'][6];
+                } on RangeError {
+                  _navEnabled = true;
+                }
+                if (userRep.status == Status.Authenticated && _storeId == userRep.user.uid) {
+                  for (var user in (await storeDoc.get()).data()['Ordered'] ?? []) {
+                    ordered[user] = [];
+                    var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user).get();
+                    var orderDoc = (await userRep.firestore.collection('Orders').doc(user).get());
+                    var ordersMap = orderDoc.data()['NewOrders'];
+                    ordersMap[_storeId]?.asMap()?.forEach((index, prod) async {
+                      ordered[user].add(prod);
+                      orderTiles.add(Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                          child: ListTile(
+                            tileColor: Colors.grey[200],
+                            isThreeLine: true,
+                            title: Text(prod['name'], style: globals.niceFont(color: Colors.green)),
+                            subtitle: Text('Ordered at: ' + prod['Date'] + '\nShip to: ' + userDoc?.data()['Info'][2], style: globals.niceFont(color: Colors.green, size: 12.0)),
+
+                            trailing: StatefulBuilder(
+                                builder: (context, setState) {
+                                  return DropdownButton(
+                                      value: prod['orderStatus'],
+                                      items: ['Ordered', 'Confirmed', 'Shipped'].map<DropdownMenuItem>(
+                                              (s) => DropdownMenuItem(value: s, child: Text(s, style: globals.niceFont(color: Colors.green)))
+                                      ).toList(),
+                                      dropdownColor: Colors.white,
+                                      onChanged: (value) async {
+                                        ordersMap[_storeId][index]['orderStatus'] = prod['orderStatus'] = value;
+                                        await userRep.firestore.collection('Orders').doc(user).update({
+                                          'NewOrders': ordersMap,
+                                        });
+                                        setState(() {});
+                                      });
+                                }
+                            ),
+                          ),
+                        ),
+                      ));
+                    });
+                  }
+                }
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.hasError) {
                     return globals.emptyErrorScaffold(snapshot.error.toString());
                   }
+
                   /// Shows the store's information.
                   /// Supports editing mode that allows the owner to change
                   /// some of the store's info.
@@ -186,7 +253,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                 });
                               }
                             },
-                            )
+                          )
                               : Container(
                             decoration: BoxDecoration(
                               border: Border.all(width: 5),
@@ -199,7 +266,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   .of(context)
                                   .size
                                   .height * 0.25),
-                              image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
+                              image: _storeImage != null ? _storeImage.image : AssetImage('Assets/Untitled.png'),
                             ),
                           ),
                           SizedBox(height: 10),
@@ -226,14 +293,27 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     controller: controllers[2],
                                     style: globals.niceFont(),
                                   )
-                                      : Text(_storeAddr,
+                                      : Text(_navEnabled ? _storeAddr : "Online store",
                                       textAlign: TextAlign.start,
                                       style: globals.niceFont()),
                                 ),
-                                IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: null),
-                                IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
-                                  await DeviceApps.openApp('com.android.tel'); // FIXME not working, probably bad package name
-                                }),
+                                IconButton(icon: Icon(Icons.navigation, color: _navEnabled ? Colors.white : Colors.grey), onPressed: _navEnabled ? () async {
+                                  String addrForUrl = Uri.encodeFull(_storeAddr);
+                                  String navUrl = 'https://www.google.com/maps/dir/?api=1&destination=$addrForUrl';
+                                  if (await canLaunch(navUrl)) {
+                                    await launch(navUrl);
+                                  } else {
+                                    _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch navigation app")));
+                                  }
+                                } : null ),
+                                IconButton(icon: Icon(Icons.phone, color: _callEnabled ? Colors.white : Colors.grey), onPressed: _callEnabled ? () async {
+                                  String phoneUrl = 'tel: $_storePhone';
+                                  if (await canLaunch(phoneUrl)) {
+                                    await launch(phoneUrl);
+                                  } else {
+                                    _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch phone")));
+                                  }
+                                } : null ),
                               ],
                             ),
                           ),
@@ -283,7 +363,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Sign in to use this feature")));
                                       return;
                                     }
-                                    if(userRep.user.uid == _storeId){
+                                    if (userRep.user.uid == _storeId) {
                                       _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("You can't add a review to your own store")));
                                       return;
                                     }
@@ -295,6 +375,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                         ]
                     ),
                   );
+
                   /// Shows the store's product in a pretty grid.
                   /// Users can access any product by clicking it.
                   final itemsTab = GridView.count(
@@ -338,8 +419,17 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                       );
                     }).toList(),
                   );
+                  List tiles = <ListTile>[];
+                  // ordered?.forEach((key, value) {});
+                  final ordersTab = ListView(
+                      children: ListTile.divideTiles(
+                        context: context,
+                        tiles: orderTiles ?? [],
+                      ).toList(),
+                  );
+                  bool isMyStore = userRep.status == Status.Authenticated && userRep.user.uid == _storeId;
                   return DefaultTabController(
-                    length: 2,
+                    length: isMyStore? 3 : 2,
                     child: Material(
                         color: Colors.lightGreen,
                         child: Consumer<UserRepository>(
@@ -358,7 +448,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     )
                                         : Text(_storeName, style: globals.calistogaFont(),),
                                     bottom: TabBar(
-                                      tabs: [
+                                      tabs: isMyStore ?
+                                      [
+                                        Tab(text: "About"),
+                                        Tab(text: "Items"),
+                                        Tab(text: "Orders"),
+                                      ]
+                                          : [
                                         Tab(text: "About"),
                                         Tab(text: "Items"),
                                       ],
@@ -366,6 +462,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                       labelColor: Colors.white,
                                       unselectedLabelColor: Colors.grey,
                                     ),
+
                                     ///Let the user edit and save store changes only if it's the owner
                                     actions: userRep.status == Status.Authenticated && _storeId == userRep.user.uid ?
                                     editingMode ? [IconButton(icon: Icon(Icons.save_outlined), onPressed: () async {
@@ -405,7 +502,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     backgroundColor: Colors.red[900],
                                   ) : null,
                                   body: TabBarView(
-                                      children: [
+                                      children: isMyStore ?
+                                      [
+                                        aboutTab,
+                                        itemsTab,
+                                        ordersTab,
+                                      ]:
+                                      [
                                         aboutTab,
                                         itemsTab,
                                       ]
@@ -530,7 +633,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 }
 
 class AddProductDialogBox extends StatefulWidget {
-  final String title="Add product",textConfirm="Add", textCancel="Cancel", storeId;
+  final String title="Add product",textConfirm="Add", storeId;
   final List controllersList = <TextEditingController>[];
 
 
@@ -556,6 +659,8 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
   PickedFile pickedImage;
   String category;
   bool _isAddedPressed = false;
+  final Map optionsDict = {'wrapping': false, 'greeting': false, 'fast': false};
+
 
   @override
   void initState() {
@@ -597,201 +702,239 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                 ),
               ]
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text(widget.title, style: GoogleFonts.openSans(fontSize: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.06, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
-              Container(
-                padding: EdgeInsets.only(left: 2.0, right: 2.0),
-                child: TextField(
-                    controller: widget.controllersList[0],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(widget.title, style: GoogleFonts.openSans(fontSize: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.06, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                Container(
+                  padding: EdgeInsets.only(left: 2.0, right: 2.0),
+                  child: TextField(
+                      controller: widget.controllersList[0],
+                      style: globals.niceFont(color: Colors.black),
+                      decoration: InputDecoration(
+                        hintText: "name*",
+                        errorText: clickedButNoName ? "Enter product name" : null,
+                      ),
+                      textAlign: TextAlign.center,
+                      onChanged: (s) {
+                        setState(() {
+                          clickedButNoName = s == '';
+                        });
+                      }
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 2.0, right: 2.0),
+                  child: TextField(
+                    controller: widget.controllersList[1],
                     style: globals.niceFont(color: Colors.black),
                     decoration: InputDecoration(
-                      hintText: "name*",
-                      errorText: clickedButNoName ? "Enter product name" : null,
+                      hintText: "description",
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 2.0, right: 2.0),
+                  child: TextField(
+                    controller: widget.controllersList[2],
+                    style: globals.niceFont(color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: "price*",
+                      errorText: clickedButNoPrice ? "Enter product price" : null,
                     ),
                     textAlign: TextAlign.center,
                     onChanged: (s) {
+                      try {
+                        double checkPrice = double.parse(widget.controllersList[2].text);
+                      } catch (e) {
+                        setState(() {
+                          clickedButNoPrice = true;
+                        });
+                        return;
+                      }
                       setState(() {
-                        clickedButNoName = s == '';
+                        clickedButNoPrice = s == '';
                       });
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Category:", style: globals.niceFont(color: colorForCategory),),
+                    Container(
+                        color: Colors.transparent,
+                        child: DropdownButton<String>(
+                            elevation: 0,
+                            value: category,
+                            onChanged: (String newValue) {
+                              setState(() {
+                                category = newValue;
+                                isCategorySelected = newValue.compareTo(globals.categories[0]) != 0;
+                                colorForCategory = isCategorySelected ? Colors.black : Colors.red;
+                              });
+                            },
+                            items: globals.categories
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList())
+                    ),
+                  ],
+                ),
+                Text("Enable gift features?", style: globals.niceFont(color: colorForImage)),
+                Container(
+                  child: CheckboxListTile(
+                      title: Text("Gift wrapping", style: globals.niceFont(color: colorForImage)),
+                      value: optionsDict['wrapping'],
+                      activeColor: Colors.green,
+                      onChanged: (b) {
+                        setState(() {
+                          optionsDict['wrapping'] = b;
+                        });
+                      }),
+                ),
+                Container(
+                  child: CheckboxListTile(
+                      title: Text("Personal greeting", style: globals.niceFont(color: colorForImage)),
+                      value: optionsDict['greeting'],
+                      activeColor: Colors.green,
+                      onChanged: (b) {
+                        setState(() {
+                          optionsDict['greeting'] = b;
+                        });
+                      }),
+                ),
+                Container(
+                  child: CheckboxListTile(
+                      title: Text("Fast delivery", style: globals.niceFont(color: colorForImage)),
+                      value: optionsDict['fast'],
+                      activeColor: Colors.green,
+                      onChanged: (b) {
+                        setState(() {
+                          optionsDict['fast'] = b;
+                        });
+                      }),
+                ),
+                Center(child: Text(!isImagePicked ? "No image picked!" : "Image picked!", style: globals.niceFont(color: colorForImage),)),
+                RaisedButton(
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    var image = await ImagePicker().getImage(source: ImageSource.gallery);
+                    setState(() {
+                      pickedImage = image;
+                      isImagePicked = true;
+                      colorForImage = isImagePicked ? Colors.black : Colors.red;
+                    });
+                  },
+                  child: Text("pick image", style: globals.niceFont()),
+                ),
+                InkWell(
+                  onTap: _isAddedPressed? null : () async {
+                    bool isAllGood = true;
+                    if (widget.controllersList[0].text == '' || widget.controllersList[2].text == '') {
+                      setState(() {
+                        clickedButNoName = widget.controllersList[0].text == '';
+                        clickedButNoPrice = widget.controllersList[2].text == '';
+                      });
+                      isAllGood = false;
                     }
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(left: 2.0, right: 2.0),
-                child: TextField(
-                  controller: widget.controllersList[1],
-                  style: globals.niceFont(color: Colors.black),
-                  decoration: InputDecoration(
-                    hintText: "description",
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(left: 2.0, right: 2.0),
-                child: TextField(
-                  controller: widget.controllersList[2],
-                  style: globals.niceFont(color: Colors.black),
-                  decoration: InputDecoration(
-                    hintText: "price*",
-                    errorText: clickedButNoPrice ? "Enter product price" : null,
-                  ),
-                  textAlign: TextAlign.center,
-                  onChanged: (s) {
                     try {
                       double checkPrice = double.parse(widget.controllersList[2].text);
                     } catch (e) {
                       setState(() {
                         clickedButNoPrice = true;
                       });
+                      isAllGood = false;
+                    }
+                    if (!isCategorySelected) {
+                      setState(() {
+                        colorForCategory = Colors.red;
+                      });
+                      isAllGood = false;
+                    } else if (!isImagePicked) {
+                      setState(() {
+                        colorForCategory = Colors.black;
+                        colorForImage = Colors.red;
+                      });
+                      isAllGood = false;
+                    }
+                    if (!isAllGood) {
                       return;
                     }
                     setState(() {
-                      clickedButNoPrice = s == '';
+                      _isAddedPressed = true;
                     });
+                    var _db = FirebaseFirestore.instance;
+                    var prodId = (await _db.collection('Products').doc('Counter').get()).data()['Counter'];
+                    var today = DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
+                    await _db.collection('Products').doc(prodId.toString()).set({
+                      'Product': {
+                        'user': widget.storeId,
+                        'name': widget.controllersList[0].text,
+                        'description': widget.controllersList[1].text,
+                        'price': widget.controllersList[2].text,
+                        'priceNumber': double.parse(widget.controllersList[2].text),
+                        'reviews': [],
+                        'date': today,
+                        'category': category,
+                      },
+                      'Options': optionsDict,
+                    }).catchError((e) {
+                      return;
+                    });
+                    await _db.collection('Stores').doc(widget.storeId).update({
+                      'Products': FieldValue.arrayUnion([prodId.toString()]),
+                    }).catchError((e) {
+                      return;
+                    });
+                    await _db.collection('Products').doc('Counter').update({
+                      'Counter': FieldValue.increment(1),
+                    }).catchError((e) {
+                      return;
+                    });
+                    await FirebaseStorage.instance.ref().child('productImages/' + prodId.toString()).putFile(File(pickedImage.path));
+                    setState(() {
+                      _isAddedPressed = false;
+                    });
+                    Navigator.of(context).pop();
                   },
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text("Category:", style: globals.niceFont(color: colorForCategory),),
-                  Container(
-                      color: Colors.transparent,
-                      child: DropdownButton<String>(
-                          elevation: 0,
-                          value: category,
-                          onChanged: (String newValue) {
-                            setState(() {
-                              category = newValue;
-                              isCategorySelected = newValue.compareTo(globals.categories[0]) != 0;
-                              colorForCategory = isCategorySelected ? Colors.black : Colors.red;
-                            });
-                          },
-                          items: globals.categories
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList())
-                  ),
-                ],
-              ),
-              Center(child: Text(!isImagePicked ? "No image picked!" : "Image picked!", style: globals.niceFont(color: colorForImage),)),
-              RaisedButton(
-                color: Colors.green,
-                textColor: Colors.white,
-                onPressed: () async {
-                  var image = await ImagePicker().getImage(source: ImageSource.gallery);
-                  setState(() {
-                    pickedImage = image;
-                    isImagePicked = true;
-                    colorForImage = isImagePicked ? Colors.black : Colors.red;
-                  });
-                },
-                child: Text("pick image", style: globals.niceFont()),
-              ),
-              InkWell(
-                onTap: _isAddedPressed? null : () async {
-                  bool isAllGood = true;
-                  if (widget.controllersList[0].text == '' || widget.controllersList[2].text == '') {
-                    setState(() {
-                      clickedButNoName = widget.controllersList[0].text == '';
-                      clickedButNoPrice = widget.controllersList[2].text == '';
-                    });
-                    isAllGood = false;
-                  }
-                  try {
-                    double checkPrice = double.parse(widget.controllersList[2].text);
-                  } catch (e) {
-                    setState(() {
-                      clickedButNoPrice = true;
-                    });
-                    isAllGood = false;
-                  }
-                  if (!isCategorySelected) {
-                    setState(() {
-                      colorForCategory = Colors.red;
-                    });
-                    isAllGood = false;
-                  } else if (!isImagePicked) {
-                    setState(() {
-                      colorForCategory = Colors.black;
-                      colorForImage = Colors.red;
-                    });
-                    isAllGood = false;
-                  }
-                  if (!isAllGood) {
-                    return;
-                  }
-                  setState(() {
-                    _isAddedPressed = true;
-                  });
-                  var _db = FirebaseFirestore.instance;
-                  var prodId = (await _db.collection('Products').doc('Counter').get()).data()['Counter'];
-                  var today = DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
-                  await _db.collection('Products').doc(prodId.toString()).set({
-                    'Product': {
-                      'user': widget.storeId,
-                      'name': widget.controllersList[0].text,
-                      'description': widget.controllersList[1].text,
-                      'price': widget.controllersList[2].text,
-                      'reviews': [],
-                      'date': today,
-                      'category': category,
-                    }
-                  }).catchError((e) {
-                    return;
-                  });
-                  await _db.collection('Stores').doc(widget.storeId).update({
-                    'Products': FieldValue.arrayUnion([prodId.toString()]),
-                  }).catchError((e) {
-                    return;
-                  });
-                  await _db.collection('Products').doc('Counter').update({
-                    'Counter': FieldValue.increment(1),
-                  }).catchError((e) {
-                    return;
-                  });
-                  await FirebaseStorage.instance.ref().child('productImages/' + prodId.toString()).putFile(File(pickedImage.path));
-                  setState(() {
-                    _isAddedPressed = false;
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  padding: EdgeInsets.only(top: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.02, bottom: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.02),
-                  decoration: BoxDecoration(
-                    color: _isAddedPressed ? Colors.grey : Colors.red,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(globals.Constants.padding),
-                        bottomRight: Radius.circular(globals.Constants.padding)),
-                  ),
-                  child: _isAddedPressed ? Center(child: CircularProgressIndicator())
-                      : Text
-                    (widget.textConfirm,
-                    style: GoogleFonts.openSans(color: Colors.white, fontSize: MediaQuery
+                  child: Container(
+                    padding: EdgeInsets.only(top: MediaQuery
                         .of(context)
                         .size
-                        .width * 0.05, fontWeight: FontWeight.w600,),
-                    textAlign: TextAlign.center,
+                        .height * 0.02, bottom: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.02),
+                    decoration: BoxDecoration(
+                      color: _isAddedPressed ? Colors.grey : Colors.red,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(globals.Constants.padding),
+                          bottomRight: Radius.circular(globals.Constants.padding)),
+                    ),
+                    child: _isAddedPressed ? Center(child: CircularProgressIndicator())
+                        : Text
+                      (widget.textConfirm,
+                      style: GoogleFonts.openSans(color: Colors.white, fontSize: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.05, fontWeight: FontWeight.w600,),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

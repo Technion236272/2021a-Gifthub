@@ -20,6 +20,7 @@ import 'dart:io';
 import 'user_repository.dart';
 import 'package:gifthub_2021a/globals.dart' as globals;
 import 'checkoutScreen.dart';
+import 'ProductScreen.dart' show AddToCartDialogBox;
 
 ///-----------------------------------------------------------------------------
 /// User Orders Screen:
@@ -29,7 +30,7 @@ import 'checkoutScreen.dart';
 /// all list items are slidable and multiple options offered as will be described below
 ///-----------------------------------------------------------------------------
 
-enum OrderStatus { Ordered, Pending, Confirmed, Arrived }
+enum OrderStatus { Ordered, Shipped, Confirmed, Arrived }
 
 class UserOrdersScreen extends StatefulWidget {
   UserOrdersScreen({Key key}) : super(key: key);
@@ -44,13 +45,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
 
   ///current review rating of user
   double _rating = 0.0;
+
+  ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
-        width: 60,
-        height: 60,
-        child: CircularProgressIndicator(
-          valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
-        )
+      width: 60,
+      height: 60,
+      child: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.lightGreen[800]),
+      )
     ),
   );
 
@@ -65,17 +68,23 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
       child: Consumer<UserRepository>(
         builder: (context, userRep, _) {
           /// fetching user's orders from FB storage
-          return FutureBuilder(
-            future: FirebaseFirestore.instance.collection("Orders").doc(userRep.user.uid).get(),
-            builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
+          return StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection("Orders").snapshots(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> orderSnapshot) {
+              if (orderSnapshot.connectionState != ConnectionState.active || !orderSnapshot.hasData) {
                 return _circularProgressIndicator;
-              } else if (0 == snapshot.data.data()['Orders'].length) {
+              }
+              ///getting user's orders:
+              DocumentSnapshot snapshot = orderSnapshot
+                  .data
+                  .docs
+                  .firstWhere((element) => element.id == userRep.user.uid);
+              int totalProducts = snapshot.data()['Orders'].length;
+              if (0 == totalProducts) {
                 /// if user's order history is empty then a blank, informative and interactive
                 /// screen is displayed. defined under globals.dart
                 return globals.emptyListErrorScreen(context, 'Orders ');
               }
-              int totalProducts = snapshot.data.data()['Orders'].length;
               return Scaffold(
                 key: _scaffoldKeyOrders,
                 resizeToAvoidBottomInset: false,
@@ -113,17 +122,41 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 );
                               }
                               /// parsing product details from FB firestore
-                              var ordersProduct = snapshot.data.data()['Orders'];
+                              var ordersProduct = snapshot.data()['Orders'];
                               String prodName = ordersProduct[i ~/ 2]['name'];
                               String prodPrice = ordersProduct[i ~/ 2]['price'];
                               String prodDate = ordersProduct[i ~/ 2]['Date'];
                               String prodID = ordersProduct[i ~/ 2]['productID'];
                               String prodQuantity = ordersProduct[i ~/ 2]['quantity'];
+                              String prodWrap = ordersProduct[i ~/ 2]['wrapping'] ?? '';
+                              String prodDelivery = ordersProduct[i ~/ 2]['fast'] ?? '';
+                              String prodGreeting = ordersProduct[i ~/ 2]['greeting'] ?? '';
+                              String prodSpecial = ordersProduct[i ~/ 2]['special'] ?? '';
+                              String prodStatus = ordersProduct[i ~/ 2]['orderStatus'] ?? '';
+                              Map ordersOptions = snapshot.data()['NewOrders'] ?? {};
+                              String prodStatusFromNewOrders = '';
+                              if(ordersOptions.isNotEmpty){
+                                for(MapEntry<String, dynamic> mapEntry in ordersOptions.entries) {
+                                  for(Map<String, dynamic> options in mapEntry.value){
+                                    bool ok = true;
+                                    ok = ok && prodID == options['productID'];
+                                    ok = ok && prodWrap == options['wrapping'];
+                                    ok = ok && prodDelivery == options['fast'];
+                                    ok = ok && prodSpecial == options['special'];
+                                    ok = ok && prodDate == options['Date'];
+                                    ok = ok && prodQuantity == options['quantity'];
+                                    ok = ok && prodGreeting == options['greeting'];
+                                    if(ok) {
+                                      prodStatusFromNewOrders = options['orderStatus'];
+                                    }
+                                  }
+                                }
+                              }
                               return FutureBuilder(
                                 /// fetching order's images
                                 future: _getImage(prodID),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
-                                  if (snapshot.connectionState != ConnectionState.done || !imageURL.hasData) {
+                                  if (imageURL.connectionState != ConnectionState.done || !imageURL.hasData) {
                                     return _circularProgressIndicator;
                                   }
                                   ///if image url has error (meaning there is no product image)
@@ -142,16 +175,29 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                         color: Colors.transparent,
                                         foregroundColor: Colors.amberAccent,
                                         icon: Icons.attach_money_outlined,
-                                        onTap: () {
+                                        onTap: () async {
+                                          var tempSnapshot = await userRep.firestore
+                                              .collection('Products')
+                                              .doc(prodID).get();
+                                          var prodOptions = tempSnapshot.data()['Options'] ?? globals.falseOptions;
+                                          int beforeAdd = globals.userCart.length;
+                                          await showDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (context) => AddToCartDialogBox(
+                                              globals.Product(
+                                                prodID,
+                                                userRep.user.uid,
+                                                prodName,
+                                                double.parse(prodPrice),
+                                                prodDate, [], "", "", prodOptions)
+                                            )
+                                          );
                                           ///adding order to cart and displaying
                                           ///success snackbar with checkout option
-                                          globals.userCart.add(globals.Product(
-                                            prodID,
-                                            userRep.user.uid,
-                                            prodName,
-                                            double.parse(prodPrice),
-                                            prodDate, [], "", "")
-                                          );
+                                          if(globals.userCart.length == beforeAdd){
+                                            return;
+                                          }
                                           _scaffoldKeyOrders.currentState.showSnackBar(
                                             SnackBar(
                                               content: Text('Product Successfully Added to Cart!',
@@ -402,14 +448,38 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                                       var toRemoveItem = ordersProduct[i ~/ 2];
                                                       toRemoveList.add(toRemoveItem);
                                                       await userRep.firestore
-                                                          .collection('Orders')
-                                                          .doc(userRep.user.uid)
-                                                          .update({
-                                                        'Orders':FieldValue.arrayRemove(toRemoveList)
+                                                        .collection('Orders')
+                                                        .doc(userRep.user.uid)
+                                                        .update({'Orders':FieldValue.arrayRemove(toRemoveList)
                                                       });
-                                                      setState(() {
-                                                        ///so that orders list will be updated
-                                                      });
+                                                      if(ordersOptions.isNotEmpty){
+                                                        Map<String, List> save = Map.from(ordersOptions);
+                                                        for(MapEntry<String, dynamic> mapEntry in ordersOptions.entries){
+                                                          int j = 0;
+                                                          for(Map<String, dynamic> options in mapEntry.value){
+                                                            bool ok = true;
+                                                            ok = ok && prodID == options['productID'];
+                                                            ok = ok && prodWrap == options['wrapping'];
+                                                            ok = ok && prodDelivery == options['fast'];
+                                                            ok = ok && prodSpecial == options['special'];
+                                                            ok = ok && prodDate == options['Date'];
+                                                            ok = ok && prodStatusFromNewOrders == options['orderStatus'];
+                                                            ok = ok && prodGreeting == options['greeting'];
+                                                            ok = ok && prodQuantity == options['quantity'];
+                                                            if(ok) {
+                                                              save[mapEntry.key].removeAt(j);
+                                                              await FirebaseFirestore.instance
+                                                                .collection('Orders')
+                                                                .doc(userRep.user.uid).update(
+                                                                {'NewOrders':save}
+                                                              );
+                                                              Navigator.pop(context);
+                                                              return;
+                                                            }
+                                                            j++;
+                                                          }
+                                                        }
+                                                      }
                                                       Navigator.pop(context);
                                                     },
                                                   ),
@@ -477,7 +547,11 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                       ///order's price, date of order and order status
                                       subtitle: Text(prodPrice + "\$  |  " +
                                           prodDate + "  |  " +
-                                          OrderStatus.values[i % 4].toString().substring(12),
+                                          (prodStatusFromNewOrders.isNotEmpty
+                                            ? prodStatusFromNewOrders
+                                            : ((null != prodStatus && prodStatus.isNotEmpty)
+                                              ? prodStatus
+                                              : OrderStatus.values[i % 4].toString().substring(12))),
                                         style: GoogleFonts.lato(
                                           fontSize: 12.0,
                                           color: Colors.grey,

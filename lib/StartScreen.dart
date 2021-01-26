@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -15,28 +18,39 @@ final firstNameController = TextEditingController();
 final lastNameController = TextEditingController();
 final emailController = TextEditingController();
 final aptController = TextEditingController();
-final cityController = TextEditingController();
+final phoneController = TextEditingController();
 final addressController = TextEditingController();
 final passwordController = TextEditingController();
-
+bool clickedSignUp=false;
 
 bool checkEmailSignupFields() {
   /*
   This function checks that the fields for sign up, it checks that they are not empty and have the right kind of text (for example, email should have '@' after the first section).
   Returns a bool, if everything has passed or not.
    */
-  return (emailController.text.isNotEmpty &&
+  return (!clickedSignUp&&emailController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
           firstNameController.text.isNotEmpty &&
           lastNameController.text.isNotEmpty &&
-          cityController.text.isNotEmpty &&
+          phoneController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
           aptController.text.isNotEmpty) &&
       RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
           .hasMatch(emailController.text) &&
       passwordController.text.length >= 6;
 }
-
+bool checkGoogleSignupFields() {
+  /*
+  This function checks that the fields for sign up, it checks that they are not empty and have the right kind of text (for example, email should have '@' after the first section).
+  Returns a bool, if everything has passed or not.
+   */
+  return (!clickedSignUp&&
+      firstNameController.text.isNotEmpty &&
+      lastNameController.text.isNotEmpty &&
+      phoneController.text.isNotEmpty &&
+      addressController.text.isNotEmpty &&
+      aptController.text.isNotEmpty);
+}
 bool checkEmailSigninFields() {
   /*
   This function checks that the fields for sign up, it checks that they are not empty
@@ -48,7 +62,8 @@ bool checkEmailSigninFields() {
 
 bool emailInUse = false;
 
-void firstSignUpSheet(var context, int screen) {
+Future<void> firstSignUpSheet(var context, int screen) async {
+  bool clicked=true;
   /**This function shows the bottom sheet when pressing on one of the "Continue with ...".
     Receives the ID of the screen it should show.
     IDs:
@@ -92,7 +107,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -136,7 +151,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -182,7 +197,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -231,7 +246,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -278,7 +293,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -286,7 +301,7 @@ void firstSignUpSheet(var context, int screen) {
                                       labelStyle: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
-                                      labelText: 'City',
+                                      labelText: 'Phone',
                                       isDense: true,
                                       enabledBorder: OutlineInputBorder(
                                           borderSide:
@@ -299,7 +314,7 @@ void firstSignUpSheet(var context, int screen) {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                     ),
-                                    controller: cityController,
+                                    controller: phoneController,
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     validator: (text) {
@@ -310,7 +325,7 @@ void firstSignUpSheet(var context, int screen) {
                                       }
                                     },
                                     autofocus: false,
-                                    keyboardType: TextInputType.streetAddress,
+                                    keyboardType: TextInputType.phone,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         fontSize:
@@ -322,7 +337,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -368,7 +383,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -418,6 +433,9 @@ void firstSignUpSheet(var context, int screen) {
                           onPressed: checkEmailSignupFields()
                               ? () async {
                                   if (!checkEmailSignupFields()) return;
+                                  setState(() {
+                                    clickedSignUp=true;
+                                  });
                                   String code = await userRep.signUp(
                                     emailController.text,
                                     passwordController.text,
@@ -425,7 +443,7 @@ void firstSignUpSheet(var context, int screen) {
                                     lastNameController.text,
                                     addressController.text,
                                     aptController.text,
-                                    cityController.text,
+                                    phoneController.text,
                                   );
                                   if (code == 'Success') {
                                     Navigator.pushAndRemoveUntil(
@@ -437,7 +455,9 @@ void firstSignUpSheet(var context, int screen) {
                                   if (code == 'email-already-in-use') {}
                                   emailInUse = true;
 
-                                  setState(() {});
+                                  setState(() {
+                                    clickedSignUp=false;
+                                  });
                                 }
                               : null,
                           color: Colors.red,
@@ -473,7 +493,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -517,7 +537,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -563,7 +583,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -610,7 +630,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -618,7 +638,7 @@ void firstSignUpSheet(var context, int screen) {
                                       labelStyle: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
-                                      labelText: 'City',
+                                      labelText: 'Phone',
                                       isDense: true,
                                       enabledBorder: OutlineInputBorder(
                                           borderSide:
@@ -631,7 +651,7 @@ void firstSignUpSheet(var context, int screen) {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                     ),
-                                    controller: cityController,
+                                    controller: phoneController,
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     validator: (text) {
@@ -642,7 +662,7 @@ void firstSignUpSheet(var context, int screen) {
                                       }
                                     },
                                     autofocus: false,
-                                    keyboardType: TextInputType.streetAddress,
+                                    keyboardType: TextInputType.phone,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         fontSize:
@@ -654,7 +674,7 @@ void firstSignUpSheet(var context, int screen) {
                             Container(
                               width: MediaQuery.of(context).size.width * 0.37,
                               height:
-                                  MediaQuery.of(context).size.height * 0.065,
+                                  MediaQuery.of(context).size.height * 0.075,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 child: TextFormField(
@@ -700,22 +720,26 @@ void firstSignUpSheet(var context, int screen) {
                         FlatButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(80.0)),
-                          onPressed: () {
+                          onPressed: checkGoogleSignupFields()?() {
+                            setState(() {
+                              clickedSignUp=false;
+                            });
                             userRep.signInWithGoogleAddAccountInfo(
                               firstNameController.text,
                               lastNameController.text,
                               addressController.text,
                               aptController.text,
-                              cityController.text,
+                              phoneController.text,
                             );
                             setState(() {
+                              clickedSignUp=true;
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   new MaterialPageRoute<void>(
                                       builder: (context) => MainScreen()),
                                   (r) => false);
                             });
-                          },
+                          }:null,
                           color: Colors.red,
                           textColor: Colors.white,
                           child: Text('Continue',
@@ -732,7 +756,7 @@ void firstSignUpSheet(var context, int screen) {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
                 child: Container(
-                    height: MediaQuery.of(context).size.height * 0.065 * 5,
+                    height: MediaQuery.of(context).size.height * 0.075 * 5,
                     decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.only(
@@ -746,7 +770,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -795,7 +819,7 @@ void firstSignUpSheet(var context, int screen) {
                         Container(
                           width:
                               MediaQuery.of(context).size.width * 0.37 * 2.25,
-                          height: MediaQuery.of(context).size.height * 0.065,
+                          height: MediaQuery.of(context).size.height * 0.075,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: TextFormField(
@@ -842,9 +866,10 @@ void firstSignUpSheet(var context, int screen) {
                         FlatButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(80.0)),
-                          onPressed: checkEmailSigninFields()
+                          onPressed: checkEmailSigninFields() && clicked
                               ? () async {
-                                  if (!checkEmailSigninFields()) return;
+                            clicked=false;
+                            if (!checkEmailSigninFields()) return;
                                   String message = await userRep.signIn(
                                       emailController.text,
                                       passwordController.text);
@@ -857,17 +882,18 @@ void firstSignUpSheet(var context, int screen) {
                                   }
                                   if (message ==
                                       'The password is invalid or the user does not have a password.') {
-                                    //TODO: show snackbar wrong password. For sprint 2
+                                    Fluttertoast.showToast(msg: 'The password is invalid or the user does not have a password.');
                                   }
                                   if (message ==
                                       'A network error (such as timeout, interrupted connection or unreachable host) has occurred.') {
-                                    //TODO: show snackbar netwrok error. For sprint 2
+                                    Fluttertoast.showToast(msg: 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.');
                                   }
                                   if (message ==
                                       'There is no user record corresponding to this identifier. The user may have been deleted.') {
                                     screen = 2;
                                   }
                                   setState(() {});
+                                  clicked=true;
                                 }
                               : null,
                           color: Colors.red,
@@ -922,7 +948,7 @@ Widget startScreenScaffold(context) => Material(
                               GiftHubIcons.gift,
                               color: Colors.red,
                               size:
-                                  MediaQuery.of(context).size.height * 0.065 * 2,
+                                  MediaQuery.of(context).size.height * 0.075 * 2,
                             ),
                             Text(
                               'GiftHub',
@@ -947,7 +973,7 @@ Widget startScreenScaffold(context) => Material(
                     height: MediaQuery.of(context).size.height * 0.1,
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.75,
+                    width: MediaQuery.of(context).size.width * 0.65,
                     child: OutlineButton(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -965,6 +991,7 @@ Widget startScreenScaffold(context) => Material(
                             'Continue with Google',
                             textAlign: TextAlign.center,
                             style: TextStyle(
+
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.05,
                                 fontFamily: 'TimesNewRoman'),
@@ -975,6 +1002,15 @@ Widget startScreenScaffold(context) => Material(
                         borderRadius: new BorderRadius.circular(30.0),
                       ),
                       onPressed: () async {
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            //Everything is good in the hood.
+                          }
+                        } on SocketException catch (_) {
+                          Fluttertoast.showToast(msg: 'No internet connection!');
+                          return;
+                        }
                         await userRep.signInWithGoogle();
                         if (await userRep.signInWithGoogleCheckIfFirstTime()) {
                           firstSignUpSheet(context, 3);
@@ -990,7 +1026,7 @@ Widget startScreenScaffold(context) => Material(
                     ),
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.75,
+                    width: MediaQuery.of(context).size.width * 0.65,
                     child: OutlineButton(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -1019,7 +1055,16 @@ Widget startScreenScaffold(context) => Material(
                       shape: new RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(30.0),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            //Everything is good in the hood.
+                          }
+                        } on SocketException catch (_) {
+                          Fluttertoast.showToast(msg: 'No internet connection!');
+                          return;
+                        }
                         firstSignUpSheet(context, 5);
                       },
                     ),
@@ -1041,6 +1086,15 @@ Widget startScreenScaffold(context) => Material(
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () async {
+                      try {
+                        final result = await InternetAddress.lookup('google.com');
+                        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                          //Everything is good in the hood.
+                        }
+                      } on SocketException catch (_) {
+                        Fluttertoast.showToast(msg: 'No internet connection!');
+                        return;
+                      }
                       userRep.status = Status.Unauthenticated;
                       await FirebaseAuth.instance.signInAnonymously();
                       Navigator.pushAndRemoveUntil(

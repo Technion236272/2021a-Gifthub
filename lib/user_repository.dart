@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
 
@@ -24,6 +26,15 @@ class UserRepository with ChangeNotifier {
   String _address = "";
   String _apt = "";
   String _city = "";
+  bool _allowCall = false;
+  bool _allowNavigate = false;
+  String _phone = "";
+
+  String get phone => _phone;
+
+  set phone(String value) {
+    _phone = value;
+  }
 
   ///This function gets user's information from firebase and initializes the local class variables with it.
   void updateLocalUserFields() async {
@@ -33,18 +44,38 @@ class UserRepository with ChangeNotifier {
     _lastName = list['Info'][1];
     _address = list['Info'][2];
     _apt = list['Info'][3];
-    _city = list['Info'][4];
+    try{
+      _city = list['Info'][4];
+      int phone = int.parse(_city);
+      _phone = _city;
+      _city = "";
+    } catch(_){
+      _phone = "";
+      if(2 != _address.split(', ').length){
+        _address += (', ' + _city.trim());
+      }
+    }
     try {
       _avatarURL = await FirebaseStorage.instance.ref("userImages")
-          .child(_user.uid)
-          .getDownloadURL() ?? defaultAvatar;
+        .child(_user.uid)
+        .getDownloadURL() ?? defaultAvatar;
     } catch (_){
       _avatarURL = defaultAvatar;
+    }
+    try {
+      _allowCall = list['Info'][5];
+    } catch(_){
+      _allowCall = false;
+    }
+    try {
+      _allowNavigate = list['Info'][6];
+    } catch(_){
+      _allowNavigate = false;
     }
   }
   ///This function takes the current information stored in this class's variables and uploads it to the user's information list on firebase.
   Future<void> updateFirebaseUserList() async {
-    var list=[_firstName,_lastName,_address,_apt,_city];
+    var list=[_firstName,_lastName,_address,_apt, _phone, _allowCall, _allowNavigate];
     await _db.collection('Users').doc(_user.uid).set({'Info':list});
     notifyListeners();
   }
@@ -104,6 +135,12 @@ class UserRepository with ChangeNotifier {
 
   String get avatarURL => _avatarURL;
 
+  bool get allowCall => _allowCall;
+
+  set allowCall(bool value) {
+    _allowCall = value;
+  }
+
   ///This function is used for Email sign in
   ///Returns "Success" string if succeeded
   Future<String> signIn(String email, String password) async {
@@ -121,6 +158,7 @@ class UserRepository with ChangeNotifier {
       }
       updateLocalUserFields();
       notifyListeners();
+      updateToken();
       return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
@@ -142,9 +180,20 @@ class UserRepository with ChangeNotifier {
       _lastName=lastName;
       _address=address;
       _apt=apt;
-      _city=city;
+      try {
+        int.parse(city);
+        _phone = city;
+        _city = '';
+      } catch (_) {
+        _phone = '';
+        _city = city;
+        _address += (', ' + _city).trim();
+      }
+      _allowCall = _allowNavigate = false;
       updateFirebaseUserList();
       var list=[];
+      await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
+
       await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
       await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
       await _db.collection('Stores').doc(_user.uid).set({
@@ -158,6 +207,7 @@ class UserRepository with ChangeNotifier {
         }
       });
       notifyListeners();
+      updateToken();
       return 'Success';
     } catch (e) {
       _status = Status.Unauthenticated;
@@ -190,6 +240,7 @@ class UserRepository with ChangeNotifier {
     await FirebaseAuth.instance.signInWithCredential(credential);
     _status = Status.Authenticated;
     _user = FirebaseAuth.instance.currentUser;
+    updateToken();
   }
   ///After signing up with Google, we initialize class's parameters and initialize the needed lists on Firebase.
   void signInWithGoogleAddAccountInfo(String firstName,String lastName,String address,String apt,String city) async {
@@ -198,9 +249,19 @@ class UserRepository with ChangeNotifier {
     _lastName=lastName;
     _address=address;
     _apt=apt;
-    _city=city;
+    try {
+      int.parse(city);
+      _phone = city;
+      _city = '';
+    } catch (_) {
+      _phone = '';
+      _city = city;
+    }
+    _allowCall = _allowNavigate = false;
     updateFirebaseUserList();
     var list=[];
+    await _db.collection('messageAlert').doc(_user.uid).set({'users':list});
+
     await _db.collection('Orders').doc(_user.uid).set({'Orders':list});
     await _db.collection('Wishlists').doc(_user.uid).set({'Wishlist':list});
     await _db.collection('Stores').doc(_user.uid).set({
@@ -267,5 +328,20 @@ class UserRepository with ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  Future<void> updateToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    var token=await messaging.getToken();
+    final FirebaseFirestore db = FirebaseFirestore.instance;
+    db.collection('tokens').doc(_user.uid)
+        .set({'token': token, 'registered_at': Timestamp.now()})
+        .then((value) => null);
+  }
+
+  bool get allowNavigate => _allowNavigate;
+
+  set allowNavigate(bool value) {
+    _allowNavigate = value;
   }
 }
