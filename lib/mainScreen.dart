@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -465,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ///holds current user-pressed category
   String _currCategory = 'All';
 
-  bool _showProducts = false;
+  bool _showProducts = true;
 
   ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
@@ -477,6 +479,10 @@ class _HomeScreenState extends State<HomeScreen> {
       )
     ),
   );
+
+  bool _showAll = true;
+
+  RangeValues _rangeValues = RangeValues(0.0, 500.0);
 
   @override
   void initState() {
@@ -497,6 +503,16 @@ class _HomeScreenState extends State<HomeScreen> {
       imageURL = "";
     }
     return imageURL;
+  }
+
+  OutlineInputBorder _getOutlineInputBorder({Color color = Colors.grey}) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(
+        color: color,
+        width: 1.3,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+    );
   }
 
   // ///extracts [_currCategory] String value from its Text child
@@ -584,7 +600,213 @@ class _HomeScreenState extends State<HomeScreen> {
                                 icon: Icon(Icons.filter_list_alt),
                                 onPressed: () {
                                   if(_showProducts){
-
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (BuildContext context, void Function(void Function()) setState){
+                                            return Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(20.0),
+                                                child: GestureDetector(
+                                                  onTap: (){
+                                                    FocusScope.of(context).unfocus();
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                    child: Material(
+                                                      child: Container(
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height * 0.4,
+                                                        child: Column(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Flexible(
+                                                              child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: <Widget>[
+                                                                  Flexible(
+                                                                    flex: 1,
+                                                                    child: Padding(
+                                                                      padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                      child: Align(
+                                                                        alignment: Alignment.center,
+                                                                        child: Text('Category:',
+                                                                          style: GoogleFonts.lato(
+                                                                            color: Colors.black,
+                                                                            fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                            fontWeight: FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Flexible(
+                                                                    flex: 2,
+                                                                    child: Align(
+                                                                      alignment: Alignment.center,
+                                                                      child: CustomDropdownButton<String>(
+                                                                        value: _currCategory,
+                                                                        items: _categories
+                                                                            .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
+                                                                          child: Text(e,
+                                                                            textAlign: TextAlign.center,
+                                                                            style: niceFont(color: Colors.lightGreen[300]),
+                                                                          ),
+                                                                          value: e,
+                                                                        )
+                                                                        ).toList(),
+                                                                        ///setting state for new chosen category
+                                                                        onChanged: (String value) {
+                                                                          setState(() {
+                                                                            _currCategory = value;
+                                                                          });
+                                                                        },
+                                                                        style: GoogleFonts.lato(
+                                                                          color: Colors.lightGreen[300],
+                                                                          fontWeight: FontWeight.w600,
+                                                                        ),
+                                                                        icon: Icon(Icons.keyboard_arrow_down_outlined,
+                                                                          color: Colors.lightGreen[200],
+                                                                        ),
+                                                                        dropdownColor: Colors.white,
+                                                                        underline: Container(
+                                                                          height: 2,
+                                                                          color: Colors.lightGreen[300],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ),
+                                                            Flexible(
+                                                              child: Align(
+                                                                alignment: Alignment.centerLeft,
+                                                                child: Padding(
+                                                                  padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                  child: Text(
+                                                                    'Price Range:',
+                                                                    style: GoogleFonts.lato(
+                                                                      color: Colors.black,
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            ),
+                                                            Flexible(
+                                                              flex: 2,
+                                                              child: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: <Widget>[
+                                                                  Flexible(
+                                                                    child: ListTileTheme(
+                                                                      contentPadding: const EdgeInsets.all(0.0),
+                                                                      child: CheckboxListTile(
+                                                                        title: Text(
+                                                                          'Show all',
+                                                                          style: GoogleFonts.lato(
+                                                                            fontWeight: FontWeight.normal,
+                                                                            color: Colors.black,
+                                                                          ),
+                                                                        ),
+                                                                        autofocus: false,
+                                                                        controlAffinity: ListTileControlAffinity.leading,
+                                                                        value: _showAll,
+                                                                        onChanged: (value) {
+                                                                          if(!_showAll) {
+                                                                            setState(() {
+                                                                              _showAll = true;
+                                                                            });
+                                                                          }
+                                                                        }
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Flexible(
+                                                                    child: ListTileTheme(
+                                                                      contentPadding: const EdgeInsets.all(0.0),
+                                                                      child: CheckboxListTile(
+                                                                        autofocus: false,
+                                                                        title: RangeSlider(
+                                                                          min: 0.0,
+                                                                          max: 500.0,
+                                                                          values: _rangeValues,
+                                                                          onChanged: _showAll
+                                                                            ? null
+                                                                            : (RangeValues value) {
+                                                                            setState(() => _rangeValues = value);
+                                                                          },
+                                                                          labels: RangeLabels(
+                                                                            _rangeValues.start.toStringAsFixed(0),
+                                                                            _rangeValues.end.toStringAsFixed(0)
+                                                                          ),
+                                                                          divisions: 50,
+                                                                          inactiveColor: Colors.grey,
+                                                                          activeColor: Colors.green,
+                                                                        ),
+                                                                        controlAffinity: ListTileControlAffinity.leading,
+                                                                        value: !_showAll,
+                                                                        onChanged: (value) {
+                                                                          if (_showAll) {
+                                                                            setState(() {
+                                                                              _showAll = false;
+                                                                            });
+                                                                          }
+                                                                        }
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ),
+                                                            Flexible(
+                                                              child: Center(
+                                                                child: OutlineButton.icon(
+                                                                  onPressed: (){
+                                                                    super.setState(() {});
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  icon: Icon(Icons.saved_search),
+                                                                  label: Text(
+                                                                    'Search',
+                                                                    textAlign: TextAlign.center,
+                                                                    style: GoogleFonts.lato(
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Colors.black,
+                                                                    width: 1.5,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(30.0),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        );
+                                      }
+                                    );
                                   } else {
 
                                   }
@@ -613,6 +835,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       /// that don't match current category
                       if(_categories[0] != _currCategory) {
                         productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
+                      }
+                      /// price filtering:
+                      if(!_showAll){
+                        productsList.removeWhere((e) => double.parse(e.data()['Product']['price']) < _rangeValues.start
+                          || double.parse(e.data()['Product']['price']) > _rangeValues.end
+                        );
                       }
                       /// if there are no products under current category then
                       /// a decorated error screen is displayed
@@ -941,4 +1169,37 @@ class _HomeScreenState extends State<HomeScreen> {
 //       ),
 //     ),
 //   ),
+// ),
+
+// title: Row(
+// mainAxisSize: MainAxisSize.min,
+// mainAxisAlignment: MainAxisAlignment.start,
+// crossAxisAlignment: CrossAxisAlignment.center,
+// children: <Widget>[
+// Flexible(child: Text('From: ')),
+// Flexible(
+// child: Container(
+// height: MediaQuery.of(context).size.height * 0.4 / 8,
+// child: TextField(
+// enabled: !_showAll,
+// decoration: InputDecoration(
+// enabledBorder: _getOutlineInputBorder(),
+// focusedBorder: _getOutlineInputBorder(color: Colors.lightGreen.shade800),
+// contentPadding: EdgeInsets.fromLTRB(5.0 , 5.0 , 5.0 , 5.0),
+// ),
+// ),
+// ),
+// ),
+// Flexible(child: Text(' To: ')),
+// Flexible(
+// child: TextField(
+// enabled: !_showAll,
+// decoration: InputDecoration(
+// enabledBorder: _getOutlineInputBorder(),
+// focusedBorder: _getOutlineInputBorder(color: Colors.lightGreen.shade800),
+// contentPadding: EdgeInsets.fromLTRB(5.0 , 5.0 , 5.0 , 5.0),
+// ),
+// ),
+// ),
+// ],
 // ),
