@@ -1360,7 +1360,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> with WidgetsBin
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
-        return 'permission denied - please enable it from app settings';
+        return 'permission denied';
       }
     }
     String error = '';

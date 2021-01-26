@@ -1,16 +1,17 @@
-import 'dart:ffi';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'dart:ui';
-import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/StartScreen.dart';
 import 'package:gifthub_2021a/StoreScreen.dart';
 import 'package:gifthub_2021a/SpinnerDropdown.dart';
+import 'package:location/location.dart';
 import 'user_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
@@ -481,8 +482,13 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   bool _showAll = true;
+  bool _showAllStores = true;
+  bool _displayAllStores = true;
+  double _maxDistance = 100.0;
 
   RangeValues _rangeValues = RangeValues(0.0, 500.0);
+
+  LocationData _locationData;
 
   @override
   void initState() {
@@ -598,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: IconButton(
                                 icon: Icon(Icons.filter_list_alt),
-                                onPressed: () {
+                                onPressed: !_showProducts ? null : () {
                                   if(_showProducts){
                                     showDialog(
                                       context: context,
@@ -829,7 +835,221 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     );
                                   } else {
-
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (BuildContext context, void Function(void Function()) setState){
+                                            return Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(20.0),
+                                                child: GestureDetector(
+                                                  onTap: (){
+                                                    FocusScope.of(context).unfocus();
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                    child: Material(
+                                                      child: Container(
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height * 0.3,
+                                                        child: Column(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Flexible(
+                                                                child: Align(
+                                                                  alignment: Alignment.centerLeft,
+                                                                  child: Padding(
+                                                                    padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                    child: Text(
+                                                                      'Filter nearby stores:',
+                                                                      style: GoogleFonts.lato(
+                                                                        color: Colors.black,
+                                                                        fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                        fontWeight: FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                            ),
+                                                            Flexible(
+                                                                flex: 2,
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  children: <Widget>[
+                                                                    Flexible(
+                                                                      child: ListTileTheme(
+                                                                        contentPadding: const EdgeInsets.all(0.0),
+                                                                        child: CheckboxListTile(
+                                                                          title: Text('Show all',
+                                                                            style: GoogleFonts.lato(
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: Colors.black,
+                                                                            ),
+                                                                          ),
+                                                                          autofocus: false,
+                                                                          controlAffinity: ListTileControlAffinity.leading,
+                                                                          value: _showAllStores,
+                                                                          onChanged: (value) {
+                                                                            if(!_showAllStores) {
+                                                                              setState(() {
+                                                                                _showAllStores = true;
+                                                                              });
+                                                                            }
+                                                                          }
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Flexible(
+                                                                      child: ListTileTheme(
+                                                                        contentPadding: const EdgeInsets.all(0.0),
+                                                                        child: CheckboxListTile(
+                                                                            autofocus: false,
+                                                                            title: Slider(
+                                                                              min: 0.0,
+                                                                              max: 500.0,
+                                                                              value: _maxDistance,
+                                                                              onChanged: _showAllStores
+                                                                                  ? null
+                                                                                  : (value) {
+                                                                                setState(() => _maxDistance = value);
+                                                                              },
+                                                                              label: _maxDistance.toStringAsFixed(0),
+                                                                              divisions: 50,
+                                                                              inactiveColor: Colors.grey,
+                                                                              activeColor: Colors.green,
+                                                                            ),
+                                                                            controlAffinity: ListTileControlAffinity.leading,
+                                                                            value: !_showAllStores,
+                                                                            onChanged: (value) {
+                                                                              if (_showAllStores) {
+                                                                                setState(() {
+                                                                                  _showAllStores = false;
+                                                                                });
+                                                                              }
+                                                                            }
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                )
+                                                            ),
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Container(
+                                                                height: MediaQuery.of(context).size.height * 0.0004,
+                                                                child: Divider(
+                                                                  color: Colors.lightGreen,
+                                                                  thickness: 1.0,
+                                                                  indent: 10,
+                                                                  endIndent: 10,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Flexible(
+                                                              child: Center(
+                                                                child: OutlineButton.icon(
+                                                                  onPressed: () async {
+                                                                    if(_showAllStores){
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    }
+                                                                    Location location = new Location();
+                                                                    bool _serviceEnabled;
+                                                                    PermissionStatus _permissionGranted;
+                                                                    _serviceEnabled = await location.serviceEnabled();
+                                                                    if (!_serviceEnabled) {
+                                                                      _serviceEnabled = await location.requestService();
+                                                                      if (!_serviceEnabled) {
+                                                                        Fluttertoast.showToast(msg: 'Error: Service is disabled');
+                                                                        super.setState(() {
+                                                                          _displayAllStores = true;
+                                                                        });
+                                                                        Navigator.pop(context);
+                                                                        return;
+                                                                      }
+                                                                    }
+                                                                    _permissionGranted = await location.hasPermission();
+                                                                    if (_permissionGranted == PermissionStatus.denied) {
+                                                                      _permissionGranted = await location.requestPermission();
+                                                                      if (_permissionGranted != PermissionStatus.granted) {
+                                                                        Fluttertoast.showToast(msg: 'Error: Service is disabled');
+                                                                        super.setState(() {
+                                                                          _displayAllStores = true;
+                                                                        });
+                                                                        Navigator.pop(context);
+                                                                        return;
+                                                                      }
+                                                                    }
+                                                                    String error = '';
+                                                                    try {
+                                                                      _locationData = await location.getLocation();
+                                                                    } on PlatformException catch (e) {
+                                                                      if (e.code == 'PERMISSION_DENIED') {
+                                                                        error = 'Permission Denied';
+                                                                      }
+                                                                      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+                                                                        error = 'Permission Denied - please enable it from app settings';
+                                                                      }
+                                                                      _locationData = null;
+                                                                      Fluttertoast.showToast(msg: 'Error: ' + (error.isEmpty ? 'Something unexpected occurred' : error));
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    } catch (_) {
+                                                                      Fluttertoast.showToast(msg: 'Error: Something unexpected occurred');
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    }
+                                                                    super.setState(() {
+                                                                      _displayAllStores = false;
+                                                                    });
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  icon: Icon(Icons.saved_search),
+                                                                  label: Text(
+                                                                    'Search',
+                                                                    textAlign: TextAlign.center,
+                                                                    style: GoogleFonts.lato(
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Colors.black,
+                                                                    width: 1.5,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(30.0),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        );
+                                      }
+                                    );
                                   }
                                 },
                               ),
@@ -998,13 +1218,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   )
                     : FutureBuilder(
-                    /// fetching all stores snapshots from firebase:
+                      /// fetching all stores snapshots from firebase:
                       future: FirebaseFirestore.instance.collection("Stores").get(),
                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
                           return _circularProgressIndicator;
                         }
                         List<QueryDocumentSnapshot> storesList = List.from(snapshot.data.docs);
+                        // if(!_displayAllStores){
+                        //   int i = 0;
+                        //   storesList.removeWhere((element) {
+                        //     i++;
+                        //     return i % 5 == 0;
+                        //   });
+                        // }
                         /// setting displayed grid view:
                         return GridView.count(
                           primary: false,
@@ -1034,7 +1261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onTap: () { ///navigating to the user tapped store:
                                         Navigator.of(context).push(
                                           new MaterialPageRoute<void>(
-                                            builder: (context) => ProductScreen(storeData[index].id)
+                                            builder: (context) => StoreScreen(storesList[index].id)
                                           )
                                         );
                                       },
@@ -1114,7 +1341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       }
-                  ),
+                    ),
                   ),
                 ],
               ),
@@ -1138,89 +1365,3 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageURL;
   }
 }
-
-// Flexible(
-//   flex: 8,
-//   child: Padding(
-//     padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
-//     child: Align(
-//       alignment: Alignment.centerRight,
-//       child: Text('   Category:',
-//         style: GoogleFonts.lato(
-//           color: Colors.black,
-//           fontSize: MediaQuery.of(context).size.height * 0.0256,
-//           fontWeight: FontWeight.w600,
-//         ),
-//       ),
-//     ),
-//   ),
-// ),
-// Flexible(
-//   flex: 10,
-//   child: Align(
-//     alignment: Alignment.centerLeft,
-//     child: CustomDropdownButton<String>(
-//       value: _currCategory,
-//       items: _categories
-//           .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
-//             child: Text(e,
-//               textAlign: TextAlign.center,
-//               style: niceFont(color: Colors.lightGreen[300]),
-//             ),
-//             value: e,
-//         )
-//       ).toList(),
-//       ///setting state for new chosen category
-//       onChanged: (String value) {
-//         setState(() {
-//           _currCategory = value;
-//         });
-//       },
-//       style: GoogleFonts.lato(
-//         color: Colors.lightGreen[300],
-//         fontWeight: FontWeight.w600,
-//       ),
-//       icon: Icon(Icons.keyboard_arrow_down_outlined,
-//         color: Colors.lightGreen[200],
-//       ),
-//       dropdownColor: Colors.white,
-//       underline: Container(
-//         height: 2,
-//         color: Colors.lightGreen[300],
-//       ),
-//     ),
-//   ),
-// ),
-
-// title: Row(
-// mainAxisSize: MainAxisSize.min,
-// mainAxisAlignment: MainAxisAlignment.start,
-// crossAxisAlignment: CrossAxisAlignment.center,
-// children: <Widget>[
-// Flexible(child: Text('From: ')),
-// Flexible(
-// child: Container(
-// height: MediaQuery.of(context).size.height * 0.4 / 8,
-// child: TextField(
-// enabled: !_showAll,
-// decoration: InputDecoration(
-// enabledBorder: _getOutlineInputBorder(),
-// focusedBorder: _getOutlineInputBorder(color: Colors.lightGreen.shade800),
-// contentPadding: EdgeInsets.fromLTRB(5.0 , 5.0 , 5.0 , 5.0),
-// ),
-// ),
-// ),
-// ),
-// Flexible(child: Text(' To: ')),
-// Flexible(
-// child: TextField(
-// enabled: !_showAll,
-// decoration: InputDecoration(
-// enabledBorder: _getOutlineInputBorder(),
-// focusedBorder: _getOutlineInputBorder(color: Colors.lightGreen.shade800),
-// contentPadding: EdgeInsets.fromLTRB(5.0 , 5.0 , 5.0 , 5.0),
-// ),
-// ),
-// ),
-// ],
-// ),
