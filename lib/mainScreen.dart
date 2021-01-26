@@ -685,6 +685,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 ],
                                                               )
                                                             ),
+                                                            Container(
+                                                              height: MediaQuery.of(context).size.height * 0.0004,
+                                                              child: Divider(
+                                                                color: Colors.lightGreen,
+                                                                thickness: 1.0,
+                                                                indent: 10,
+                                                                endIndent: 10,
+                                                              ),
+                                                            ),
                                                             Flexible(
                                                               child: Align(
                                                                 alignment: Alignment.centerLeft,
@@ -768,6 +777,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   ),
                                                                 ],
                                                               )
+                                                            ),
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Container(
+                                                                height: MediaQuery.of(context).size.height * 0.0004,
+                                                                child: Divider(
+                                                                  color: Colors.lightGreen,
+                                                                  thickness: 1.0,
+                                                                  indent: 10,
+                                                                  endIndent: 10,
+                                                                ),
+                                                              ),
                                                             ),
                                                             Flexible(
                                                               child: Center(
