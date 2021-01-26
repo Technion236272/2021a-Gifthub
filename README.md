@@ -33,8 +33,8 @@ A social and user-friendly app for buying and selling romantic gifts :heart:
 * [ ] Pay with credit card or PayPal.
 
 ## Table of Contents
-1. [Application structure](docs/applicationstracture.md)
-2. [Firebase structure](docs/FirebaseStructure.md)
+1. [Application structure](docs/applicationstracture2.md)
+2. [Firebase structure](docs/FirebaseStructure2.md)
 
 
 
