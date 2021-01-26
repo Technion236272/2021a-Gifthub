@@ -3,7 +3,7 @@
 A social and user-friendly app for buying and selling romantic gifts :heart:
 
 
-<a href='https://play.google.com/store/apps/details?id=com.technion.gifthub_2021a&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'width='258.5' height='100'/></a>
+<a href='https://play.google.com/store/apps/details?id=com.technion.gifthub_2021a&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
 
 
 ![Screenshot 1](docs/1.PNG "Screenshot 1 Diagram")
