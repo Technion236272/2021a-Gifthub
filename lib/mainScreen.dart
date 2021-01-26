@@ -511,25 +511,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageURL;
   }
 
-  OutlineInputBorder _getOutlineInputBorder({Color color = Colors.grey}) {
-    return OutlineInputBorder(
-      borderSide: BorderSide(
-        color: color,
-        width: 1.3,
-      ),
-      borderRadius: BorderRadius.all(Radius.circular(30)),
-    );
-  }
-
-  // ///extracts [_currCategory] String value from its Text child
-  // String _getCenterText(Center center) {
-  //   return center.toString().split('(\"')[1].split('\")')[0];
-  // }
-
   @override
   Widget build(BuildContext context) {
-    print(_showAll);
-    print(_currCategory);
     return Material(
       child: Stack(
         alignment: Alignment.center,
