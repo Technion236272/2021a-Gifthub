@@ -38,7 +38,7 @@ class _ProductScreenState extends State<ProductScreen> {
   String _productId;
   globals.Product _prod;
   String _productImageURL;
-  NetworkImage _productImage;
+  Image _productImage;
   Size _productImageSize;
   double _productRating;
   bool editingMode = false;
@@ -80,8 +80,8 @@ class _ProductScreenState extends State<ProductScreen> {
     Completer<Size> completer = Completer<Size>();
     try {
       _productImageURL = await FirebaseStorage.instance.ref().child('productImages/' + _productId).getDownloadURL();
-      _productImage = NetworkImage(_productImageURL);
-      _productImage.resolve(ImageConfiguration()).addListener(ImageStreamListener(
+      _productImage = Image.network(_productImageURL);
+      _productImage.image.resolve(ImageConfiguration()).addListener(ImageStreamListener(
               (i, b) {
             completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
           }
@@ -196,7 +196,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                     border: Border.all(width: 5),
                                   ),
                                   child: Image(
-                                    image: _productImage != null ? _productImage : AssetImage('Assets/Untitled.png'),
+                                    image: _productImage != null ? _productImage.image : AssetImage('Assets/Untitled.png'),
                                     width: min(min(MediaQuery
                                         .of(context).size.width, _productImageSize.width), MediaQuery.of(context).size.height * 0.25),
                                   ),
@@ -207,7 +207,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                 ),
                                 child: Image(
                                   width: min(min(MediaQuery.of(context).size.width, _productImageSize.width), MediaQuery.of(context).size.height * 0.25),
-                                  image: _productImage != null ? _productImage : AssetImage('Assets/Untitled.png'),
+                                  image: _productImage != null ? _productImage.image : AssetImage('Assets/Untitled.png'),
                                 ),
                               ),
                               SizedBox(height: 20.0),

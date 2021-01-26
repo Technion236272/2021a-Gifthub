@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -42,7 +43,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   String _storeId;
   String _storeName;
   String _storeImageURL;
-  NetworkImage _storeImage;
+  Image _storeImage;
   Size _storeImageSize;
   String _storeDesc;
   String _storeAddr;
@@ -50,6 +51,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   double _storeRating = 1.0;
   List _products = <globals.Product>[];
   List _reviews = <globals.Review>[];
+  bool _navEnabled;
+  bool _callEnabled;
   bool editingMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyStoreScreenSet = new GlobalKey<ScaffoldState>();
   final List controllers = <TextEditingController>[TextEditingController(), TextEditingController(), TextEditingController()];
@@ -71,13 +74,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     _storeName = storeArgs['name'];
     _storeDesc = storeArgs['description'];
     _storeAddr = storeArgs['address'];
-    _storePhone = storeArgs['phone'];
+    //_storePhone = storeArgs['phone'];
     Completer<Size> completer = Completer<Size>();
     /// Get the store's image from the storage if it exists or show a default image.
     try {
       _storeImageURL = await FirebaseStorage.instance.ref().child('storeImages/' + _storeId).getDownloadURL();
-      _storeImage = NetworkImage(_storeImageURL);
-      _storeImage.resolve(ImageConfiguration()).addListener(ImageStreamListener(
+      _storeImage = Image.network(_storeImageURL,);
+      _storeImage.image.resolve(ImageConfiguration()).addListener(ImageStreamListener(
               (i, b) {
             completer.complete(Size(i.image.width.toDouble(), i.image.height.toDouble()));
           }
@@ -140,6 +143,22 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 // var doc = await storeDoc.get();
                 await _initStoreArgs(await storeDoc.get(), prodDoc);
                 _storeRating = _getStoreRating();
+                var userDoc = await userRep.firestore.collection('Users').doc(_storeId).get();
+                try {
+                  _storePhone = userDoc.data()['Info'][4];
+                } on RangeError {
+                  _storePhone = "0000000000";
+                }
+                try {
+                  _callEnabled = userDoc.data()['Info'][5];
+                } on RangeError {
+                  _callEnabled = true;
+                }
+                try {
+                  _navEnabled = userDoc.data()['Info'][6];
+                } on RangeError {
+                  _navEnabled = true;
+                }
                 if (userRep.status == Status.Authenticated && _storeId == userRep.user.uid) {
                   for (var user in (await storeDoc.get()).data()['Ordered'] ?? []) {
                     ordered[user] = [];
@@ -247,7 +266,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   .of(context)
                                   .size
                                   .height * 0.25),
-                              image: _storeImage != null ? _storeImage : AssetImage('Assets/Untitled.png'),
+                              image: _storeImage != null ? _storeImage.image : AssetImage('Assets/Untitled.png'),
                             ),
                           ),
                           SizedBox(height: 10),
@@ -274,11 +293,11 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                     controller: controllers[2],
                                     style: globals.niceFont(),
                                   )
-                                      : Text(_storeAddr,
+                                      : Text(_navEnabled ? _storeAddr : "Online store",
                                       textAlign: TextAlign.start,
                                       style: globals.niceFont()),
                                 ),
-                                IconButton(icon: Icon(Icons.navigation, color: Colors.white), onPressed: () async {
+                                IconButton(icon: Icon(Icons.navigation, color: _navEnabled ? Colors.white : Colors.grey), onPressed: _navEnabled ? () async {
                                   String addrForUrl = Uri.encodeFull(_storeAddr);
                                   String navUrl = 'https://www.google.com/maps/dir/?api=1&destination=$addrForUrl';
                                   if (await canLaunch(navUrl)) {
@@ -286,15 +305,15 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                                   } else {
                                     _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch navigation app")));
                                   }
-                                }),
-                                IconButton(icon: Icon(Icons.phone, color: Colors.white), onPressed: () async {
+                                } : null ),
+                                IconButton(icon: Icon(Icons.phone, color: _callEnabled ? Colors.white : Colors.grey), onPressed: _callEnabled ? () async {
                                   String phoneUrl = 'tel: $_storePhone';
                                   if (await canLaunch(phoneUrl)) {
                                     await launch(phoneUrl);
                                   } else {
                                     _scaffoldKeyStoreScreenSet.currentState.showSnackBar(SnackBar(content: Text("Could not launch phone")));
                                   }
-                                }),
+                                } : null ),
                               ],
                             ),
                           ),
