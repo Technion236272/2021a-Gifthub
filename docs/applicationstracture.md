@@ -1,7 +1,7 @@
 ![App Stracture Diagram](AppStracture.PNG "App Stracture Diagram")
 
 
-# Application Stracture
+# List of screens:
 
 ## Start Screen
 

@@ -1,6 +1,16 @@
 # GiftHub
 
-> A social and user-friendly app for buying and selling romantic gifts :heart:
+A social and user-friendly app for buying and selling romantic gifts :heart:
+
+
+<a href='https://play.google.com/store/apps/details?id=com.technion.gifthub_2021a&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'width='258.5' height='100'/></a>
+
+
+![Screenshot 1](docs/1.PNG "Screenshot 1 Diagram")
+![Screenshot 2](docs/2.PNG "Screenshot 2 Diagram")
+![Screenshot 3](docs/3.PNG "Screenshot 3 Diagram")
+![Screenshot 4](docs/4.PNG "Screenshot 4 Diagram")
+![Screenshot 5](docs/5.PNG "Screenshot 5 Diagram")
 
 ## Motivation
 
@@ -23,5 +33,11 @@
 * [ ] Pay with credit card or PayPal.
 
 ## Table of Contents
-1. [Application stracture](docs/applicationstracture.md)
-2. [Firebase stracture](docs/firebasestracture.md)
+1. [Application structure](docs/applicationstracture.md)
+2. [Firebase structure](docs/FirebaseStructure.md)
+
+
+
+
+
+
