@@ -481,14 +481,19 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 
+  ///true iff we show all products with no filter
   bool _showAll = true;
+
+  ///true iff we show all stores with no filter
   bool _showAllStores = true;
+
+  ///deprecated:
   bool _displayAllStores = true;
+  LocationData _locationData;
   double _maxDistance = 100.0;
 
+  ///range values for the product price filtering
   RangeValues _rangeValues = RangeValues(0.0, 500.0);
-
-  LocationData _locationData;
 
   @override
   void initState() {
