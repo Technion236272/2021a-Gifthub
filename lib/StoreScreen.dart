@@ -864,6 +864,7 @@ class _AddProductDialogBoxState extends State<AddProductDialogBox> {
                         'name': widget.controllersList[0].text,
                         'description': widget.controllersList[1].text,
                         'price': widget.controllersList[2].text,
+                        'priceNumber': double.parse(widget.controllersList[2].text),
                         'reviews': [],
                         'date': today,
                         'category': category,

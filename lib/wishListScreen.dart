@@ -157,283 +157,283 @@ class _WishListScreenState extends State<WishListScreen> with SingleTickerProvid
                                 color: Colors.white,
                                 child: ListView.builder(
                                   /// generating the wishlist
-                                    itemCount: totalProducts * 2,
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.all(16),
-                                    itemBuilder: (BuildContext context, int i) {
-                                      if (i >= 2 * totalProducts) {
-                                        return null;
-                                      }
-                                      if (i.isOdd) {
-                                        return Divider(
-                                          color: Colors.green,
-                                          thickness: 1.0,
-                                        );
-                                      }
-                                      var wishlistIdData = wishListSnapshot.data()['Wishlist'];
-                                      String productID = wishlistIdData[i ~/ 2];
-                                      return FutureBuilder(
-                                        future: FirebaseFirestore.instance.collection("Products").doc(productID).get(),
-                                        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> productSnapshot) {
-                                          if (productSnapshot.connectionState != ConnectionState.done) {
-                                            return _circularProgressIndicator;
-                                          }
-                                          if(!productSnapshot.hasData || _isCounter(productSnapshot)){
-                                            return Container(width: 0.0, height: 0.0);
-                                          }
-                                          /// parsing product details from FB firestore
-                                          var productData = productSnapshot.data.data()['Product'];
-                                          String prodName = productData['name'];
-                                          String prodPrice = productData['price'];
-                                          String prodDate = productData['date'];
-                                          var productOptions = productSnapshot.data.data()['Options'] ?? globals.falseOptions;
-                                          return FutureBuilder(
-                                            future: _getImage(productID),
-                                            builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
-                                              if (imageURL.connectionState != ConnectionState.done || !imageURL.hasData) {
-                                                return _circularProgressIndicator;
-                                              }
-                                              ///if image url has error (meaning there is no product image)
-                                              ///then defaulted asset image is displayed
-                                              ///under 'Assets/no image product.png'
-                                              return Slidable(
-                                                actionPane: SlidableDrawerActionPane(),
-                                                actionExtentRatio: 0.22,
-                                                direction: Axis.horizontal,
-                                                actions: <Widget>[
-                                                  ///add to cart
-                                                  IconSlideAction(
-                                                    caption: 'Add to cart',
-                                                    color: Colors.transparent,
-                                                    foregroundColor: Colors.amberAccent,
-                                                    icon: Icons.add_shopping_cart,
-                                                    onTap: () async {
-                                                      int beforeAdd = globals.userCart.length;
-                                                      await showDialog(
-                                                        context: context,
-                                                        barrierDismissible: true,
-                                                        builder: (context) =>
-                                                          AddToCartDialogBox(globals.Product(
-                                                            productID,
-                                                            userRep.user.uid,
-                                                            prodName,
-                                                            double.parse(prodPrice),
-                                                            prodDate, [], "", "", productOptions)
-                                                          )
-                                                      );
-                                                      if(beforeAdd == globals.userCart.length){
-                                                        return;
-                                                      }
-                                                      _addedToCart = true;
-                                                      ///removing product from wishlist
-                                                      List toRemove = [];
-                                                      toRemove.add(productID);
+                                  itemCount: totalProducts * 2,
+                                  shrinkWrap: true,
+                                  padding: const EdgeInsets.all(16),
+                                  itemBuilder: (BuildContext context, int i) {
+                                    if (i >= 2 * totalProducts) {
+                                      return null;
+                                    }
+                                    if (i.isOdd) {
+                                      return Divider(
+                                        color: Colors.green,
+                                        thickness: 1.0,
+                                      );
+                                    }
+                                    var wishlistIdData = wishListSnapshot.data()['Wishlist'];
+                                    String productID = wishlistIdData[i ~/ 2];
+                                    return FutureBuilder(
+                                      future: FirebaseFirestore.instance.collection("Products").doc(productID).get(),
+                                      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> productSnapshot) {
+                                        if (productSnapshot.connectionState != ConnectionState.done) {
+                                          return _circularProgressIndicator;
+                                        }
+                                        if(!productSnapshot.hasData || _isCounter(productSnapshot)){
+                                          return Container(width: 0.0, height: 0.0);
+                                        }
+                                        /// parsing product details from FB firestore
+                                        var productData = productSnapshot.data.data()['Product'];
+                                        String prodName = productData['name'];
+                                        String prodPrice = productData['price'];
+                                        String prodDate = productData['date'];
+                                        var productOptions = productSnapshot.data.data()['Options'] ?? globals.falseOptions;
+                                        return FutureBuilder(
+                                          future: _getImage(productID),
+                                          builder: (BuildContext context, AsyncSnapshot<String> imageURL) {
+                                            if (imageURL.connectionState != ConnectionState.done || !imageURL.hasData) {
+                                              return _circularProgressIndicator;
+                                            }
+                                            ///if image url has error (meaning there is no product image)
+                                            ///then defaulted asset image is displayed
+                                            ///under 'Assets/no image product.png'
+                                            return Slidable(
+                                              actionPane: SlidableDrawerActionPane(),
+                                              actionExtentRatio: 0.22,
+                                              direction: Axis.horizontal,
+                                              actions: <Widget>[
+                                                ///add to cart
+                                                IconSlideAction(
+                                                  caption: 'Add to cart',
+                                                  color: Colors.transparent,
+                                                  foregroundColor: Colors.amberAccent,
+                                                  icon: Icons.add_shopping_cart,
+                                                  onTap: () async {
+                                                    int beforeAdd = globals.userCart.length;
+                                                    await showDialog(
+                                                      context: context,
+                                                      barrierDismissible: true,
+                                                      builder: (context) =>
+                                                        AddToCartDialogBox(globals.Product(
+                                                          productID,
+                                                          userRep.user.uid,
+                                                          prodName,
+                                                          double.parse(prodPrice),
+                                                          prodDate, [], "", "", productOptions)
+                                                        )
+                                                    );
+                                                    if(beforeAdd == globals.userCart.length){
+                                                      return;
+                                                    }
+                                                    _addedToCart = true;
+                                                    ///removing product from wishlist
+                                                    List toRemove = [];
+                                                    toRemove.add(productID);
+                                                    await userRep.firestore
+                                                        .collection('Wishlists')
+                                                        .doc(userRep.user.uid)
+                                                        .get()
+                                                        .then((value) async {
+                                                      List<dynamic> list = List.from(value.data()['Wishlist']);
+                                                      list..removeWhere((e) => toRemove.contains(e));
                                                       await userRep.firestore
                                                           .collection('Wishlists')
                                                           .doc(userRep.user.uid)
-                                                          .get()
-                                                          .then((value) async {
-                                                        List<dynamic> list = List.from(value.data()['Wishlist']);
-                                                        list..removeWhere((e) => toRemove.contains(e));
-                                                        await userRep.firestore
-                                                            .collection('Wishlists')
-                                                            .doc(userRep.user.uid)
-                                                            .update({'Wishlist': list});
-                                                      });
-                                                    },
-                                                  ),
-                                                  /// Share
-                                                  IconSlideAction(
-                                                    caption: 'Share',
-                                                    color: Colors.transparent,
-                                                    foregroundColor: Colors.blueAccent,
-                                                    icon: Icons.share_outlined,
-                                                    onTap: () async {
-                                                      /// split between 2 cases:
-                                                      /// item has an image or not
-                                                      if(!imageURL.hasError && imageURL.hasData && "" != imageURL.data) {
-                                                        try {
-                                                          final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
-                                                          if (Platform.isAndroid) {
-                                                            var response = await get(imageURL.data);
-                                                            final documentDirectory = (await getExternalStorageDirectory()).path;
-                                                            File imgFile = new File('$documentDirectory/flutter.png');
-                                                            imgFile.writeAsBytesSync(response.bodyBytes);
-                                                            List<String> sharingList = new List();
-                                                            sharingList.add('$documentDirectory/flutter.png');
-                                                            await Share.shareFiles(
-                                                                sharingList,
-                                                                text: "check this cool product now!\n" + prodName,
-                                                                sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-                                                                subject: 'I found a lovely product on GiftHub!'
-                                                            );
-                                                          }
-                                                        } catch (_) {}
-                                                      } else {
-                                                        try {
-                                                          final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
-                                                          String image = 'no image product.png';
-                                                          final List <String> list = [];
-                                                          final tempDir = await getTemporaryDirectory();
-                                                          list.add('${tempDir.path}/' + image);
+                                                          .update({'Wishlist': list});
+                                                    });
+                                                  },
+                                                ),
+                                                /// Share
+                                                IconSlideAction(
+                                                  caption: 'Share',
+                                                  color: Colors.transparent,
+                                                  foregroundColor: Colors.blueAccent,
+                                                  icon: Icons.share_outlined,
+                                                  onTap: () async {
+                                                    /// split between 2 cases:
+                                                    /// item has an image or not
+                                                    if(!imageURL.hasError && imageURL.hasData && "" != imageURL.data) {
+                                                      try {
+                                                        final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
+                                                        if (Platform.isAndroid) {
+                                                          var response = await get(imageURL.data);
+                                                          final documentDirectory = (await getExternalStorageDirectory()).path;
+                                                          File imgFile = new File('$documentDirectory/flutter.png');
+                                                          imgFile.writeAsBytesSync(response.bodyBytes);
+                                                          List<String> sharingList = new List();
+                                                          sharingList.add('$documentDirectory/flutter.png');
                                                           await Share.shareFiles(
-                                                              list,
+                                                              sharingList,
                                                               text: "check this cool product now!\n" + prodName,
                                                               sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
                                                               subject: 'I found a lovely product on GiftHub!'
                                                           );
-                                                        } catch (_) {} //TODO: show error snackbar?
-                                                      }
-                                                    },
-                                                  ),
-                                                ],
-                                                secondaryActions: <Widget>[
-                                                  /// Delete
-                                                  IconSlideAction(
-                                                    caption: 'Delete',
-                                                    color: Colors.transparent,
-                                                    foregroundColor: Colors.red,
-                                                    icon: Icons.delete_outline_outlined,
-                                                    onTap: () async {
-                                                      /// upon deletion
-                                                      /// showing alert dialog to reassure
-                                                      /// user's intention
-                                                      showDialog(
-                                                          barrierDismissible: true,
-                                                          context: context,
-                                                          builder: (BuildContext context) {
-                                                            return AlertDialog(
-                                                              backgroundColor: Colors.white,
-                                                              elevation: 24.0,
-                                                              title: Text('Delete?',
-                                                                style: GoogleFonts.lato(
-                                                                  fontSize: 18.0,
-                                                                  color: Colors.black,
-                                                                ),
-                                                              ),
-                                                              content: Text('Are you sure you want to delete ' +
-                                                                  prodName + '?',
-                                                                style: GoogleFonts.lato(
-                                                                  fontSize: 16.0,
-                                                                  color: Colors.grey,
-                                                                ),
-                                                              ),
-                                                              actions: [
-                                                                FlatButton(
-                                                                  child: Text("Yes",
-                                                                    style: GoogleFonts.lato(
-                                                                      fontSize: 14.0,
-                                                                      color: Colors.green,
-                                                                    ),
-                                                                  ),
-                                                                  onPressed: () async {
-                                                                    var toRemoveList = [];
-                                                                    toRemoveList.add(productID);
-                                                                    await userRep.firestore
-                                                                        .collection('Wishlists')
-                                                                        .doc(userRep.user.uid)
-                                                                        .update({
-                                                                      'Wishlist':FieldValue.arrayRemove(toRemoveList)
-                                                                    });
-                                                                    setState(() {
-                                                                      ///so that wishlist list will be updated
-                                                                    });
-                                                                    Navigator.pop(context);
-                                                                  },
-                                                                ),
-                                                                FlatButton(
-                                                                  child: Text("No",
-                                                                    style: GoogleFonts.lato(
-                                                                      fontSize: 14.0,
-                                                                      color: Colors.red,
-                                                                    ),
-                                                                  ),
-                                                                  onPressed: () {
-                                                                    Navigator.pop(context);
-                                                                  },
-                                                                ),
-                                                              ],
-                                                            );
-                                                          }
-                                                      );
-                                                    },
-                                                  )
-                                                ],
-                                                child: ListTile(
-                                                  onTap: () => Navigator.of(context).push(
-                                                      new MaterialPageRoute(
-                                                          builder: (BuildContext context) {
-                                                            return ProductScreen(productID);
-                                                          }
-                                                      )
-                                                  ),
-                                                  leading: !imageURL.hasError && imageURL.hasData && imageURL.data != ""
-                                                  /// split to 2 cases where product has a
-                                                  /// picture or not
-                                                      ? CircularProfileAvatar(
-                                                    imageURL.data,
-                                                    radius: 26.0,
-                                                    onTap: () {
-                                                      Navigator.of(context).push(new MaterialPageRoute<void>(
-                                                        builder: (BuildContext context) => Dismissible(
-                                                          key: const Key('keyH'),
-                                                          direction: DismissDirection.horizontal,
-                                                          onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
-                                                          child: Dismissible(
-                                                              direction: DismissDirection.vertical,
-                                                              key: const Key('keyV'),
-                                                              onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
-                                                              child: DecoratedBox(
-                                                                  decoration: BoxDecoration(
-                                                                      image: DecorationImage(
-                                                                        image: NetworkImage(imageURL.data),
-                                                                        fit: BoxFit.fitWidth,
-                                                                      )
-                                                                  )
-                                                              )
-                                                          ),
-                                                        ),
-                                                      )
-                                                      );
-                                                    },
-                                                  )
-                                                      : InkWell(
-                                                    onTap: () => _scaffoldKeyWishList.currentState.showSnackBar(
-                                                        SnackBar(
-                                                            behavior: SnackBarBehavior.floating,
-                                                            content: Text('This Product does not have an image',
-                                                              style: GoogleFonts.lato(
-                                                                  fontSize: 13.0,
-                                                                  color: Colors.white
-                                                              ),
-                                                            )
-                                                        )
-                                                    ),
-                                                    child: ClipRRect(
-                                                      borderRadius: BorderRadius.circular(26.0),
-                                                      child: Image.asset('Assets/no image product.png'),
-                                                    ),
-                                                  ),
-                                                  title: Text(prodName, ///product name
-                                                    style: GoogleFonts.lato(
-                                                      fontSize: 18.0,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                  subtitle: Text(prodPrice + "\$", ///product's price
-                                                    style: GoogleFonts.lato(
-                                                      fontSize: 13.5,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                                                        }
+                                                      } catch (_) {}
+                                                    } else {
+                                                      try {
+                                                        final RenderBox box = _scaffoldKeyWishList.currentContext.findRenderObject();
+                                                        String image = 'no image product.png';
+                                                        final List <String> list = [];
+                                                        final tempDir = await getTemporaryDirectory();
+                                                        list.add('${tempDir.path}/' + image);
+                                                        await Share.shareFiles(
+                                                            list,
+                                                            text: "check this cool product now!\n" + prodName,
+                                                            sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+                                                            subject: 'I found a lovely product on GiftHub!'
+                                                        );
+                                                      } catch (_) {} //TODO: show error snackbar?
+                                                    }
+                                                  },
                                                 ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      );
-                                    }
+                                              ],
+                                              secondaryActions: <Widget>[
+                                                /// Delete
+                                                IconSlideAction(
+                                                  caption: 'Delete',
+                                                  color: Colors.transparent,
+                                                  foregroundColor: Colors.red,
+                                                  icon: Icons.delete_outline_outlined,
+                                                  onTap: () async {
+                                                    /// upon deletion
+                                                    /// showing alert dialog to reassure
+                                                    /// user's intention
+                                                    showDialog(
+                                                        barrierDismissible: true,
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return AlertDialog(
+                                                            backgroundColor: Colors.white,
+                                                            elevation: 24.0,
+                                                            title: Text('Delete?',
+                                                              style: GoogleFonts.lato(
+                                                                fontSize: 18.0,
+                                                                color: Colors.black,
+                                                              ),
+                                                            ),
+                                                            content: Text('Are you sure you want to delete ' +
+                                                                prodName + '?',
+                                                              style: GoogleFonts.lato(
+                                                                fontSize: 16.0,
+                                                                color: Colors.grey,
+                                                              ),
+                                                            ),
+                                                            actions: [
+                                                              FlatButton(
+                                                                child: Text("Yes",
+                                                                  style: GoogleFonts.lato(
+                                                                    fontSize: 14.0,
+                                                                    color: Colors.green,
+                                                                  ),
+                                                                ),
+                                                                onPressed: () async {
+                                                                  var toRemoveList = [];
+                                                                  toRemoveList.add(productID);
+                                                                  await userRep.firestore
+                                                                      .collection('Wishlists')
+                                                                      .doc(userRep.user.uid)
+                                                                      .update({
+                                                                    'Wishlist':FieldValue.arrayRemove(toRemoveList)
+                                                                  });
+                                                                  setState(() {
+                                                                    ///so that wishlist list will be updated
+                                                                  });
+                                                                  Navigator.pop(context);
+                                                                },
+                                                              ),
+                                                              FlatButton(
+                                                                child: Text("No",
+                                                                  style: GoogleFonts.lato(
+                                                                    fontSize: 14.0,
+                                                                    color: Colors.red,
+                                                                  ),
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator.pop(context);
+                                                                },
+                                                              ),
+                                                            ],
+                                                          );
+                                                        }
+                                                    );
+                                                  },
+                                                )
+                                              ],
+                                              child: ListTile(
+                                                onTap: () => Navigator.of(context).push(
+                                                    new MaterialPageRoute(
+                                                        builder: (BuildContext context) {
+                                                          return ProductScreen(productID);
+                                                        }
+                                                    )
+                                                ),
+                                                leading: !imageURL.hasError && imageURL.hasData && imageURL.data != ""
+                                                /// split to 2 cases where product has a
+                                                /// picture or not
+                                                    ? CircularProfileAvatar(
+                                                  imageURL.data,
+                                                  radius: 26.0,
+                                                  onTap: () {
+                                                    Navigator.of(context).push(new MaterialPageRoute<void>(
+                                                      builder: (BuildContext context) => Dismissible(
+                                                        key: const Key('keyH'),
+                                                        direction: DismissDirection.horizontal,
+                                                        onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
+                                                        child: Dismissible(
+                                                            direction: DismissDirection.vertical,
+                                                            key: const Key('keyV'),
+                                                            onDismissed: (_) => Navigator.pop(_scaffoldKeyWishList.currentContext),
+                                                            child: DecoratedBox(
+                                                                decoration: BoxDecoration(
+                                                                    image: DecorationImage(
+                                                                      image: NetworkImage(imageURL.data),
+                                                                      fit: BoxFit.fitWidth,
+                                                                    )
+                                                                )
+                                                            )
+                                                        ),
+                                                      ),
+                                                    )
+                                                    );
+                                                  },
+                                                )
+                                                    : InkWell(
+                                                  onTap: () => _scaffoldKeyWishList.currentState.showSnackBar(
+                                                      SnackBar(
+                                                          behavior: SnackBarBehavior.floating,
+                                                          content: Text('This Product does not have an image',
+                                                            style: GoogleFonts.lato(
+                                                                fontSize: 13.0,
+                                                                color: Colors.white
+                                                            ),
+                                                          )
+                                                      )
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(26.0),
+                                                    child: Image.asset('Assets/no image product.png'),
+                                                  ),
+                                                ),
+                                                title: Text(prodName, ///product name
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 18.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                subtitle: Text(prodPrice + "\$", ///product's price
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 13.5,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                visualDensity: VisualDensity.adaptivePlatformDensity,
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  }
                                 ),
                               ),
                             )

@@ -528,6 +528,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(_showAll);
+    print(_currCategory);
     return Material(
       child: Stack(
         alignment: Alignment.center,
@@ -762,8 +764,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                             setState(() => _rangeValues = value);
                                                                           },
                                                                           labels: RangeLabels(
-                                                                            _rangeValues.start.toStringAsFixed(0),
-                                                                            _rangeValues.end.toStringAsFixed(0)
+                                                                            '\$ ' + _rangeValues.start.toStringAsFixed(0),
+                                                                            '\$ ' + _rangeValues.end.toStringAsFixed(0)
                                                                           ),
                                                                           divisions: 50,
                                                                           inactiveColor: Colors.grey,
@@ -1064,25 +1066,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _showProducts
                     ? FutureBuilder(
                     /// fetching all product snapshots from firebase:
-                    future: FirebaseFirestore.instance.collection("Products").get(),
+                    future: _showAll && _currCategory == 'All'
+                      ? FirebaseFirestore.instance
+                        .collection("Products")
+                        .orderBy('Product.'+'priceNumber', descending: false)
+                        .get()
+                      : !_showAll && _currCategory != 'All'
+                        ? FirebaseFirestore.instance
+                        .collection("Products")
+                        .where('Product.'+'priceNumber', isGreaterThanOrEqualTo: _rangeValues.start)
+                        .where('Product.'+'priceNumber', isLessThanOrEqualTo: _rangeValues.end)
+                        .where('Product.'+'category', isEqualTo: _currCategory.trim())
+                        .orderBy('Product.'+'priceNumber', descending: false)
+                        .get()
+                        : _showAll
+                          ? FirebaseFirestore.instance
+                            .collection("Products")
+                            .where('Product.'+'category', isEqualTo: _currCategory.trim())
+                            .orderBy('Product.'+'priceNumber', descending: false)
+                            .get()
+                          : FirebaseFirestore.instance
+                            .collection("Products")
+                            .where('Product.'+'priceNumber', isGreaterThanOrEqualTo: _rangeValues.start)
+                            .where('Product.'+'priceNumber', isLessThanOrEqualTo: _rangeValues.end)
+                            .orderBy('Product.'+'priceNumber', descending: false)
+                            .get(),
                     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
                         return _circularProgressIndicator;
                       }
                       List<QueryDocumentSnapshot> productsList = List.from(snapshot.data.docs);
-                      ///removing the 'Counter' document (see Firebase structure under docs/)
-                      productsList.removeWhere((element) => element.id == 'Counter');
-                      /// if the current category is not 'All', then we remove all products
-                      /// that don't match current category
-                      if(_categories[0] != _currCategory) {
-                        productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
-                      }
-                      /// price filtering:
-                      if(!_showAll){
-                        productsList.removeWhere((e) => double.parse(e.data()['Product']['price']) < _rangeValues.start
-                          || double.parse(e.data()['Product']['price']) > _rangeValues.end
-                        );
-                      }
                       /// if there are no products under current category then
                       /// a decorated error screen is displayed
                       /// the screen is defined under globals.dart
@@ -1193,7 +1206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   child: Padding(
                                                     padding: EdgeInsets.symmetric(horizontal: 5.0),
                                                     child: Text(
-                                                      prodPrice + '\$',
+                                                      '\$' + prodPrice,
                                                       textAlign: TextAlign.right,
                                                       style: GoogleFonts.lato(
                                                         fontSize: 12.0,
@@ -1225,13 +1238,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           return _circularProgressIndicator;
                         }
                         List<QueryDocumentSnapshot> storesList = List.from(snapshot.data.docs);
-                        // if(!_displayAllStores){
-                        //   int i = 0;
-                        //   storesList.removeWhere((element) {
-                        //     i++;
-                        //     return i % 5 == 0;
-                        //   });
-                        // }
                         /// setting displayed grid view:
                         return GridView.count(
                           primary: false,
