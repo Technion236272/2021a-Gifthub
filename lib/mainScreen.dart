@@ -1,14 +1,17 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'dart:ui';
-import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:gifthub_2021a/ProductScreen.dart';
 import 'package:gifthub_2021a/StartScreen.dart';
 import 'package:gifthub_2021a/StoreScreen.dart';
 import 'package:gifthub_2021a/SpinnerDropdown.dart';
+import 'package:location/location.dart';
 import 'user_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
@@ -465,6 +468,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ///holds current user-pressed category
   String _currCategory = 'All';
 
+  bool _showProducts = true;
+
   ///big circular progress indicator
   final Center _circularProgressIndicator = Center(
     child: SizedBox(
@@ -475,6 +480,15 @@ class _HomeScreenState extends State<HomeScreen> {
       )
     ),
   );
+
+  bool _showAll = true;
+  bool _showAllStores = true;
+  bool _displayAllStores = true;
+  double _maxDistance = 100.0;
+
+  RangeValues _rangeValues = RangeValues(0.0, 500.0);
+
+  LocationData _locationData;
 
   @override
   void initState() {
@@ -495,6 +509,16 @@ class _HomeScreenState extends State<HomeScreen> {
       imageURL = "";
     }
     return imageURL;
+  }
+
+  OutlineInputBorder _getOutlineInputBorder({Color color = Colors.grey}) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(
+        color: color,
+        width: 1.3,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+    );
   }
 
   // ///extracts [_currCategory] String value from its Text child
@@ -534,95 +558,680 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Flexible(
-                              flex: 8,
-                              child: Padding(
-                                padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text('   Category:',
-                                    style: GoogleFonts.lato(
-                                      color: Colors.black,
-                                      fontSize: MediaQuery.of(context).size.height * 0.0256,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(width: 7.0,),
+                          IconButton(
+                            icon: Icon(
+                              Icons.card_giftcard_rounded,
+                              color: _showProducts ? Colors.black26 : Colors.black,
+                            ),
+                            onPressed: () {
+                              if(_showProducts){
+                                return;
+                              }
+                              setState(() {
+                                _showProducts = true;
+                              });
+                            }
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.store_outlined,
+                              color: _showProducts ? Colors.black : Colors.black26,
+                            ),
+                            onPressed: () {
+                              if(!_showProducts){
+                                return;
+                              }
+                              setState(() {
+                                _showProducts = false;
+                              });
+                            }
+                          ),
+                          Spacer(flex: 1,),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 6.0,
+                                bottom: 4.0
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.filter_list_alt),
+                                onPressed: !_showProducts ? null : () {
+                                  if(_showProducts){
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (BuildContext context, void Function(void Function()) setState){
+                                            return Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(20.0),
+                                                child: GestureDetector(
+                                                  onTap: (){
+                                                    FocusScope.of(context).unfocus();
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                    child: Material(
+                                                      child: Container(
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height * 0.4,
+                                                        child: Column(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Flexible(
+                                                              child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: <Widget>[
+                                                                  Flexible(
+                                                                    flex: 1,
+                                                                    child: Padding(
+                                                                      padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                      child: Align(
+                                                                        alignment: Alignment.center,
+                                                                        child: Text('Category:',
+                                                                          style: GoogleFonts.lato(
+                                                                            color: Colors.black,
+                                                                            fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                            fontWeight: FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Flexible(
+                                                                    flex: 2,
+                                                                    child: Align(
+                                                                      alignment: Alignment.center,
+                                                                      child: CustomDropdownButton<String>(
+                                                                        value: _currCategory,
+                                                                        items: _categories
+                                                                            .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
+                                                                          child: Text(e,
+                                                                            textAlign: TextAlign.center,
+                                                                            style: niceFont(color: Colors.lightGreen[300]),
+                                                                          ),
+                                                                          value: e,
+                                                                        )
+                                                                        ).toList(),
+                                                                        ///setting state for new chosen category
+                                                                        onChanged: (String value) {
+                                                                          setState(() {
+                                                                            _currCategory = value;
+                                                                          });
+                                                                        },
+                                                                        style: GoogleFonts.lato(
+                                                                          color: Colors.lightGreen[300],
+                                                                          fontWeight: FontWeight.w600,
+                                                                        ),
+                                                                        icon: Icon(Icons.keyboard_arrow_down_outlined,
+                                                                          color: Colors.lightGreen[200],
+                                                                        ),
+                                                                        dropdownColor: Colors.white,
+                                                                        underline: Container(
+                                                                          height: 2,
+                                                                          color: Colors.lightGreen[300],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ),
+                                                            Container(
+                                                              height: MediaQuery.of(context).size.height * 0.0004,
+                                                              child: Divider(
+                                                                color: Colors.lightGreen,
+                                                                thickness: 1.0,
+                                                                indent: 10,
+                                                                endIndent: 10,
+                                                              ),
+                                                            ),
+                                                            Flexible(
+                                                              child: Align(
+                                                                alignment: Alignment.centerLeft,
+                                                                child: Padding(
+                                                                  padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                  child: Text(
+                                                                    'Price Range:',
+                                                                    style: GoogleFonts.lato(
+                                                                      color: Colors.black,
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            ),
+                                                            Flexible(
+                                                              flex: 2,
+                                                              child: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: <Widget>[
+                                                                  Flexible(
+                                                                    child: ListTileTheme(
+                                                                      contentPadding: const EdgeInsets.all(0.0),
+                                                                      child: CheckboxListTile(
+                                                                        title: Text(
+                                                                          'Show all',
+                                                                          style: GoogleFonts.lato(
+                                                                            fontWeight: FontWeight.normal,
+                                                                            color: Colors.black,
+                                                                          ),
+                                                                        ),
+                                                                        autofocus: false,
+                                                                        controlAffinity: ListTileControlAffinity.leading,
+                                                                        value: _showAll,
+                                                                        onChanged: (value) {
+                                                                          if(!_showAll) {
+                                                                            setState(() {
+                                                                              _showAll = true;
+                                                                            });
+                                                                          }
+                                                                        }
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Flexible(
+                                                                    child: ListTileTheme(
+                                                                      contentPadding: const EdgeInsets.all(0.0),
+                                                                      child: CheckboxListTile(
+                                                                        autofocus: false,
+                                                                        title: RangeSlider(
+                                                                          min: 0.0,
+                                                                          max: 500.0,
+                                                                          values: _rangeValues,
+                                                                          onChanged: _showAll
+                                                                            ? null
+                                                                            : (RangeValues value) {
+                                                                            setState(() => _rangeValues = value);
+                                                                          },
+                                                                          labels: RangeLabels(
+                                                                            _rangeValues.start.toStringAsFixed(0),
+                                                                            _rangeValues.end.toStringAsFixed(0)
+                                                                          ),
+                                                                          divisions: 50,
+                                                                          inactiveColor: Colors.grey,
+                                                                          activeColor: Colors.green,
+                                                                        ),
+                                                                        controlAffinity: ListTileControlAffinity.leading,
+                                                                        value: !_showAll,
+                                                                        onChanged: (value) {
+                                                                          if (_showAll) {
+                                                                            setState(() {
+                                                                              _showAll = false;
+                                                                            });
+                                                                          }
+                                                                        }
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ),
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Container(
+                                                                height: MediaQuery.of(context).size.height * 0.0004,
+                                                                child: Divider(
+                                                                  color: Colors.lightGreen,
+                                                                  thickness: 1.0,
+                                                                  indent: 10,
+                                                                  endIndent: 10,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Flexible(
+                                                              child: Center(
+                                                                child: OutlineButton.icon(
+                                                                  onPressed: (){
+                                                                    super.setState(() {});
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  icon: Icon(Icons.saved_search),
+                                                                  label: Text(
+                                                                    'Search',
+                                                                    textAlign: TextAlign.center,
+                                                                    style: GoogleFonts.lato(
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Colors.black,
+                                                                    width: 1.5,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(30.0),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        );
+                                      }
+                                    );
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (BuildContext context, void Function(void Function()) setState){
+                                            return Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(20.0),
+                                                child: GestureDetector(
+                                                  onTap: (){
+                                                    FocusScope.of(context).unfocus();
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                                    child: Material(
+                                                      child: Container(
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height * 0.3,
+                                                        child: Column(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: <Widget>[
+                                                            Flexible(
+                                                                child: Align(
+                                                                  alignment: Alignment.centerLeft,
+                                                                  child: Padding(
+                                                                    padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.0256 * (11/18)),
+                                                                    child: Text(
+                                                                      'Filter nearby stores:',
+                                                                      style: GoogleFonts.lato(
+                                                                        color: Colors.black,
+                                                                        fontSize: MediaQuery.of(context).size.height * 0.0256,
+                                                                        fontWeight: FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                            ),
+                                                            Flexible(
+                                                                flex: 2,
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  children: <Widget>[
+                                                                    Flexible(
+                                                                      child: ListTileTheme(
+                                                                        contentPadding: const EdgeInsets.all(0.0),
+                                                                        child: CheckboxListTile(
+                                                                          title: Text('Show all',
+                                                                            style: GoogleFonts.lato(
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: Colors.black,
+                                                                            ),
+                                                                          ),
+                                                                          autofocus: false,
+                                                                          controlAffinity: ListTileControlAffinity.leading,
+                                                                          value: _showAllStores,
+                                                                          onChanged: (value) {
+                                                                            if(!_showAllStores) {
+                                                                              setState(() {
+                                                                                _showAllStores = true;
+                                                                              });
+                                                                            }
+                                                                          }
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Flexible(
+                                                                      child: ListTileTheme(
+                                                                        contentPadding: const EdgeInsets.all(0.0),
+                                                                        child: CheckboxListTile(
+                                                                            autofocus: false,
+                                                                            title: Slider(
+                                                                              min: 0.0,
+                                                                              max: 500.0,
+                                                                              value: _maxDistance,
+                                                                              onChanged: _showAllStores
+                                                                                  ? null
+                                                                                  : (value) {
+                                                                                setState(() => _maxDistance = value);
+                                                                              },
+                                                                              label: _maxDistance.toStringAsFixed(0),
+                                                                              divisions: 50,
+                                                                              inactiveColor: Colors.grey,
+                                                                              activeColor: Colors.green,
+                                                                            ),
+                                                                            controlAffinity: ListTileControlAffinity.leading,
+                                                                            value: !_showAllStores,
+                                                                            onChanged: (value) {
+                                                                              if (_showAllStores) {
+                                                                                setState(() {
+                                                                                  _showAllStores = false;
+                                                                                });
+                                                                              }
+                                                                            }
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                )
+                                                            ),
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Container(
+                                                                height: MediaQuery.of(context).size.height * 0.0004,
+                                                                child: Divider(
+                                                                  color: Colors.lightGreen,
+                                                                  thickness: 1.0,
+                                                                  indent: 10,
+                                                                  endIndent: 10,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Flexible(
+                                                              child: Center(
+                                                                child: OutlineButton.icon(
+                                                                  onPressed: () async {
+                                                                    if(_showAllStores){
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    }
+                                                                    Location location = new Location();
+                                                                    bool _serviceEnabled;
+                                                                    PermissionStatus _permissionGranted;
+                                                                    _serviceEnabled = await location.serviceEnabled();
+                                                                    if (!_serviceEnabled) {
+                                                                      _serviceEnabled = await location.requestService();
+                                                                      if (!_serviceEnabled) {
+                                                                        Fluttertoast.showToast(msg: 'Error: Service is disabled');
+                                                                        super.setState(() {
+                                                                          _displayAllStores = true;
+                                                                        });
+                                                                        Navigator.pop(context);
+                                                                        return;
+                                                                      }
+                                                                    }
+                                                                    _permissionGranted = await location.hasPermission();
+                                                                    if (_permissionGranted == PermissionStatus.denied) {
+                                                                      _permissionGranted = await location.requestPermission();
+                                                                      if (_permissionGranted != PermissionStatus.granted) {
+                                                                        Fluttertoast.showToast(msg: 'Error: Service is disabled');
+                                                                        super.setState(() {
+                                                                          _displayAllStores = true;
+                                                                        });
+                                                                        Navigator.pop(context);
+                                                                        return;
+                                                                      }
+                                                                    }
+                                                                    String error = '';
+                                                                    try {
+                                                                      _locationData = await location.getLocation();
+                                                                    } on PlatformException catch (e) {
+                                                                      if (e.code == 'PERMISSION_DENIED') {
+                                                                        error = 'Permission Denied';
+                                                                      }
+                                                                      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+                                                                        error = 'Permission Denied - please enable it from app settings';
+                                                                      }
+                                                                      _locationData = null;
+                                                                      Fluttertoast.showToast(msg: 'Error: ' + (error.isEmpty ? 'Something unexpected occurred' : error));
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    } catch (_) {
+                                                                      Fluttertoast.showToast(msg: 'Error: Something unexpected occurred');
+                                                                      super.setState(() {
+                                                                        _displayAllStores = true;
+                                                                      });
+                                                                      Navigator.pop(context);
+                                                                      return;
+                                                                    }
+                                                                    super.setState(() {
+                                                                      _displayAllStores = false;
+                                                                    });
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                  icon: Icon(Icons.saved_search),
+                                                                  label: Text(
+                                                                    'Search',
+                                                                    textAlign: TextAlign.center,
+                                                                    style: GoogleFonts.lato(
+                                                                      fontSize: MediaQuery.of(context).size.height * 0.0256 * 16/18,
+                                                                      fontWeight: FontWeight.w600,
+                                                                    ),
+                                                                  ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Colors.black,
+                                                                    width: 1.5,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(30.0),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        );
+                                      }
+                                    );
+                                  }
+                                },
                               ),
                             ),
-                            Flexible(
-                              flex: 10,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: CustomDropdownButton<String>(
-                                  value: _currCategory,
-                                  items: _categories
-                                      .map<CustomDropdownMenuItem<String>>((e) => CustomDropdownMenuItem(
-                                        child: Text(e,
-                                          textAlign: TextAlign.center,
-                                          style: niceFont(color: Colors.lightGreen[300]),
-                                        ),
-                                        value: e,
-                                    )
-                                  ).toList(),
-                                  ///setting state for new chosen category
-                                  onChanged: (String value) {
-                                    setState(() {
-                                      _currCategory = value;
-                                    });
-                                  },
-                                  style: GoogleFonts.lato(
-                                    color: Colors.lightGreen[300],
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  icon: Icon(Icons.keyboard_arrow_down_outlined,
-                                    color: Colors.lightGreen[200],
-                                  ),
-                                  dropdownColor: Colors.white,
-                                  underline: Container(
-                                    height: 2,
-                                    color: Colors.lightGreen[300],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),
                   Flexible(
                     flex: 11,
-                    child: FutureBuilder(
-                      /// fetching all product snapshots from firebase:
-                      future: FirebaseFirestore.instance.collection("Products").get(),
+                    child: _showProducts
+                    ? FutureBuilder(
+                    /// fetching all product snapshots from firebase:
+                    future: FirebaseFirestore.instance.collection("Products").get(),
+                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                        return _circularProgressIndicator;
+                      }
+                      List<QueryDocumentSnapshot> productsList = List.from(snapshot.data.docs);
+                      ///removing the 'Counter' document (see Firebase structure under docs/)
+                      productsList.removeWhere((element) => element.id == 'Counter');
+                      /// if the current category is not 'All', then we remove all products
+                      /// that don't match current category
+                      if(_categories[0] != _currCategory) {
+                        productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
+                      }
+                      /// price filtering:
+                      if(!_showAll){
+                        productsList.removeWhere((e) => double.parse(e.data()['Product']['price']) < _rangeValues.start
+                          || double.parse(e.data()['Product']['price']) > _rangeValues.end
+                        );
+                      }
+                      /// if there are no products under current category then
+                      /// a decorated error screen is displayed
+                      /// the screen is defined under globals.dart
+                      if(productsList.isEmpty) {
+                        return emptyListOfCategories(context, _currCategory);
+                      }
+                      /// setting displayed grid view:
+                      return GridView.count(
+                        primary: false,
+                        crossAxisCount: 2,
+                        padding: const EdgeInsets.all(20),
+                        crossAxisSpacing: 5,
+                        mainAxisSpacing: 5,
+                        children: List.generate(
+                          productsList.length,
+                          (index) {
+                            /// fetching product's attributes:
+                            var productData = productsList[index].data();
+                            String prodName = productData['Product']['name'];
+                            String prodDescription = productData['Product']['description'];
+                            String prodPrice = productData['Product']['price'];
+                            return FutureBuilder(
+                              future: _getImage(productsList[index].id),
+                              builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
+                              ///if imageURL has error then defaulted asset image is displayed
+                              ///under 'Assets/no image product.png'
+                              (imageURL.connectionState != ConnectionState.done || !imageURL.hasData)
+                              ? _circularProgressIndicator
+                              : Card(
+                                elevation: 10.0,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                                  child: InkWell(
+                                    onTap: () { ///navigating to the user tapped product:
+                                      Navigator.of(context).push(
+                                        new MaterialPageRoute<void>(
+                                          builder: (context) => ProductScreen(productsList[index].id)
+                                        )
+                                      );
+                                    },
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: MediaQuery.of(context).size.height,
+                                      color: Colors.transparent,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Container( ///setting product's image:
+                                            width: MediaQuery.of(context).size.width,
+                                            height: MediaQuery.of(context).size.height * 1/6,
+                                            color: Colors.transparent,
+                                            child: !imageURL.hasError && "" != imageURL.data
+                                            ? CachedNetworkImage(
+                                                imageUrl: imageURL.data,
+                                                placeholder: (context, url) => _circularProgressIndicator,
+                                                fit: BoxFit.fitWidth,
+                                            )
+                                            : Image.asset('Assets/no image product.png',
+                                              fit: BoxFit.fitWidth,
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Flexible(
+                                                    ///product title goes here
+                                                    ///if it's too long to fit then we take a substring of it
+                                                    child: Text('  ' +
+                                                      ((prodName.length < 20 - (prodPrice.length + 1))
+                                                      ? prodName
+                                                      : (prodName.substring(0, 17 - (prodPrice.length + 1)).trimRight() + '...')),
+                                                      textAlign: TextAlign.left,
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 14.0,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Flexible(
+                                                    ///product description goes here
+                                                    ///if it's too long to fit then we take a substring of it
+                                                    child: Text('  ' +
+                                                      ((prodDescription.length <= 23 - (prodPrice.length + 1))
+                                                      ? prodDescription
+                                                      : (prodDescription.substring(0, 20 - (prodPrice.length + 1)).trimRight() + '...')),
+                                                      textAlign: TextAlign.left,
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 11.0,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Flexible(
+                                                ///product price goes here:
+                                                child: Align(
+                                                  alignment: Alignment.centerRight,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.symmetric(horizontal: 5.0),
+                                                    child: Text(
+                                                      prodPrice + '\$',
+                                                      textAlign: TextAlign.right,
+                                                      style: GoogleFonts.lato(
+                                                        fontSize: 12.0,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        ),
+                      );
+                    }
+                  )
+                    : FutureBuilder(
+                      /// fetching all stores snapshots from firebase:
+                      future: FirebaseFirestore.instance.collection("Stores").get(),
                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
                           return _circularProgressIndicator;
                         }
-                        List<QueryDocumentSnapshot> productsList = List.from(snapshot.data.docs);
-                        ///removing the 'Counter' document (see Firebase structure under docs/)
-                        productsList.removeWhere((element) => element.id == 'Counter');
-                        /// if the current category is not 'All', then we remove all products
-                        /// that don't match current category
-                        if(_categories[0] != _currCategory) {
-                          productsList.removeWhere((e) => e.data()['Product']['category'].toString() != _currCategory);
-                        }
-                        /// if there are no products under current category then
-                        /// a decorated error screen is displayed
-                        /// the screen is defined under globals.dart
-                        if(productsList.isEmpty) {
-                          return emptyListOfCategories(context, _currCategory);
-                        }
+                        List<QueryDocumentSnapshot> storesList = List.from(snapshot.data.docs);
+                        // if(!_displayAllStores){
+                        //   int i = 0;
+                        //   storesList.removeWhere((element) {
+                        //     i++;
+                        //     return i % 5 == 0;
+                        //   });
+                        // }
                         /// setting displayed grid view:
                         return GridView.count(
                           primary: false,
@@ -631,15 +1240,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisSpacing: 5,
                           mainAxisSpacing: 5,
                           children: List.generate(
-                            productsList.length,
-                            (index) {
-                              /// fetching product's attributes:
-                              var productData = productsList[index].data();
-                              String prodName = productData['Product']['name'];
-                              String prodDescription = productData['Product']['description'];
-                              String prodPrice = productData['Product']['price'];
+                            storesList.length,
+                              (index) {
+                              /// fetching stores's attributes:
+                              var storeData = storesList[index].data();
+                              String storeName = storeData['Store']['name'];
+                              String storeDescription = storeData['Store']['description'];
                               return FutureBuilder(
-                                future: _getImage(productsList[index].id),
+                                future: _getStoreImage(storesList[index].id),
                                 builder: (BuildContext context, AsyncSnapshot<String> imageURL) =>
                                 ///if imageURL has error then defaulted asset image is displayed
                                 ///under 'Assets/no image product.png'
@@ -650,10 +1258,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.all(Radius.circular(4.0)),
                                     child: InkWell(
-                                      onTap: () { ///navigating to the user tapped product:
+                                      onTap: () { ///navigating to the user tapped store:
                                         Navigator.of(context).push(
                                           new MaterialPageRoute<void>(
-                                            builder: (context) => ProductScreen(productsList[index].id)
+                                            builder: (context) => StoreScreen(storesList[index].id)
                                           )
                                         );
                                       },
@@ -672,11 +1280,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               color: Colors.transparent,
                                               child: !imageURL.hasError && "" != imageURL.data
                                               ? CachedNetworkImage(
-                                                  imageUrl: imageURL.data,
-                                                  placeholder: (context, url) => _circularProgressIndicator,
-                                                  fit: BoxFit.fitWidth,
+                                                imageUrl: imageURL.data,
+                                                placeholder: (context, url) => _circularProgressIndicator,
+                                                fit: BoxFit.fitWidth,
                                               )
-                                              : Image.asset('Assets/no image product.png',
+                                              : Image.asset('Assets/Untitled.png',
                                                 fit: BoxFit.fitWidth,
                                               ),
                                             ),
@@ -691,12 +1299,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Flexible(
-                                                      ///product title goes here
+                                                      ///store title goes here
                                                       ///if it's too long to fit then we take a substring of it
                                                       child: Text('  ' +
-                                                        ((prodName.length < 20 - (prodPrice.length + 1))
-                                                        ? prodName
-                                                        : (prodName.substring(0, 17 - (prodPrice.length + 1)).trimRight() + '...')),
+                                                          ((storeName.length <= 21)
+                                                            ? storeName
+                                                            : (storeName.substring(0, 18).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 14.0,
@@ -705,12 +1313,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       ),
                                                     ),
                                                     Flexible(
-                                                      ///product description goes here
+                                                      ///store description goes here
                                                       ///if it's too long to fit then we take a substring of it
                                                       child: Text('  ' +
-                                                        ((prodDescription.length <= 23 - (prodPrice.length + 1))
-                                                        ? prodDescription
-                                                        : (prodDescription.substring(0, 20 - (prodPrice.length + 1)).trimRight() + '...')),
+                                                          ((storeDescription.length <= 28)
+                                                            ? storeDescription
+                                                            : (storeDescription.substring(0, 25).trimRight() + '...')),
                                                         textAlign: TextAlign.left,
                                                         style: GoogleFonts.lato(
                                                           fontSize: 11.0,
@@ -720,23 +1328,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                   ],
                                                 ),
-                                                Flexible(
-                                                  ///product price goes here:
-                                                  child: Align(
-                                                    alignment: Alignment.centerRight,
-                                                    child: Padding(
-                                                      padding: EdgeInsets.symmetric(horizontal: 5.0),
-                                                      child: Text(
-                                                        prodPrice + '\$',
-                                                        textAlign: TextAlign.right,
-                                                        style: GoogleFonts.lato(
-                                                          fontSize: 12.0,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )
                                               ],
                                             ),
                                           ],
@@ -759,5 +1350,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ]
       ),
     );
+  }
+
+  Future<String> _getStoreImage(String id) async {
+    String imageURL = "";
+    try {
+      imageURL = await FirebaseStorage.instance
+        .ref()
+        .child('storeImages/' + id)
+        .getDownloadURL();
+    } catch (_) {
+      imageURL = "";
+    }
+    return imageURL;
   }
 }
